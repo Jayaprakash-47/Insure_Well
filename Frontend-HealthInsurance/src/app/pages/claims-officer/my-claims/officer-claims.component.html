@@ -1,0 +1,57 @@
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1>📋 My Assigned Claims</h1>
+        <p>Claims currently assigned to you for review</p>
+    </div>
+
+    @if (loading) {
+    <div class="loading-page"><div class="spinner"></div><p>Loading...</p></div>
+    } @else {
+
+    <!-- Filters -->
+    <div class="filter-bar">
+        @for (f of ['ALL','UNDER_REVIEW','APPROVED','REJECTED','ESCALATED','DOCUMENT_PENDING']; track f) {
+        <button class="filter-btn" [class.active]="filter === f" (click)="setFilter(f)">{{ f.replace('_', ' ') }}</button>
+        }
+    </div>
+
+    @if (filteredClaims.length === 0) {
+    <div class="empty-state card"><h3>No claims found</h3><p>No claims match the selected filter.</p></div>
+    } @else {
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Claim #</th>
+                    <th>Customer</th>
+                    <th>Hospital</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Filed</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (claim of filteredClaims; track claim.claimId) {
+                <tr>
+                    <td><strong>{{ claim.claimNumber }}</strong></td>
+                    <td>{{ claim.customerName }}</td>
+                    <td>{{ claim.hospitalName }}</td>
+                    <td class="amount">{{ formatCurrency(claim.claimAmount) }}</td>
+                    <td><span class="badge" [ngClass]="getStatusClass(claim.claimStatus)">{{ claim.claimStatus }}</span></td>
+                    <td>{{ claim.createdAt | date:'mediumDate' }}</td>
+                    <td>
+                        @if (claim.claimStatus === 'UNDER_REVIEW' || claim.claimStatus === 'DOCUMENT_PENDING') {
+                        <a [routerLink]="['/claims-officer/review', claim.claimId]" class="btn btn-sm btn-primary">Review</a>
+                        } @else {
+                        <a [routerLink]="['/claims-officer/review', claim.claimId]" class="btn btn-sm btn-secondary">View</a>
+                        }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+    }
+</div>

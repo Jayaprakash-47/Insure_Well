@@ -1,0 +1,45 @@
+.payment-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+}
+
+.summary-row span {
+    color: var(--text-secondary);
+}
+
+.summary-row.total {
+    background: linear-gradient(135deg, #ecfeff, #f0fdfa);
+    border-bottom: none;
+    padding: 16px;
+    border-top: 2px solid var(--primary);
+}
+
+.summary-row.total strong {
+    font-size: 22px;
+    font-family: var(--font-heading);
+    color: var(--primary);
+    font-weight: 800;
+}

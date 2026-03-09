@@ -1,0 +1,56 @@
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1>My Policies</h1>
+        <p>View and manage your insurance policies</p>
+    </div>
+    @if (loading) {
+    <div class="loading-page">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+    } @else if (policies.length === 0) {
+    <div class="empty-state">
+        <h3>No policies yet</h3>
+        <p>Browse our plans and purchase your first policy!</p><a routerLink="/customer/plans"
+            class="btn btn-primary">Browse Plans</a>
+    </div>
+    } @else {
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Policy #</th>
+                    <th>Plan</th>
+                    <th>Premium</th>
+                    <th>Coverage</th>
+                    <th>Status</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (p of policies; track p.policyId) {
+                <tr>
+                    <td><strong>{{ p.policyNumber }}</strong></td>
+                    <td>{{ p.planName }}</td>
+                    <td>{{ formatCurrency(p.premiumAmount) }}</td>
+                    <td>{{ formatCurrency(p.coverageAmount) }}</td>
+                    <td><span class="badge" [class.badge-active]="p.policyStatus==='ACTIVE'"
+                            [class.badge-pending]="p.policyStatus==='PENDING'"
+                            [class.badge-cancelled]="p.policyStatus==='CANCELLED'">{{ p.policyStatus }}</span></td>
+                    <td>{{ p.startDate || '-' }}</td>
+                    <td>{{ p.endDate || '-' }}</td>
+                    <td>
+                        @if (p.policyStatus === 'PENDING') { <a [routerLink]="['/customer/payment', p.policyId]"
+                            class="btn btn-sm btn-primary">Pay</a> }
+                        @if (p.policyStatus === 'ACTIVE') { <button class="btn btn-sm btn-danger"
+                            (click)="cancel(p.policyId)">Cancel</button> }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>

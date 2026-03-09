@@ -1,0 +1,52 @@
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1>File a Claim</h1>
+        <p>Submit an insurance claim for your active policy</p>
+    </div>
+    <div class="card" style="max-width:600px;">
+        @if (policies.length === 0) {
+        <div class="empty-state">
+            <h3>No active policies</h3>
+            <p>You need an active policy to file a claim</p>
+        </div>
+        } @else {
+        <form (ngSubmit)="submit()">
+            <div class="form-group"><label>Select Policy *</label>
+                <select class="form-control" [(ngModel)]="form.policyId" name="pid">
+                    @for (p of policies; track p.policyId) { <option [value]="p.policyId">{{ p.policyNumber }} - {{
+                        p.planName }}</option> }
+                </select>
+            </div>
+            <div class="form-group"><label>Claim Type</label>
+                <select class="form-control" [(ngModel)]="form.claimType" name="ct">
+                    <option value="CASHLESS">Cashless</option>
+                    <option value="REIMBURSEMENT">Reimbursement</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Claim Amount (₹) *</label><input class="form-control"
+                    [(ngModel)]="form.claimAmount" name="ca" type="number" /></div>
+            <div class="form-group"><label>Hospital Name *</label><input class="form-control"
+                    [(ngModel)]="form.hospitalName" name="hn" placeholder="Apollo Hospital" /></div>
+            <div class="form-row">
+                <div class="form-group"><label>Admission Date *</label><input class="form-control"
+                        [(ngModel)]="form.admissionDate" name="ad" type="date" /></div>
+                <div class="form-group"><label>Discharge Date *</label><input class="form-control"
+                        [(ngModel)]="form.dischargeDate" name="dd" type="date" /></div>
+            </div>
+            <div class="form-group"><label>Diagnosis *</label><textarea class="form-control"
+                    [(ngModel)]="form.diagnosis" name="diag" rows="3"
+                    placeholder="Describe the diagnosis..."></textarea></div>
+
+            <div class="form-group">
+                <label>Upload Documents (Optional)</label>
+                <input type="file" class="form-control" (change)="onFileSelect($event)" multiple accept="image/*,.pdf"
+                    style="padding-bottom: 35px;" />
+                <small style="color: #666; margin-top: 5px; display: block;">You can select multiple photos/PDFs (bills,
+                    prescriptions, reports)</small>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;" [disabled]="filing">{{ filing ?
+                'Filing...' : 'Submit Claim' }}</button>
+        </form>
+        }
+    </div>
+</div>

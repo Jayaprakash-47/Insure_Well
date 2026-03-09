@@ -1,0 +1,156 @@
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1>🤝 Sell Policy</h1>
+        <p>Sell an insurance policy on behalf of a customer</p>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="steps-bar">
+        @for (s of ['Select Customer','Select Plan','Nominee','Members','Confirm']; track s; let i = $index) {
+        <div class="step" [class.active]="step === i+1" [class.completed]="step > i+1">
+            <span class="step-num">{{ step > i+1 ? '✓' : i+1 }}</span>
+            <span class="step-label">{{ s }}</span>
+        </div>
+        }
+    </div>
+
+    @if (loading) {
+    <div class="loading-page"><div class="spinner"></div><p>Loading...</p></div>
+    } @else {
+
+    <!-- Step 1: Select Customer -->
+    @if (step === 1) {
+    <div class="step-content card">
+        <h2>Select a Customer</h2>
+        <div class="customer-grid">
+            @for (c of customers; track c.userId) {
+            <div class="customer-card" [class.selected]="selectedCustomerId === c.userId" (click)="selectedCustomerId = c.userId">
+                <div class="customer-avatar">{{ c.firstName?.charAt(0) }}</div>
+                <div class="customer-info">
+                    <strong>{{ c.firstName }} {{ c.lastName }}</strong>
+                    <span>{{ c.email }}</span>
+                    <span>{{ c.city }}, {{ c.state }}</span>
+                </div>
+                @if (selectedCustomerId === c.userId) {
+                <span class="selected-check">✓</span>
+                }
+            </div>
+            }
+        </div>
+    </div>
+    }
+
+    <!-- Step 2: Select Plan -->
+    @if (step === 2) {
+    <div class="step-content card">
+        <h2>Select Insurance Plan</h2>
+        <div class="plan-grid">
+            @for (plan of plans; track plan.planId) {
+            <div class="plan-card" [class.selected]="selectedPlanId === plan.planId" (click)="selectedPlanId = plan.planId">
+                <h3>{{ plan.planName }}</h3>
+                <div class="plan-price">{{ formatCurrency(plan.basePremiumAmount) }}<span>/year</span></div>
+                <p class="plan-coverage">Coverage: {{ formatCurrency(plan.coverageAmount) }}</p>
+                <ul class="plan-features">
+                    <li>{{ plan.planType }} Plan</li>
+                    <li>{{ plan.planDurationMonths }} months duration</li>
+                    <li>{{ plan.waitingPeriodMonths }} months waiting</li>
+                    @if (plan.maternityCover) { <li>✅ Maternity Cover</li> }
+                    @if (plan.preExistingDiseaseCover) { <li>✅ Pre-existing Disease Cover</li> }
+                </ul>
+            </div>
+            }
+        </div>
+    </div>
+    }
+
+    <!-- Step 3: Nominee Details -->
+    @if (step === 3) {
+    <div class="step-content card">
+        <h2>Nominee Details</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nominee Name *</label>
+                <input class="form-control" [(ngModel)]="nomineeName" placeholder="Full name of nominee">
+            </div>
+            <div class="form-group">
+                <label>Relationship *</label>
+                <select class="form-control" [(ngModel)]="nomineeRelationship">
+                    <option value="">Select...</option>
+                    <option value="SPOUSE">Spouse</option>
+                    <option value="PARENT">Parent</option>
+                    <option value="CHILD">Child</option>
+                    <option value="SIBLING">Sibling</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Step 4: Members -->
+    @if (step === 4) {
+    <div class="step-content card">
+        <h2>Add Family Members (Optional)</h2>
+        <p class="hint-text">Add family members who will be covered under this policy</p>
+        @for (m of members; track $index; let i = $index) {
+        <div class="member-card">
+            <div class="member-header">
+                <strong>Member {{ i + 1 }}</strong>
+                <button class="btn btn-sm btn-danger" (click)="removeMember(i)">Remove</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Name</label><input class="form-control" [(ngModel)]="m.memberName"></div>
+                <div class="form-group">
+                    <label>Relationship</label>
+                    <select class="form-control" [(ngModel)]="m.relationship">
+                        <option value="SPOUSE">Spouse</option>
+                        <option value="CHILD">Child</option>
+                        <option value="PARENT">Parent</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Date of Birth</label><input class="form-control" type="date" [(ngModel)]="m.dateOfBirth"></div>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select class="form-control" [(ngModel)]="m.gender">
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        }
+        <button class="btn btn-secondary" (click)="addMember()">+ Add Member</button>
+    </div>
+    }
+
+    <!-- Step 5: Confirm -->
+    @if (step === 5) {
+    <div class="step-content card">
+        <h2>Confirm Sale</h2>
+        <div class="confirm-grid">
+            <div class="confirm-item"><span>Customer</span><strong>{{ selectedCustomer?.firstName }} {{ selectedCustomer?.lastName }}</strong></div>
+            <div class="confirm-item"><span>Plan</span><strong>{{ selectedPlan?.planName }}</strong></div>
+            <div class="confirm-item"><span>Base Premium</span><strong>{{ formatCurrency(selectedPlan?.basePremiumAmount || 0) }}</strong></div>
+            <div class="confirm-item"><span>Coverage</span><strong>{{ formatCurrency(selectedPlan?.coverageAmount || 0) }}</strong></div>
+            <div class="confirm-item"><span>Nominee</span><strong>{{ nomineeName }} ({{ nomineeRelationship }})</strong></div>
+            <div class="confirm-item"><span>Members</span><strong>{{ members.length }} additional member(s)</strong></div>
+        </div>
+    </div>
+    }
+
+    <!-- Navigation Buttons -->
+    <div class="step-nav">
+        @if (step > 1) {
+        <button class="btn btn-secondary" (click)="prevStep()">← Previous</button>
+        }
+        <div class="spacer"></div>
+        @if (step < 5) {
+        <button class="btn btn-primary" (click)="nextStep()">Next →</button>
+        } @else {
+        <button class="btn btn-primary btn-lg" (click)="submitSale()" [disabled]="submitting">
+            @if (submitting) { <div class="spinner"></div> Processing... } @else { 🤝 Complete Sale }
+        </button>
+        }
+    </div>
+    }
+</div>

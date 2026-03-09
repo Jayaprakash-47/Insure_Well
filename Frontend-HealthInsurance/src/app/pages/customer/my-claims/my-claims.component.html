@@ -1,0 +1,50 @@
+<div class="page-wrapper">
+    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h1>My Claims</h1>
+            <p>Track your insurance claims</p>
+        </div>
+        <a routerLink="/customer/claims/new" class="btn btn-primary">+ File New Claim</a>
+    </div>
+    @if (loading) { <div class="loading-page">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div> }
+    @else if (claims.length === 0) { <div class="empty-state">
+        <h3>No claims filed</h3>
+        <p>File a claim when you need to use your insurance</p><a routerLink="/customer/claims/new"
+            class="btn btn-primary">File Claim</a>
+    </div> }
+    @else {
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Claim #</th>
+                    <th>Policy #</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Hospital</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (c of claims; track c.claimId) {
+                <tr>
+                    <td><strong>{{ c.claimNumber }}</strong></td>
+                    <td>{{ c.policyNumber }}</td>
+                    <td>{{ c.claimType }}</td>
+                    <td>{{ formatCurrency(c.claimAmount) }}</td>
+                    <td>{{ c.hospitalName }}</td>
+                    <td><span class="badge" [class.badge-submitted]="c.claimStatus==='SUBMITTED'"
+                            [class.badge-approved]="c.claimStatus==='APPROVED'"
+                            [class.badge-rejected]="c.claimStatus==='REJECTED'">{{ c.claimStatus }}</span></td>
+                    <td>{{ c.createdAt | date:'dd/MM/yyyy' }}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>

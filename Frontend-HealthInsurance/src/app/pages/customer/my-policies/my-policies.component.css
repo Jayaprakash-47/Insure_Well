@@ -1,0 +1,13 @@
+/* Uses global styles */
+
+/* My Policies - enhanced styles */
+td strong {
+    color: var(--primary);
+    font-family: var(--font-heading);
+    letter-spacing: 0.02em;
+}
+
+.badge-expired {
+    background-color: #f1f5f9;
+    color: #64748b;
+}

@@ -1,0 +1,50 @@
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1>All Policies</h1>
+        <p>View all insurance policies across the system</p>
+    </div>
+    @if (loading) {
+    <div class="loading-page">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+    } @else {
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Policy #</th>
+                    <th>Customer</th>
+                    <th>Plan</th>
+                    <th>Premium</th>
+                    <th>Coverage</th>
+                    <th>Status</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (p of policies; track p.policyId) {
+                <tr>
+                    <td><strong>{{ p.policyNumber }}</strong></td>
+                    <td>{{ p.customerName }}</td>
+                    <td>{{ p.planName }}</td>
+                    <td>{{ formatCurrency(p.premiumAmount) }}</td>
+                    <td>{{ formatCurrency(p.coverageAmount) }}</td>
+                    <td><span class="badge" [class.badge-active]="p.policyStatus==='ACTIVE'"
+                            [class.badge-pending]="p.policyStatus==='PENDING'"
+                            [class.badge-cancelled]="p.policyStatus==='CANCELLED'">{{ p.policyStatus }}</span></td>
+                    <td>{{ p.startDate || '-' }}</td>
+                    <td>{{ p.endDate || '-' }}</td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="8" style="text-align:center; padding:32px; color:var(--text-secondary);">No policies
+                        found</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>

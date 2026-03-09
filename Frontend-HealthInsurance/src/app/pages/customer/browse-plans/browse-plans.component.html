@@ -1,0 +1,106 @@
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1>Browse Insurance Plans</h1>
+        <p>Select a plan, get a quote, and purchase</p>
+    </div>
+
+    @if (loading) {
+    <div class="loading-page">
+        <div class="spinner"></div>
+        <p>Loading plans...</p>
+    </div>
+    } @else {
+    <div class="plans-grid">
+        @for (plan of plans; track plan.planId) {
+        <div class="plan-card">
+            <div class="plan-type-badge">{{ plan.planType }}</div>
+            <h3>{{ plan.planName }}</h3>
+            <p class="plan-desc">{{ plan.description }}</p>
+            <div class="plan-price"><span class="price">{{ formatCurrency(plan.basePremiumAmount) }}</span><span
+                    class="price-label">/ year (base)</span></div>
+            <div class="plan-details">
+                <div class="detail-row"><span>Coverage</span><strong>{{ formatCurrency(plan.coverageAmount) }}</strong>
+                </div>
+                <div class="detail-row"><span>Duration</span><strong>{{ plan.planDurationMonths }} months</strong></div>
+                <div class="detail-row"><span>Age</span><strong>{{ plan.minAgeLimit }}-{{ plan.maxAgeLimit }}
+                        yrs</strong></div>
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-top:16px;" (click)="openQuote(plan)">Get Quote &
+                Buy</button>
+        </div>
+        }
+    </div>
+    }
+</div>
+
+<!-- Quote Modal -->
+@if (showQuoteModal && selectedPlan) {
+<div class="modal-overlay" (click)="showQuoteModal = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Get Quote - {{ selectedPlan.planName }}</h2><button class="modal-close"
+                (click)="showQuoteModal = false">✕</button>
+        </div>
+
+        @if (!quoteResult) {
+        <div class="form-group"><label>Your Age</label><input class="form-control" [(ngModel)]="quoteForm.age"
+                type="number" /></div>
+        <div class="form-group"><label>Number of Members (including you)</label><input class="form-control"
+                [(ngModel)]="quoteForm.numberOfMembers" type="number" min="1" /></div>
+        <div class="form-group"><label><input type="checkbox" [(ngModel)]="quoteForm.smoker" /> Are you a
+                smoker?</label></div>
+        <div class="form-group"><label><input type="checkbox" [(ngModel)]="quoteForm.preExistingDiseases" /> Do you have
+                pre-existing diseases?</label></div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" (click)="showQuoteModal = false">Cancel</button>
+            <button class="btn btn-primary" (click)="getQuote()" [disabled]="quoting">{{ quoting ? 'Calculating...' :
+                'Calculate Premium' }}</button>
+        </div>
+        } @else {
+        <div class="quote-result">
+            <div class="quote-amount">{{ formatCurrency(quoteResult.calculatedPremium) }}<span>/year</span></div>
+            <div class="quote-details">
+                <p>Age: {{ quoteResult.age }} | Smoker: {{ quoteResult.smoker ? 'Yes' : 'No' }} | Diseases: {{
+                    quoteResult.preExistingDiseases ? 'Yes' : 'No' }} | Members: {{ quoteResult.numberOfMembers }}</p>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" (click)="quoteResult = null">Recalculate</button>
+            <button class="btn btn-primary" (click)="openPurchase()">Buy This Plan</button>
+        </div>
+        }
+    </div>
+</div>
+}
+
+<!-- Purchase Modal -->
+@if (showPurchaseModal && selectedPlan) {
+<div class="modal-overlay" (click)="showPurchaseModal = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Purchase {{ selectedPlan.planName }}</h2><button class="modal-close"
+                (click)="showPurchaseModal = false">✕</button>
+        </div>
+        @if (quoteResult) { <p style="margin-bottom:16px; font-size:14px; color:var(--text-secondary);">Premium: <strong
+                style="color:var(--text-primary);">{{ formatCurrency(quoteResult.calculatedPremium) }}/year</strong></p>
+        }
+        <div class="form-group"><label>Nominee Name *</label><input class="form-control"
+                [(ngModel)]="purchaseForm.nomineeName" placeholder="Full name of nominee" /></div>
+        <div class="form-group"><label>Nominee Relationship *</label>
+            <select class="form-control" [(ngModel)]="purchaseForm.nomineeRelationship">
+                <option value="">Select relationship</option>
+                <option value="SPOUSE">Spouse</option>
+                <option value="FATHER">Father</option>
+                <option value="MOTHER">Mother</option>
+                <option value="CHILD">Child</option>
+                <option value="SIBLING">Sibling</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" (click)="showPurchaseModal = false">Cancel</button>
+            <button class="btn btn-primary" (click)="purchase()" [disabled]="purchasing">{{ purchasing ? 'Processing...'
+                : 'Confirm Purchase' }}</button>
+        </div>
+    </div>
+</div>
+}

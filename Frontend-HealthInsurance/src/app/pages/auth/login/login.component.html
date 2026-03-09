@@ -1,0 +1,37 @@
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <a routerLink="/" class="auth-brand">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                InsureWell
+            </a>
+            <h1>Welcome Back</h1>
+            <p>Sign in to manage your policies and claims</p>
+        </div>
+
+        <form (ngSubmit)="onSubmit()">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input id="email" type="email" class="form-control" [(ngModel)]="email" name="email"
+                    placeholder="Enter your email" autocomplete="email" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input id="password" type="password" class="form-control" [(ngModel)]="password" name="password"
+                    placeholder="Enter your password" autocomplete="current-password" />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="loading">
+                @if (loading) {
+                <span class="spinner"></span> Signing in...
+                } @else {
+                Sign In
+                }
+            </button>
+        </form>
+        <div class="auth-footer">
+            <p>Don't have an account? <a routerLink="/register">Register here</a></p>
+        </div>
+    </div>
+</div>

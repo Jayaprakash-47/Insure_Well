@@ -1,0 +1,72 @@
+<div class="page-wrapper">
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="welcome-content">
+            <h1>Welcome back, {{ auth.getUserName() }}! 👋</h1>
+            <p>Here's an overview of your health insurance portfolio</p>
+        </div>
+        <a routerLink="/customer/plans" class="btn btn-primary">Browse Plans</a>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon green">📋</div>
+            <div class="stat-info">
+                <h3>{{ policies.length }}</h3>
+                <p>Total Policies</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue">✅</div>
+            <div class="stat-info">
+                <h3>{{ activePolicies }}</h3>
+                <p>Active Policies</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon yellow">⏳</div>
+            <div class="stat-info">
+                <h3>{{ pendingPolicies }}</h3>
+                <p>Pending Payment</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red">🏥</div>
+            <div class="stat-info">
+                <h3>{{ pendingClaims }}</h3>
+                <p>Pending Claims</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="actions-grid">
+            <a routerLink="/customer/plans" class="action-card">
+                <span class="action-icon">🔍</span>
+                <span class="action-label">Browse Plans</span>
+                <span class="action-desc">Explore insurance options</span>
+            </a>
+            <a routerLink="/customer/calculator" class="action-card">
+                <span class="action-icon">💰</span>
+                <span class="action-label">Get Quote</span>
+                <span class="action-desc">Calculate your premium</span>
+            </a>
+            <a routerLink="/customer/policies" class="action-card">
+                <span class="action-icon">📋</span>
+                <span class="action-label">My Policies</span>
+                <span class="action-desc">View & manage policies</span>
+            </a>
+            <a routerLink="/customer/claims" class="action-card">
+                <span class="action-icon">🏥</span>
+                <span class="action-label">My Claims</span>
+                <span class="action-desc">Track claim status</span>
+            </a>
+            <a routerLink="/customer/claims/new" class="action-card">
+                <span class="action-icon">📝</span>
+                <span class="action-label">File Claim</span>
+                <span class="action-desc">Submit a new claim</span>
+            </a>
+        </div>
+    </div>
+</div>

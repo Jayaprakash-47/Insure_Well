@@ -1,0 +1,30 @@
+.queue-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.queue-count { font-size: 14px; font-weight: 600; color: var(--text-secondary); background: var(--bg-primary); padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border); }
+
+.claims-list { display: flex; flex-direction: column; gap: 16px; }
+
+.claim-card { padding: 24px; transition: all 0.25s ease; border: 1.5px solid var(--border); border-radius: var(--radius-lg); background: white; position: relative; overflow: hidden; }
+.claim-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--primary); opacity: 0; transition: opacity 0.25s ease; }
+.claim-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.06); transform: translateY(-2px); }
+.claim-card:hover::before { opacity: 1; }
+
+.claim-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light); }
+.claim-id { display: flex; align-items: center; gap: 10px; }
+.claim-number { font-size: 16px; font-weight: 700; font-family: var(--font-heading); color: var(--primary); }
+.claim-amount { font-size: 22px; font-weight: 800; color: var(--primary); font-family: var(--font-heading); }
+
+.claim-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.detail-row { display: flex; flex-direction: column; gap: 2px; }
+.detail-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+.detail-value { font-size: 14px; color: var(--text-primary); font-weight: 500; }
+
+.claim-actions { display: flex; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--border-light); }
+
+.badge-escalated { background: #fef3c7; color: #b45309; }
+
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+@media (max-width: 768px) {
+    .claim-details { grid-template-columns: 1fr 1fr; }
+    .claim-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+}

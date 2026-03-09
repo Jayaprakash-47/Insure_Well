@@ -1,0 +1,38 @@
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1>📜 Audit Trail</h1>
+        <p>Complete log of all system activities for compliance and debugging</p>
+    </div>
+
+    @if (loading) {
+    <div class="loading-page"><div class="spinner"></div><p>Loading audit logs...</p></div>
+    } @else if (logs.length === 0) {
+    <div class="empty-state card"><h3>No audit logs</h3><p>System activities will appear here.</p></div>
+    } @else {
+    <div class="audit-timeline">
+        @for (log of logs; track log.auditId) {
+        <div class="audit-entry" [ngClass]="getActionClass(log.action)">
+            <div class="audit-icon">{{ getActionIcon(log.action) }}</div>
+            <div class="audit-content">
+                <div class="audit-header">
+                    <span class="audit-action">{{ log.action }}</span>
+                    <span class="audit-entity">{{ log.entityType }} #{{ log.entityId }}</span>
+                </div>
+                <p class="audit-remarks">{{ log.remarks }}</p>
+                <div class="audit-meta">
+                    <span class="audit-actor">👤 {{ log.performedByName }}</span>
+                    <span class="audit-time">{{ log.timestamp | date:'medium' }}</span>
+                </div>
+                @if (log.previousValue && log.newValue) {
+                <div class="audit-change">
+                    <span class="change-from">{{ log.previousValue }}</span>
+                    <span class="change-arrow">→</span>
+                    <span class="change-to">{{ log.newValue }}</span>
+                </div>
+                }
+            </div>
+        </div>
+        }
+    </div>
+    }
+</div>

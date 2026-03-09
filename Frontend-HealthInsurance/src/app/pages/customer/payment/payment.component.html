@@ -1,0 +1,41 @@
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1>💳 Secure Payment</h1>
+        <p>Complete your policy activation — all transactions are encrypted</p>
+    </div>
+    @if (loading) {
+    <div class="loading-page">
+        <div class="spinner"></div>
+        <p>Loading payment details...</p>
+    </div>
+    } @else if (policy) {
+    <div class="payment-card card" style="max-width:500px;">
+        <h3>Payment Summary</h3>
+        <div class="summary">
+            <div class="summary-row"><span>Policy</span><strong>{{ policy.policyNumber }}</strong></div>
+            <div class="summary-row"><span>Plan</span><strong>{{ policy.planName }}</strong></div>
+            <div class="summary-row"><span>Coverage</span><strong>{{ formatCurrency(policy.coverageAmount) }}</strong>
+            </div>
+            <div class="summary-row total"><span>Amount Due</span><strong>{{ formatCurrency(policy.premiumAmount)
+                    }}</strong></div>
+        </div>
+        <div class="form-group" style="margin-top:20px;">
+            <label>Payment Method</label>
+            <select class="form-control" [(ngModel)]="paymentMethod">
+                <option value="UPI">UPI</option>
+                <option value="CREDIT_CARD">Credit Card</option>
+                <option value="DEBIT_CARD">Debit Card</option>
+                <option value="NET_BANKING">Net Banking</option>
+            </select>
+        </div>
+        <button class="btn btn-primary btn-lg" style="width:100%; margin-top:16px;" (click)="pay()"
+            [disabled]="paying || policy.policyStatus !== 'PENDING'">
+            @if (paying) { <span class="spinner"></span> Processing... } @else if (policy.policyStatus !== 'PENDING') {
+            Already {{ policy.policyStatus }} } @else { 🔒 Pay {{ formatCurrency(policy.premiumAmount) }} }
+        </button>
+        <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-top:16px;">
+            🔒 Your payment is secured with 256-bit SSL encryption
+        </p>
+    </div>
+    }
+</div>

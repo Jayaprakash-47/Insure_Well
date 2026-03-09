@@ -1,0 +1,51 @@
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1>Premium Calculator</h1>
+        <p>Calculate your personalized premium based on your profile</p>
+    </div>
+
+    <div class="calc-layout">
+        <div class="calc-form card">
+            <h3>Enter Details</h3>
+            <div class="form-group"><label>Select Plan</label>
+                <select class="form-control" [(ngModel)]="form.planId">
+                    @for (p of plans; track p.planId) { <option [value]="p.planId">{{ p.planName }} ({{
+                        formatCurrency(p.basePremiumAmount) }})</option> }
+                </select>
+            </div>
+            <div class="form-group"><label>Your Age</label><input class="form-control" [(ngModel)]="form.age"
+                    type="number" min="1" max="100" /></div>
+            <div class="form-group"><label>Number of Members</label><input class="form-control"
+                    [(ngModel)]="form.numberOfMembers" type="number" min="1" max="10" /></div>
+            <div class="form-group"><label><input type="checkbox" [(ngModel)]="form.smoker" /> Are you a smoker?</label>
+            </div>
+            <div class="form-group"><label><input type="checkbox" [(ngModel)]="form.preExistingDiseases" /> Pre-existing
+                    diseases?</label></div>
+            <button class="btn btn-primary" style="width:100%;" (click)="calculate()" [disabled]="calculating">{{
+                calculating ? 'Calculating...' : 'Calculate Premium' }}</button>
+
+            @if (result) {
+            <div class="result-box">
+                <p>Your Premium</p>
+                <h2>{{ formatCurrency(result.calculatedPremium) }}<span>/year</span></h2>
+                <p class="result-id">Quote ID: {{ result.quoteId }} — Use this when purchasing</p>
+            </div>
+            }
+        </div>
+
+        <div class="calc-history card">
+            <h3>Your Quote History</h3>
+            @if (quotes.length === 0) {
+            <p style="color:var(--text-secondary); margin-top:16px;">No quotes yet. Calculate your first quote!</p>
+            } @else {
+            @for (q of quotes; track q.quoteId) {
+            <div class="history-item">
+                <div><strong>{{ q.planName }}</strong><br><span class="text-sm">Age: {{ q.age }} | Members: {{
+                        q.numberOfMembers }} | Smoker: {{ q.smoker ? 'Yes' : 'No' }}</span></div>
+                <div class="history-price">{{ formatCurrency(q.calculatedPremium) }}</div>
+            </div>
+            }
+            }
+        </div>
+    </div>
+</div>

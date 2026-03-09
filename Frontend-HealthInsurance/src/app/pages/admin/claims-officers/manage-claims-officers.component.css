@@ -1,0 +1,14 @@
+.toolbar {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.toolbar .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}

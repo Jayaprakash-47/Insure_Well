@@ -1,0 +1,168 @@
+<div class="page-wrapper">
+    <div class="page-header">
+        <a routerLink="/claims-officer/my-claims" class="back-link">← Back to My Claims</a>
+        <h1>Claim Review</h1>
+    </div>
+
+    @if (loading) {
+    <div class="loading-page"><div class="spinner"></div><p>Loading claim details...</p></div>
+    } @else if (claim) {
+
+    <!-- Claim Summary Card -->
+    <div class="review-layout">
+        <div class="claim-detail-card card">
+            <div class="detail-header">
+                <div>
+                    <h2>{{ claim.claimNumber }}</h2>
+                    <span class="badge" [ngClass]="getStatusClass(claim.claimStatus)">{{ claim.claimStatus }}</span>
+                </div>
+                <div class="claim-total">{{ formatCurrency(claim.claimAmount) }}</div>
+            </div>
+
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="item-label">Customer</span>
+                    <span class="item-value">{{ claim.customerName }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="item-label">Policy</span>
+                    <span class="item-value">{{ claim.policyNumber }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="item-label">Claim Type</span>
+                    <span class="item-value">{{ claim.claimType }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="item-label">Hospital</span>
+                    <span class="item-value">{{ claim.hospitalName }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="item-label">Admission Date</span>
+                    <span class="item-value">{{ claim.admissionDate | date:'mediumDate' }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="item-label">Discharge Date</span>
+                    <span class="item-value">{{ claim.dischargeDate | date:'mediumDate' }}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <span class="item-label">Diagnosis</span>
+                    <span class="item-value">{{ claim.diagnosis }}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <span class="item-label">Filed On</span>
+                    <span class="item-value">{{ claim.createdAt | date:'medium' }}</span>
+                </div>
+            </div>
+
+            @if (claim.tpaReferenceNumber) {
+            <div class="settlement-info">
+                <h4>🏦 Settlement Info</h4>
+                <p><strong>TPA Reference:</strong> {{ claim.tpaReferenceNumber }}</p>
+                <p><strong>Settlement Amount:</strong> {{ formatCurrency(claim.settlementAmount) }}</p>
+                <p><strong>Settlement Date:</strong> {{ claim.settlementDate | date:'medium' }}</p>
+            </div>
+            }
+        </div>
+
+        <!-- Decision Panel -->
+        @if (canReview) {
+        <div class="decision-panel card">
+            <h3>📝 Submit Decision</h3>
+
+            <div class="decision-buttons">
+                <button class="decision-btn approve" [class.selected]="decision === 'APPROVE'" (click)="setDecision('APPROVE')">
+                    ✅ Approve
+                </button>
+                <button class="decision-btn partial" [class.selected]="decision === 'PARTIALLY_APPROVE'" (click)="setDecision('PARTIALLY_APPROVE')">
+                    ⚖️ Partial
+                </button>
+                <button class="decision-btn reject" [class.selected]="decision === 'REJECT'" (click)="setDecision('REJECT')">
+                    ❌ Reject
+                </button>
+                <button class="decision-btn escalate" [class.selected]="decision === 'ESCALATE'" (click)="setDecision('ESCALATE')">
+                    ⬆️ Escalate
+                </button>
+                <button class="decision-btn pending" [class.selected]="decision === 'DOCUMENT_PENDING'" (click)="setDecision('DOCUMENT_PENDING')">
+                    📄 Need Docs
+                </button>
+            </div>
+
+            @if (decision) {
+            <div class="decision-form">
+                @if (decision === 'APPROVE' || decision === 'PARTIALLY_APPROVE') {
+                <div class="form-group">
+                    <label>Approved Amount (₹)</label>
+                    <input class="form-control" type="number" [(ngModel)]="approvedAmount" [max]="claim.claimAmount" placeholder="Enter approved amount">
+                    <span class="hint">Claimed: {{ formatCurrency(claim.claimAmount) }}</span>
+                </div>
+                }
+
+                @if (decision === 'REJECT') {
+                <div class="form-group">
+                    <label>Rejection Reason *</label>
+                    <textarea class="form-control" [(ngModel)]="rejectionReason" rows="3" placeholder="Explain the reason for rejection"></textarea>
+                </div>
+                }
+
+                @if (decision === 'ESCALATE') {
+                <div class="form-group">
+                    <label>Escalation Reason *</label>
+                    <select class="form-control" [(ngModel)]="escalationReason">
+                        <option value="">Select reason...</option>
+                        @for (r of escalationReasons; track r) {
+                        <option [value]="r">{{ r.replace('_', ' ') }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Escalation Notes</label>
+                    <textarea class="form-control" [(ngModel)]="escalationNotes" rows="2" placeholder="Additional notes for admin"></textarea>
+                </div>
+                }
+
+                @if (decision === 'DOCUMENT_PENDING') {
+                <div class="form-group">
+                    <label>Documents Required</label>
+                    <textarea class="form-control" [(ngModel)]="additionalDocumentsRequired" rows="2" placeholder="List the required documents"></textarea>
+                </div>
+                }
+
+                <div class="form-group">
+                    <label>Reviewer Remarks</label>
+                    <textarea class="form-control" [(ngModel)]="reviewerRemarks" rows="2" placeholder="Your observations (optional)"></textarea>
+                </div>
+
+                <button class="btn btn-primary btn-lg full-width" (click)="submitReview()" [disabled]="submitting">
+                    @if (submitting) {
+                    <div class="spinner"></div> Submitting...
+                    } @else {
+                    Submit Decision
+                    }
+                </button>
+            </div>
+            }
+        </div>
+        } @else {
+        <div class="decision-panel card read-only">
+            <h3>Decision Summary</h3>
+            @if (claim.reviewerRemarks) {
+            <p><strong>Remarks:</strong> {{ claim.reviewerRemarks }}</p>
+            }
+            @if (claim.approvedAmount) {
+            <p><strong>Approved Amount:</strong> {{ formatCurrency(claim.approvedAmount) }}</p>
+            }
+            @if (claim.rejectionReason) {
+            <p><strong>Rejection Reason:</strong> {{ claim.rejectionReason }}</p>
+            }
+            @if (claim.isEscalated) {
+            <p><strong>Escalation Reason:</strong> {{ claim.escalationReason }}</p>
+            <p><strong>Escalation Notes:</strong> {{ claim.escalationNotes }}</p>
+            }
+            @if (claim.adminRemarks) {
+            <p><strong>Admin Decision:</strong> {{ claim.adminRemarks }}</p>
+            }
+        </div>
+        }
+    </div>
+    }
+</div>

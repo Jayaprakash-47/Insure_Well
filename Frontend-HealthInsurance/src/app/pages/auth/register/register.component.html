@@ -1,0 +1,98 @@
+<div class="auth-page">
+    <div class="auth-card register-card">
+        <div class="auth-header">
+            <a routerLink="/" class="auth-brand">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                InsureWell
+            </a>
+            <h1>Create Account</h1>
+            <p>Register to start exploring health insurance plans</p>
+        </div>
+
+        <form (ngSubmit)="onSubmit()">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name *</label>
+                    <input id="firstName" type="text" class="form-control" [(ngModel)]="form.firstName" name="firstName"
+                        placeholder="First name" />
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name *</label>
+                    <input id="lastName" type="text" class="form-control" [(ngModel)]="form.lastName" name="lastName"
+                        placeholder="Last name" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="regEmail">Email Address *</label>
+                <input id="regEmail" type="email" class="form-control" [(ngModel)]="form.email" name="email"
+                    placeholder="you@example.com" />
+            </div>
+
+            <div class="form-group">
+                <label for="regPassword">Password *</label>
+                <input id="regPassword" type="password" class="form-control" [(ngModel)]="form.password" name="password"
+                    placeholder="Min 6 characters" />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input id="phone" type="tel" class="form-control" [(ngModel)]="form.phone" name="phone"
+                        placeholder="9876543210" />
+                </div>
+                <div class="form-group">
+                    <label for="dob">Date of Birth *</label>
+                    <input id="dob" type="date" class="form-control" [(ngModel)]="form.dateOfBirth"
+                        name="dateOfBirth" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" class="form-control" [(ngModel)]="form.gender" name="gender">
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input id="address" type="text" class="form-control" [(ngModel)]="form.address" name="address"
+                    placeholder="Street address" />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input id="city" type="text" class="form-control" [(ngModel)]="form.city" name="city"
+                        placeholder="City" />
+                </div>
+                <div class="form-group">
+                    <label for="state">State</label>
+                    <input id="state" type="text" class="form-control" [(ngModel)]="form.state" name="state"
+                        placeholder="State" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="pincode">Pincode</label>
+                <input id="pincode" type="text" class="form-control" [(ngModel)]="form.pincode" name="pincode"
+                    placeholder="600001" />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="loading">
+                @if (loading) {
+                <span class="spinner"></span> Creating Account...
+                } @else {
+                Create Account
+                }
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a routerLink="/login">Sign in</a></p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,13 @@
+/* Uses global styles */
+
+/* My Claims - enhanced styles */
+td strong {
+    color: var(--primary);
+    font-family: var(--font-heading);
+    letter-spacing: 0.02em;
+}
+
+.badge-under_review {
+    background-color: var(--info-light);
+    color: #1e40af;
+}

@@ -1,0 +1,18 @@
+/* Uses global styles */
+
+/* Manage Plans - enhanced styles */
+td strong {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Action buttons in table */
+td .btn + .btn {
+    margin-left: 6px;
+}
