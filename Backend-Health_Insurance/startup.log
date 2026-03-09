@@ -1,0 +1,316 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------< com.healthshield:Corporate_Health_Insurance >-------------
+[INFO] Building Corporate_Health_Insurance 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.4.5:run (default-cli) > test-compile @ Corporate_Health_Insurance >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ Corporate_Health_Insurance ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ Corporate_Health_Insurance ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ Corporate_Health_Insurance ---
+[INFO] skip non existing resourceDirectory C:\Users\Shash\OneDrive\Desktop\SprinBootProjects\Corporate_Health_Insurance\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ Corporate_Health_Insurance ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.4.5:run (default-cli) < test-compile @ Corporate_Health_Insurance <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.4.5:run (default-cli) @ Corporate_Health_Insurance ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.5)
+
+2026-02-26T10:32:53.992+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] c.h.HealthInsuranceApplication           : Starting HealthInsuranceApplication using Java 25.0.1 with PID 16620 (C:\Users\Shash\OneDrive\Desktop\SprinBootProjects\Corporate_Health_Insurance\target\classes started by Shash in C:\Users\Shash\OneDrive\Desktop\SprinBootProjects\Corporate_Health_Insurance)
+2026-02-26T10:32:53.996+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] c.h.HealthInsuranceApplication           : No active profile set, falling back to 1 default profile: "default"
+2026-02-26T10:32:54.084+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-02-26T10:32:54.085+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-02-26T10:32:55.964+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-02-26T10:32:56.149+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 171 ms. Found 11 JPA repository interfaces.
+2026-02-26T10:32:57.453+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-02-26T10:32:57.480+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-02-26T10:32:57.481+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-02-26T10:32:57.599+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-02-26T10:32:57.601+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3514 ms
+2026-02-26T10:32:57.928+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-02-26T10:32:58.043+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.13.Final
+2026-02-26T10:32:58.117+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-02-26T10:32:58.711+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-02-26T10:32:58.776+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-02-26T10:32:59.165+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:healthshielddb user=SA
+2026-02-26T10:32:59.168+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-02-26T10:32:59.212+05:30  WARN 16620 --- [Corporate_Health_Insurance] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-02-26T10:32:59.255+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-02-26T10:33:01.827+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: 
+    drop table if exists claim_documents cascade 
+Hibernate: 
+    drop table if exists claims cascade 
+Hibernate: 
+    drop table if exists insurance_plans cascade 
+Hibernate: 
+    drop table if exists payments cascade 
+Hibernate: 
+    drop table if exists policies cascade 
+Hibernate: 
+    drop table if exists policy_members cascade 
+Hibernate: 
+    drop table if exists premium_quotes cascade 
+Hibernate: 
+    drop table if exists users cascade 
+Hibernate: 
+    create table claim_documents (
+        claim_id bigint,
+        document_id bigint generated by default as identity,
+        uploaded_at timestamp(6),
+        file_name varchar(255),
+        file_path varchar(255),
+        document_type enum ('DISCHARGE_SUMMARY','HOSPITAL_BILL','ID_PROOF','LAB_REPORT','OTHER','PRESCRIPTION'),
+        primary key (document_id)
+    )
+Hibernate: 
+    create table claims (
+        admission_date date,
+        approved_amount numeric(38,2),
+        claim_amount numeric(38,2),
+        discharge_date date,
+        claim_id bigint generated by default as identity,
+        created_at timestamp(6),
+        policy_id bigint,
+        user_id bigint,
+        claim_number varchar(255) unique,
+        diagnosis varchar(255),
+        doctor_name varchar(255),
+        hospital_address TEXT,
+        hospital_name varchar(255),
+        rejection_reason TEXT,
+        remarks TEXT,
+        claim_status enum ('APPROVED','REJECTED','SETTLED','SUBMITTED','UNDER_REVIEW'),
+        claim_type enum ('CASHLESS','REIMBURSEMENT'),
+        primary key (claim_id)
+    )
+Hibernate: 
+    create table insurance_plans (
+        base_premium_amount numeric(38,2),
+        coverage_amount numeric(38,2),
+        dental_cover boolean,
+        is_active boolean default true,
+        maternity_cover boolean,
+        max_age_limit integer,
+        min_age_limit integer,
+        optical_cover boolean,
+        plan_duration_months integer,
+        pre_existing_disease_cover boolean,
+        room_rent_limit_per_day numeric(38,2),
+        waiting_period_months integer,
+        plan_id bigint generated by default as identity,
+        description TEXT,
+        plan_name varchar(255),
+        plan_type enum ('CORPORATE','FAMILY','INDIVIDUAL','SENIOR_CITIZEN'),
+        primary key (plan_id)
+    )
+Hibernate: 
+    create table payments (
+        amount numeric(38,2),
+        payment_date timestamp(6),
+        payment_id bigint generated by default as identity,
+        policy_id bigint,
+        user_id bigint,
+        transaction_id varchar(255) unique,
+        payment_method enum ('CORPORATE_TRANSFER','CREDIT_CARD','DEBIT_CARD','NET_BANKING','UPI'),
+        payment_status enum ('FAILED','PENDING','REFUNDED','SUCCESS'),
+        primary key (payment_id)
+    )
+Hibernate: 
+    create table policies (
+        coverage_amount numeric(38,2),
+        end_date date,
+        premium_amount numeric(38,2),
+        start_date date,
+        agent_id bigint,
+        created_at timestamp(6),
+        plan_id bigint,
+        policy_id bigint generated by default as identity,
+        user_id bigint,
+        nominee_name varchar(255),
+        nominee_relationship varchar(255),
+        policy_number varchar(255) unique,
+        payment_frequency enum ('ANNUALLY','HALF_YEARLY','MONTHLY','QUARTERLY'),
+        policy_status enum ('ACTIVE','CANCELLED','EXPIRED','LAPSED','PENDING'),
+        primary key (policy_id)
+    )
+Hibernate: 
+    create table policy_members (
+        date_of_birth date,
+        member_id bigint generated by default as identity,
+        policy_id bigint,
+        member_name varchar(255),
+        pre_existing_diseases TEXT,
+        gender enum ('FEMALE','MALE','OTHER'),
+        relationship enum ('CHILD','PARENT','SELF','SPOUSE'),
+        primary key (member_id)
+    )
+Hibernate: 
+    create table premium_quotes (
+        age integer,
+        calculated_premium numeric(38,2),
+        number_of_members integer default 1,
+        pre_existing_diseases boolean,
+        smoker boolean,
+        calculated_at timestamp(6),
+        plan_id bigint,
+        quote_id bigint generated by default as identity,
+        user_id bigint,
+        primary key (quote_id)
+    )
+Hibernate: 
+    create table users (
+        can_approve_claims boolean default false,
+        commission_percentage numeric(38,2),
+        date_of_birth date,
+        is_active boolean default true,
+        total_policies_sold integer default 0,
+        created_at timestamp(6),
+        user_id bigint generated by default as identity,
+        user_type varchar(31) not null,
+        access_level varchar(255),
+        address TEXT,
+        city varchar(255),
+        department varchar(255),
+        email varchar(255) unique,
+        first_name varchar(255),
+        last_name varchar(255),
+        license_number varchar(255),
+        password varchar(255),
+        phone varchar(255),
+        pincode varchar(255),
+        state varchar(255),
+        territory varchar(255),
+        gender enum ('FEMALE','MALE','OTHER'),
+        primary key (user_id)
+    )
+Hibernate: 
+    alter table if exists claim_documents 
+       add constraint FK1wmywqj1uideimwd7pdc8rxh4 
+       foreign key (claim_id) 
+       references claims
+Hibernate: 
+    alter table if exists claims 
+       add constraint FKm0w2xffwe13pmkusoxnxuim7j 
+       foreign key (policy_id) 
+       references policies
+Hibernate: 
+    alter table if exists claims 
+       add constraint FKpa11rhvbu0t3yoouw2m6k15ic 
+       foreign key (user_id) 
+       references users
+Hibernate: 
+    alter table if exists payments 
+       add constraint FKlemj5kqcn9p31xx0qbpwu3p3l 
+       foreign key (policy_id) 
+       references policies
+Hibernate: 
+    alter table if exists payments 
+       add constraint FKj94hgy9v5fw1munb90tar2eje 
+       foreign key (user_id) 
+       references users
+Hibernate: 
+    alter table if exists policies 
+       add constraint FK6xqki2lfeu8con7kvrmlvaw8v 
+       foreign key (agent_id) 
+       references users
+Hibernate: 
+    alter table if exists policies 
+       add constraint FK7btrh5n6d730p3hfjkwd9r9qb 
+       foreign key (plan_id) 
+       references insurance_plans
+Hibernate: 
+    alter table if exists policies 
+       add constraint FKah8s5yurk7145x8c18kv9um0l 
+       foreign key (user_id) 
+       references users
+Hibernate: 
+    alter table if exists policy_members 
+       add constraint FKtnxal8uw5rfwi6n4rjig6dkrf 
+       foreign key (policy_id) 
+       references policies
+Hibernate: 
+    alter table if exists premium_quotes 
+       add constraint FKtcfeoobiv4911sjpkhg5hsbt1 
+       foreign key (plan_id) 
+       references insurance_plans
+Hibernate: 
+    alter table if exists premium_quotes 
+       add constraint FKi8hlk5t00hl96jb0opl7c6w4x 
+       foreign key (user_id) 
+       references users
+2026-02-26T10:33:01.974+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-02-26T10:33:03.676+05:30  WARN 16620 --- [Corporate_Health_Insurance] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-02-26T10:33:04.361+05:30  WARN 16620 --- [Corporate_Health_Insurance] [  restartedMain] thorizationManagerRequestMatcherRegistry : One of the patterns in [GET, /api/plans/**] is missing a leading slash. This is discouraged; please include the leading slash in all your request matcher patterns. In future versions of Spring Security, leaving out the leading slash will result in an exception.
+2026-02-26T10:33:05.100+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:healthshielddb'
+2026-02-26T10:33:05.326+05:30  WARN 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2026-02-26T10:33:05.373+05:30  WARN 16620 --- [Corporate_Health_Insurance] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-02-26T10:33:05.380+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+Hibernate: 
+    drop table if exists claim_documents cascade 
+Hibernate: 
+    drop table if exists claims cascade 
+Hibernate: 
+    drop table if exists insurance_plans cascade 
+Hibernate: 
+    drop table if exists payments cascade 
+Hibernate: 
+    drop table if exists policies cascade 
+Hibernate: 
+    drop table if exists policy_members cascade 
+Hibernate: 
+    drop table if exists premium_quotes cascade 
+Hibernate: 
+    drop table if exists users cascade 
+2026-02-26T10:33:05.402+05:30  WARN 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.s.b.f.support.DisposableBeanAdapter    : Invocation of destroy method failed on bean with name 'inMemoryDatabaseShutdownExecutor': org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-232]
+2026-02-26T10:33:05.403+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-02-26T10:33:05.405+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-02-26T10:33:05.427+05:30  INFO 16620 --- [Corporate_Health_Insurance] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-02-26T10:33:05.462+05:30 ERROR 16620 --- [Corporate_Health_Insurance] [  restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 8080 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 8080 or configure this application to listen on another port.
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  16.909 s
+[INFO] Finished at: 2026-02-26T10:33:05+05:30
+[INFO] ------------------------------------------------------------------------
