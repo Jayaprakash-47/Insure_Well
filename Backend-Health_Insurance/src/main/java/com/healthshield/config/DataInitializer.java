@@ -4,7 +4,6 @@ import com.healthshield.entity.*;
 import com.healthshield.enums.Gender;
 import com.healthshield.enums.PlanType;
 import com.healthshield.repository.InsurancePlanRepository;
-import com.healthshield.repository.NetworkHospitalRepository;
 import com.healthshield.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +21,12 @@ public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final InsurancePlanRepository insurancePlanRepository;
-    private final NetworkHospitalRepository networkHospitalRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
         seedUsers();
         seedInsurancePlans();
-        seedNetworkHospitals();
 
         log.info("═══════════════════════════════════════════════════════════");
         log.info("  🏥 HealthShield Insurance System — Started Successfully!");
@@ -41,7 +38,7 @@ public class DataInitializer implements CommandLineRunner {
         log.info("  DEFAULT CREDENTIALS:");
         log.info("  Admin           : admin@healthshield.com / Admin@1234");
         log.info("  Claims Officer  : ravi.co@healthshield.com / Officer@1234");
-        log.info("  Agent           : priya.agent@healthshield.com / Agent@1234");
+         log.info("  Under Writer    : priya.underwriter@healthshield.com / Agent@1234");
         log.info("  Customer        : jayaprakash@gmail.com / Jaya@1234");
         log.info("═══════════════════════════════════════════════════════════");
     }
@@ -81,21 +78,21 @@ public class DataInitializer implements CommandLineRunner {
             log.info("✅ Claims Officer seeded: ravi.co@healthshield.com");
         }
 
-        // Seed Agent
-        if (!userRepository.existsByEmail("priya.agent@healthshield.com")) {
-            Agent agent = new Agent();
-            agent.setFirstName("Priya");
-            agent.setLastName("Mehta");
-            agent.setEmail("priya.agent@healthshield.com");
-            agent.setPassword(passwordEncoder.encode("Agent@1234"));
-            agent.setPhone("9000000002");
-            agent.setIsActive(true);
-            agent.setLicenseNumber("LIC-2024-001");
-            agent.setTerritory("South India");
-            agent.setCommissionPercentage(new BigDecimal("10.00"));
-            agent.setTotalPoliciesSold(0);
-            userRepository.save(agent);
-            log.info("✅ Agent seeded: priya.agent@healthshield.com");
+        // Seed Underwriter
+        if (!userRepository.existsByEmail("priya.underwriter@healthshield.com")) {
+            Underwriter underwriter = new Underwriter();
+            underwriter.setFirstName("Priya");
+            underwriter.setLastName("Mehta");
+            underwriter.setEmail("priya.underwriter@healthshield.com");
+            underwriter.setPassword(passwordEncoder.encode("Agent@1234"));
+            underwriter.setPhone("9000000002");
+            underwriter.setIsActive(true);
+            underwriter.setLicenseNumber("LIC-2024-001");
+            underwriter.setSpecialization("Health & Life Insurance");
+            underwriter.setCommissionPercentage(new BigDecimal("10.00"));
+            underwriter.setTotalQuotesSent(0);
+            userRepository.save(underwriter);
+            log.info("✅ Underwriter seeded: priya.underwriter@healthshield.com");
         }
 
         // Seed Customer
@@ -115,25 +112,6 @@ public class DataInitializer implements CommandLineRunner {
             customer.setPincode("600001");
             userRepository.save(customer);
             log.info("✅ Customer seeded: jayaprakash@gmail.com");
-        }
-
-        // Seed Second Customer for agent sales demo
-        if (!userRepository.existsByEmail("anitha.r@gmail.com")) {
-            Customer customer2 = new Customer();
-            customer2.setFirstName("Anitha");
-            customer2.setLastName("Ramasamy");
-            customer2.setEmail("anitha.r@gmail.com");
-            customer2.setPassword(passwordEncoder.encode("Anitha@1234"));
-            customer2.setPhone("9000000005");
-            customer2.setIsActive(true);
-            customer2.setDateOfBirth(LocalDate.of(1985, 8, 22));
-            customer2.setGender(Gender.FEMALE);
-            customer2.setAddress("456 Park Road");
-            customer2.setCity("Bangalore");
-            customer2.setState("Karnataka");
-            customer2.setPincode("560001");
-            userRepository.save(customer2);
-            log.info("✅ Customer 2 seeded: anitha.r@gmail.com");
         }
     }
 
@@ -230,82 +208,6 @@ public class DataInitializer implements CommandLineRunner {
                     .build());
 
             log.info("✅ 6 Insurance Plans seeded successfully");
-        }
-    }
-
-    private void seedNetworkHospitals() {
-        if (networkHospitalRepository.count() == 0) {
-            networkHospitalRepository.save(NetworkHospital.builder()
-                    .hospitalCode("NH-CHN-001")
-                    .hospitalName("Apollo Hospitals, Greams Road")
-                    .address("21 Greams Lane, Off Greams Road")
-                    .city("Chennai")
-                    .state("Tamil Nadu")
-                    .pincode("600006")
-                    .contactNumber("044-28293333")
-                    .email("info@apollochennai.com")
-                    .hospitalType("Super-Specialty")
-                    .nabhAccredited(true)
-                    .isActive(true)
-                    .build());
-
-            networkHospitalRepository.save(NetworkHospital.builder()
-                    .hospitalCode("NH-BLR-001")
-                    .hospitalName("Manipal Hospital, Old Airport Road")
-                    .address("98 HAL Old Airport Road")
-                    .city("Bangalore")
-                    .state("Karnataka")
-                    .pincode("560017")
-                    .contactNumber("080-25024444")
-                    .email("info@manipalhospital.com")
-                    .hospitalType("Multi-Specialty")
-                    .nabhAccredited(true)
-                    .isActive(true)
-                    .build());
-
-            networkHospitalRepository.save(NetworkHospital.builder()
-                    .hospitalCode("NH-MUM-001")
-                    .hospitalName("Kokilaben Dhirubhai Ambani Hospital")
-                    .address("Rao Saheb Achutrao Patwardhan Marg, Four Bungalows")
-                    .city("Mumbai")
-                    .state("Maharashtra")
-                    .pincode("400053")
-                    .contactNumber("022-30999999")
-                    .email("info@kokilabenhospital.com")
-                    .hospitalType("Super-Specialty")
-                    .nabhAccredited(true)
-                    .isActive(true)
-                    .build());
-
-            networkHospitalRepository.save(NetworkHospital.builder()
-                    .hospitalCode("NH-HYD-001")
-                    .hospitalName("KIMS Hospital, Secunderabad")
-                    .address("1-8-31/1 Minister Road")
-                    .city("Hyderabad")
-                    .state("Telangana")
-                    .pincode("500003")
-                    .contactNumber("040-44885000")
-                    .email("info@kimshospitals.com")
-                    .hospitalType("Multi-Specialty")
-                    .nabhAccredited(true)
-                    .isActive(true)
-                    .build());
-
-            networkHospitalRepository.save(NetworkHospital.builder()
-                    .hospitalCode("NH-DEL-001")
-                    .hospitalName("Max Super Speciality Hospital, Saket")
-                    .address("1-2 Press Enclave Road, Saket")
-                    .city("New Delhi")
-                    .state("Delhi")
-                    .pincode("110017")
-                    .contactNumber("011-26515050")
-                    .email("info@maxhealthcare.com")
-                    .hospitalType("Super-Specialty")
-                    .nabhAccredited(true)
-                    .isActive(true)
-                    .build());
-
-            log.info("✅ 5 Network Hospitals seeded successfully");
         }
     }
 }

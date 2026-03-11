@@ -31,15 +31,19 @@ public class PolicyResponse {
     private String nomineeName;
     private String nomineeRelationship;
     private LocalDateTime createdAt;
+    private Integer waitingPeriodMonths;
     private List<PolicyMemberResponse> members;
 
-    // Agent tracking
-    private Long agentId;
-    private String agentName;
+    // Underwriter tracking
+    private Long underwriterId;
+    private String underwriterName;
     private BigDecimal commissionAmount;
+    private BigDecimal quoteAmount;
+    private LocalDateTime assignedAt;
 
     // Renewal tracking
     private Integer renewalCount;
     private BigDecimal noClaimBonus;
     private Long originalPolicyId;
 }
+

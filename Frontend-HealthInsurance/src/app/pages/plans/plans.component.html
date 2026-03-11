@@ -41,11 +41,11 @@
                 </div>
                 <div class="detail-row">
                     <span>Maternity Cover</span>
-                    <strong>{{ plan.maternityCover ? '✓ Yes' : '✕ No' }}</strong>
+                    <strong><span class="material-icons" [style.color]="plan.maternityCover ? '#10b981' : '#dc2626'" style="font-size: 1rem; vertical-align: middle;">{{ plan.maternityCover ? 'check_circle' : 'cancel' }}</span> {{ plan.maternityCover ? 'Yes' : 'No' }}</strong>
                 </div>
                 <div class="detail-row">
                     <span>Pre-existing Cover</span>
-                    <strong>{{ plan.preExistingDiseaseCover ? '✓ Yes' : '✕ No' }}</strong>
+                    <strong><span class="material-icons" [style.color]="plan.preExistingDiseaseCover ? '#10b981' : '#dc2626'" style="font-size: 1rem; vertical-align: middle;">{{ plan.preExistingDiseaseCover ? 'check_circle' : 'cancel' }}</span> {{ plan.preExistingDiseaseCover ? 'Yes' : 'No' }}</strong>
                 </div>
             </div>
 

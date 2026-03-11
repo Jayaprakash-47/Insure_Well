@@ -1,12 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { PolicyResponse } from '../../../core/models/models';
 
-@Component({ selector: 'app-payment', standalone: true, imports: [CommonModule, FormsModule], templateUrl: './payment.component.html', styleUrl: './payment.component.css' })
+@Component({ selector: 'app-payment', standalone: true, imports: [FormsModule], templateUrl: './payment.component.html', styleUrl: './payment.component.css' })
 export class PaymentComponent implements OnInit {
     policy: PolicyResponse | null = null;
     loading = true;

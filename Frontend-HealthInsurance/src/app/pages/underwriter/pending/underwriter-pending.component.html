@@ -1,0 +1,105 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Pending Assignments</h1>
+      <p>Policy applications assigned to you — calculate and send your premium quote.</p>
+    </div>
+    <a routerLink="/underwriter/dashboard" class="btn-back">← Dashboard</a>
+  </div>
+
+  @if (loading) {
+    <div class="loader">Loading assignments...</div>
+  }
+
+  @if (!loading && policies.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon"></div>
+      <h3>No pending assignments!</h3>
+      <p>You're all caught up. The admin will assign new policy applications to you.</p>
+    </div>
+  }
+
+  @if (!loading && policies.length > 0) {
+    <div class="policies-list">
+      @for (p of policies; track p) {
+        <div class="policy-card">
+          <div class="policy-header">
+            <div>
+              <span class="policy-num">{{ p.policyNumber }}</span>
+              <span class="badge badge-assigned">ASSIGNED</span>
+            </div>
+            <div class="assigned-date">Assigned: {{ p.assignedAt | date:'dd MMM yyyy, h:mm a' }}</div>
+          </div>
+          <div class="policy-body">
+            <div class="info-row">
+              <div class="info-item">
+                <label>Customer</label>
+                <strong>{{ p.customerName }}</strong>
+              </div>
+              <div class="info-item">
+                <label>Plan</label>
+                <strong>{{ p.planName }}</strong>
+              </div>
+              <div class="info-item">
+                <label>Coverage</label>
+                <strong>₹{{ (p.coverageAmount || 0).toLocaleString() }}</strong>
+              </div>
+              <div class="info-item">
+                <label>Members</label>
+                <strong>{{ p.members.length || 1 }}</strong>
+              </div>
+            </div>
+            <!-- Members List -->
+            @if (p.members && p.members.length > 0) {
+              <div class="members-table">
+                <h4>Policy Members</h4>
+                <table>
+                  <thead><tr><th>Name</th><th>Relationship</th><th>DOB</th><th>Gender</th><th>Pre-existing Conditions</th></tr></thead>
+                  <tbody>
+                    @for (m of p.members; track m) {
+                      <tr>
+                        <td>{{ m.memberName }}</td>
+                        <td>{{ m.relationship }}</td>
+                        <td>{{ m.dateOfBirth | date:'dd MMM yyyy' }}</td>
+                        <td>{{ m.gender }}</td>
+                        <td>{{ m.preExistingDiseases || 'None' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+            <!-- Quote Form -->
+            <div class="quote-form">
+              <h4 style="display: flex; align-items: center; gap: 8px;">
+                <span class="material-icons" style="font-size: 18px;">monetization_on</span> Send Premium Quote
+              </h4>
+              <div class="form-row" style="align-items: center;">
+                @if (quoteAmounts[p.policyId]) {
+                  <div class="calculated-amount" style="flex: 1.5;">
+                    <span style="font-size: 0.8rem; color: #64748b; display: block;">Calculated Premium</span>
+                    <strong style="font-size: 1.25rem; color: #0f1f3d;">₹{{ quoteAmounts[p.policyId].toLocaleString() }}</strong>
+                  </div>
+                  <button class="btn-send" (click)="sendQuote(p.policyId)" [disabled]="sending[p.policyId]">
+                    {{ sending[p.policyId] ? 'Sending...' : 'Send Quote' }}
+                  </button>
+                } @else {
+                  <button class="btn btn-secondary" (click)="calculateQuote(p.policyId)" [disabled]="sending[p.policyId]" style="background: #e2e8f0; color: #333; font-weight: 600; padding: 0.65rem 1.5rem; border: none; border-radius: 8px; cursor: pointer;">
+                    {{ sending[p.policyId] ? 'Calculating...' : 'Calculate Premium Quote' }}
+                  </button>
+                }
+              </div>
+              @if (successPolicyId === p.policyId) {
+                <div class="success-msg">Quote sent successfully!</div>
+              }
+              @if (errors[p.policyId]) {
+                <div class="error-msg">{{ errors[p.policyId] }}</div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+

@@ -1,106 +1,181 @@
-<div class="page-wrapper">
-    <div class="page-header">
-        <h1>Browse Insurance Plans</h1>
-        <p>Select a plan, get a quote, and purchase</p>
-    </div>
+<div class="page">
 
-    @if (loading) {
-    <div class="loading-page">
-        <div class="spinner"></div>
-        <p>Loading plans...</p>
-    </div>
-    } @else {
-    <div class="plans-grid">
-        @for (plan of plans; track plan.planId) {
-        <div class="plan-card">
-            <div class="plan-type-badge">{{ plan.planType }}</div>
-            <h3>{{ plan.planName }}</h3>
-            <p class="plan-desc">{{ plan.description }}</p>
-            <div class="plan-price"><span class="price">{{ formatCurrency(plan.basePremiumAmount) }}</span><span
-                    class="price-label">/ year (base)</span></div>
-            <div class="plan-details">
-                <div class="detail-row"><span>Coverage</span><strong>{{ formatCurrency(plan.coverageAmount) }}</strong>
+  <!-- STEP 1: Choose Plan -->
+  @if (step === 1) {
+    <div>
+      <div class="page-header">
+        <div>
+          <h1>Choose Your Plan</h1>
+          <p>Select an insurance plan that suits you. Our underwriter will calculate your exact premium after reviewing your details.</p>
+        </div>
+      </div>
+      @if (loading) {
+        <div class="loader">Loading plans...</div>
+      }
+      @if (!loading) {
+        <div class="plans-grid">
+          @for (p of plans; track p) {
+            <div class="plan-card" (click)="selectPlan(p)">
+              <div class="plan-badge">{{ p.planType | titlecase }}</div>
+              <h3>{{ p.planName }}</h3>
+              <p class="plan-desc">{{ p.description }}</p>
+              <div class="plan-highlights">
+                <div class="highlight-item">
+                  <span class="highlight-icon"></span>
+                  <div>
+                    <div class="highlight-label">Max Coverage</div>
+                    <div class="highlight-val">₹{{ formatCoverage(p.coverageAmount) }}</div>
+                  </div>
                 </div>
-                <div class="detail-row"><span>Duration</span><strong>{{ plan.planDurationMonths }} months</strong></div>
-                <div class="detail-row"><span>Age</span><strong>{{ plan.minAgeLimit }}-{{ plan.maxAgeLimit }}
-                        yrs</strong></div>
+                <div class="highlight-item">
+                  <span class="highlight-icon"></span>
+                  <div>
+                    <div class="highlight-label">Base Premium</div>
+                    <div class="highlight-val">₹{{ formatCoverage(p.basePremiumAmount) }}/yr</div>
+                  </div>
+                </div>
+                <div class="highlight-item">
+                  <span class="highlight-icon"></span>
+                  <div>
+                    <div class="highlight-label">Age Range</div>
+                    <div class="highlight-val">{{ p.minAgeLimit }}–{{ p.maxAgeLimit }} yrs</div>
+                  </div>
+                </div>
+                <div class="highlight-item">
+                  <span class="highlight-icon"></span>
+                  <div>
+                    <div class="highlight-label">Waiting Period</div>
+                    <div class="highlight-val">{{ p.waitingPeriodMonths }} months</div>
+                  </div>
+                </div>
+                <div class="highlight-item">
+                  <span class="highlight-icon"></span>
+                  <div>
+                    <div class="highlight-label">Duration</div>
+                    <div class="highlight-val">{{ p.planDurationMonths }} months</div>
+                  </div>
+                </div>
+              </div>
+              <div class="plan-tags">
+                <span [class.tag-yes]="p.maternityCover" [class.tag-no]="!p.maternityCover">
+                  {{ p.maternityCover ? '✓' : '✗' }} Maternity
+                </span>
+                <span [class.tag-yes]="p.preExistingDiseaseCover" [class.tag-no]="!p.preExistingDiseaseCover">
+                  {{ p.preExistingDiseaseCover ? '✓' : '✗' }} Pre-existing
+                </span>
+              </div>
+              <button class="btn btn-primary" style="margin-top:auto;" (click)="selectPlan(p)">Select This Plan →</button>
             </div>
-            <button class="btn btn-primary" style="width:100%; margin-top:16px;" (click)="openQuote(plan)">Get Quote &
-                Buy</button>
+          }
         </div>
-        }
+      }
     </div>
-    }
-</div>
+  }
 
-<!-- Quote Modal -->
-@if (showQuoteModal && selectedPlan) {
-<div class="modal-overlay" (click)="showQuoteModal = false">
-    <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h2>Get Quote - {{ selectedPlan.planName }}</h2><button class="modal-close"
-                (click)="showQuoteModal = false">✕</button>
-        </div>
-
-        @if (!quoteResult) {
-        <div class="form-group"><label>Your Age</label><input class="form-control" [(ngModel)]="quoteForm.age"
-                type="number" /></div>
-        <div class="form-group"><label>Number of Members (including you)</label><input class="form-control"
-                [(ngModel)]="quoteForm.numberOfMembers" type="number" min="1" /></div>
-        <div class="form-group"><label><input type="checkbox" [(ngModel)]="quoteForm.smoker" /> Are you a
-                smoker?</label></div>
-        <div class="form-group"><label><input type="checkbox" [(ngModel)]="quoteForm.preExistingDiseases" /> Do you have
-                pre-existing diseases?</label></div>
-        <div class="modal-actions">
-            <button class="btn btn-secondary" (click)="showQuoteModal = false">Cancel</button>
-            <button class="btn btn-primary" (click)="getQuote()" [disabled]="quoting">{{ quoting ? 'Calculating...' :
-                'Calculate Premium' }}</button>
-        </div>
-        } @else {
-        <div class="quote-result">
-            <div class="quote-amount">{{ formatCurrency(quoteResult.calculatedPremium) }}<span>/year</span></div>
-            <div class="quote-details">
-                <p>Age: {{ quoteResult.age }} | Smoker: {{ quoteResult.smoker ? 'Yes' : 'No' }} | Diseases: {{
-                    quoteResult.preExistingDiseases ? 'Yes' : 'No' }} | Members: {{ quoteResult.numberOfMembers }}</p>
+  <!-- STEP 2: Request Policy Form -->
+  @if (step === 2 && selectedPlan) {
+    <div class="form-page">
+      <button class="btn-back" (click)="step = 1">← Back to Plans</button>
+      <div class="form-header">
+        <div class="selected-plan-tag">{{ selectedPlan.planName }}</div>
+        <h1>Request Policy</h1>
+        <p>Fill in your details. Our underwriter will review your application and send you a customized premium quote.</p>
+      </div>
+      <div class="form-card">
+        <!-- Nominee -->
+        <div class="section">
+          <h3>Nominee Details</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nominee Full Name *</label>
+              <input [(ngModel)]="form.nomineeName" placeholder="e.g. Priya Sharma" />
             </div>
+            <div class="form-group">
+              <label>Relationship *</label>
+              <select [(ngModel)]="form.nomineeRelationship">
+                <option value="">— Select —</option>
+                <option>Spouse</option>
+                <option>Father</option>
+                <option>Mother</option>
+                <option>Son</option>
+                <option>Daughter</option>
+                <option>Sibling</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div class="modal-actions">
-            <button class="btn btn-secondary" (click)="quoteResult = null">Recalculate</button>
-            <button class="btn btn-primary" (click)="openPurchase()">Buy This Plan</button>
+        <!-- Members -->
+        <div class="section">
+          <div class="section-header">
+            <h3>Members to Insure</h3>
+            <button class="btn-add" (click)="addMember()">+ Add Member</button>
+          </div>
+          <p class="section-note">Add all members (including yourself) who need to be covered under this policy.</p>
+          @for (m of form.members; track m; let i = $index) {
+            <div class="member-card">
+              <div class="member-header">
+                <strong>Member {{ i + 1 }}</strong>
+                @if (form.members.length > 1) {
+                  <button class="btn-remove" (click)="removeMember(i)">✕ Remove</button>
+                }
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Full Name *</label>
+                  <input [(ngModel)]="m.memberName" placeholder="Full name" />
+                </div>
+                <div class="form-group">
+                  <label>Relationship *</label>
+                  <select [(ngModel)]="m.relationship">
+                    <option value="">— Select —</option>
+                    <option value="SELF">Self</option>
+                    <option value="SPOUSE">Spouse</option>
+                    <option value="PARENT">Parent</option>
+                    <option value="CHILD">Child</option>
+                    <option value="SIBLING">Sibling</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Date of Birth *</label>
+                  <input type="date" [(ngModel)]="m.dateOfBirth" />
+                </div>
+                <div class="form-group">
+                  <label>Gender *</label>
+                  <select [(ngModel)]="m.gender">
+                    <option value="">— Select —</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div class="form-group wide">
+                  <label>Pre-existing Diseases / Conditions</label>
+                  <input [(ngModel)]="m.preExistingDiseases" placeholder="e.g. Diabetes, Hypertension, None" />
+                </div>
+              </div>
+            </div>
+          }
         </div>
-        }
-    </div>
-</div>
-}
 
-<!-- Purchase Modal -->
-@if (showPurchaseModal && selectedPlan) {
-<div class="modal-overlay" (click)="showPurchaseModal = false">
-    <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h2>Purchase {{ selectedPlan.planName }}</h2><button class="modal-close"
-                (click)="showPurchaseModal = false">✕</button>
-        </div>
-        @if (quoteResult) { <p style="margin-bottom:16px; font-size:14px; color:var(--text-secondary);">Premium: <strong
-                style="color:var(--text-primary);">{{ formatCurrency(quoteResult.calculatedPremium) }}/year</strong></p>
+        <button class="btn btn-primary btn-block" style="padding: 1rem; font-size: 1.05rem;" (click)="submitRequest()" [disabled]="submitting">
+          @if (!submitting) {
+            <span style="display:flex; align-items:center; justify-content:center; gap:0.5rem;"><span class="material-icons">send</span> Submit Policy Request</span>
+          }
+          @if (submitting) {
+            <span style="display:flex; align-items:center; justify-content:center; gap:0.5rem;"><span class="material-icons" style="animation: spin 1s linear infinite;">hourglass_empty</span> Submitting...</span>
+          }
+        </button>
+        @if (submitted) {
+          <div class="success-card">
+            <div class="success-icon"><span class="material-icons" style="font-size: 3rem; color: #059669;">check_circle</span></div>
+            <h3>Policy Request Submitted!</h3>
+            <p>Your application is under review. You'll see the premium quote in <strong>My Policies</strong> once the underwriter evaluates it.</p>
+            <button class="btn btn-primary" (click)="goToPolicies()">Go to My Policies →</button>
+          </div>
         }
-        <div class="form-group"><label>Nominee Name *</label><input class="form-control"
-                [(ngModel)]="purchaseForm.nomineeName" placeholder="Full name of nominee" /></div>
-        <div class="form-group"><label>Nominee Relationship *</label>
-            <select class="form-control" [(ngModel)]="purchaseForm.nomineeRelationship">
-                <option value="">Select relationship</option>
-                <option value="SPOUSE">Spouse</option>
-                <option value="FATHER">Father</option>
-                <option value="MOTHER">Mother</option>
-                <option value="CHILD">Child</option>
-                <option value="SIBLING">Sibling</option>
-            </select>
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-secondary" (click)="showPurchaseModal = false">Cancel</button>
-            <button class="btn btn-primary" (click)="purchase()" [disabled]="purchasing">{{ purchasing ? 'Processing...'
-                : 'Confirm Purchase' }}</button>
-        </div>
+      </div>
     </div>
+  }
 </div>
-}

@@ -39,7 +39,21 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     /** Count claims assigned to officer */
     long countByAssignedOfficerUserId(Long officerId);
 
-    /** All claims for policies sold by a specific agent */
-    @Query("SELECT c FROM Claim c WHERE c.policy.soldByAgent.userId = :agentId")
-    List<Claim> findByAgentId(@Param("agentId") Long agentId);
+    long countByAssignedOfficerUserIdAndClaimStatus(Long officerId, ClaimStatus status);
+    long countByAssignedOfficerIsNullAndClaimStatus(ClaimStatus status);
+    long countByAssignedOfficerUserIdAndIsEscalatedTrue(Long officerId);
+
+    /** Check if claim number exists */
+    boolean existsByClaimNumber(String claimNumber);
+
+    /** Find claim by ID with all related entities eagerly loaded */
+    @Query("SELECT c FROM Claim c " +
+           "LEFT JOIN FETCH c.policy p " +
+           "LEFT JOIN FETCH p.plan " +
+           "LEFT JOIN FETCH c.user u " +
+           "LEFT JOIN FETCH c.assignedOfficer o " +
+           "LEFT JOIN FETCH c.documents " +
+           "WHERE c.claimId = :claimId")
+    Claim findByIdWithDetails(@Param("claimId") Long claimId);
+
 }

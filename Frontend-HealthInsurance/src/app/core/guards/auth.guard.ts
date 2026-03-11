@@ -38,11 +38,11 @@ export const customerGuard: CanActivateFn = () => {
     return false;
 };
 
-export const agentGuard: CanActivateFn = () => {
+export const underwriterGuard: CanActivateFn = () => {
     const auth = inject(AuthService);
     const router = inject(Router);
 
-    if (auth.isLoggedIn() && auth.isAgent()) {
+    if (auth.isLoggedIn() && auth.isUnderwriter()) {
         return true;
     }
 

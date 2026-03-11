@@ -13,7 +13,7 @@ public class PolicyPurchaseRequest {
     @NotNull(message = "Plan ID is required")
     private Long planId;
 
-    private Long quoteId;  // Optional: link to a premium quote for accurate pricing
+    private Long quoteId;
 
     @NotBlank(message = "Nominee name is required")
     private String nomineeName;

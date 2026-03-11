@@ -6,16 +6,14 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotBlank;
 
-/**
- * DTO for Admin's final decision on an escalated claim.
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminClaimDecisionRequest {
 
     @NotBlank(message = "Decision status is required")
-    private String decision; // APPROVED, PARTIALLY_APPROVED, REJECTED
+    private String decision;
 
     private java.math.BigDecimal approvedAmount;
 

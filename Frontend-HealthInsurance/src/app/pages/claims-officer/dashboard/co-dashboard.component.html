@@ -22,17 +22,15 @@
                 <span class="profile-label">Department</span>
                 <span class="profile-value">{{ dashboard.department }}</span>
             </div>
-            <div class="profile-item">
-                <span class="profile-label">Specialization</span>
-                <span class="profile-value">{{ dashboard.specialization }}</span>
-            </div>
+
             <div class="profile-item">
                 <span class="profile-label">Approval Limit</span>
                 <span class="profile-value accent">{{ formatCurrency(dashboard.approvalLimit) }}</span>
             </div>
             <div class="profile-item">
                 <span class="profile-label">Approval Rate</span>
-                <span class="profile-value" [class.green]="dashboard.approvalRate >= 60" [class.red]="dashboard.approvalRate < 40">{{ dashboard.approvalRate }}%</span>
+                <span class="profile-value" [class.green]="dashboard.approvalRate >= 60"
+                    [class.red]="dashboard.approvalRate < 40">{{ dashboard.approvalRate }}%</span>
             </div>
         </div>
     </div>
@@ -40,45 +38,38 @@
     <!-- Workload Stats -->
     <div class="stats-grid">
         <div class="stat-card stat-urgent">
-            <div class="stat-icon yellow">📥</div>
+            <div class="stat-icon yellow"><span class="material-icons">assignment_late</span></div>
             <div class="stat-info">
                 <h3>{{ dashboard.unassignedClaimCount }}</h3>
                 <p>Claims in Queue</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon blue">🔍</div>
+            <div class="stat-icon blue"><span class="material-icons">pending_actions</span></div>
             <div class="stat-info">
                 <h3>{{ dashboard.pendingReviewCount }}</h3>
                 <p>Under My Review</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green">✅</div>
+            <div class="stat-icon green"><span class="material-icons">task_alt</span></div>
             <div class="stat-info">
                 <h3>{{ dashboard.totalClaimsProcessed }}</h3>
                 <p>Total Processed</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green">👍</div>
+            <div class="stat-icon green"><span class="material-icons">check_circle</span></div>
             <div class="stat-info">
                 <h3>{{ dashboard.totalClaimsApproved }}</h3>
                 <p>Approved</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon red">❌</div>
+            <div class="stat-icon red"><span class="material-icons">cancel</span></div>
             <div class="stat-info">
                 <h3>{{ dashboard.totalClaimsRejected }}</h3>
                 <p>Rejected</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon purple">⬆️</div>
-            <div class="stat-info">
-                <h3>{{ dashboard.escalatedCount }}</h3>
-                <p>Escalated</p>
             </div>
         </div>
     </div>
@@ -87,16 +78,8 @@
     <div class="quick-actions">
         <h2>Quick Actions</h2>
         <div class="actions-grid">
-            <a routerLink="/claims-officer/queue" class="action-card action-primary">
-                <span class="action-icon">📥</span>
-                <span class="action-label">Claim Queue</span>
-                <span class="action-desc">Pick up new claims</span>
-                @if (dashboard.unassignedClaimCount > 0) {
-                <span class="action-badge">{{ dashboard.unassignedClaimCount }}</span>
-                }
-            </a>
-            <a routerLink="/claims-officer/my-claims" class="action-card">
-                <span class="action-icon">📋</span>
+            <a routerLink="/claims-officer/my-claims" class="action-card action-primary">
+                <span class="action-icon"><span class="material-icons">inventory</span></span>
                 <span class="action-label">My Assigned Claims</span>
                 <span class="action-desc">Review assigned claims</span>
                 @if (dashboard.pendingReviewCount > 0) {

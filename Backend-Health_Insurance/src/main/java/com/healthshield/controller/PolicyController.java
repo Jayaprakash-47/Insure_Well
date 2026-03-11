@@ -37,14 +37,14 @@ public class PolicyController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','AGENT')")
+    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','UNDERWRITER')")
     public ResponseEntity<PolicyResponse> getPolicyById(@AuthenticationPrincipal User user,
                                                          @PathVariable Long id) {
         return ResponseEntity.ok(policyService.getPolicyById(user, id));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN','UNDERWRITER')")
     public ResponseEntity<List<PolicyResponse>> getAllPolicies() {
         return ResponseEntity.ok(policyService.getAllPolicies());
     }
@@ -57,7 +57,7 @@ public class PolicyController {
     }
 
     @GetMapping("/{id}/members")
-    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','AGENT')")
+    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','UNDERWRITER')")
     public ResponseEntity<List<PolicyMemberResponse>> getPolicyMembers(@AuthenticationPrincipal User user,
                                                                         @PathVariable Long id) {
         return ResponseEntity.ok(policyService.getPolicyMembers(user, id));
@@ -70,5 +70,10 @@ public class PolicyController {
                                                        @PathVariable Long id,
                                                        @RequestBody PolicyRenewalRequest request) {
         return new ResponseEntity<>(policyService.renewPolicy(user, id, request), HttpStatus.CREATED);
+    }
+    @GetMapping("/test-expire/{policyId}")
+    public ResponseEntity<String> testExpirePolicy(@PathVariable Long policyId) {
+        policyService.expirePolicyForTesting(policyId);
+        return ResponseEntity.ok("Policy " + policyId + " has been forced to EXPIRED state for testing.");
     }
 }

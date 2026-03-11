@@ -1,22 +1,37 @@
 <div class="page-wrapper">
     <div class="page-header">
-        <h1>👨‍⚕️ Claims Officers</h1>
+        <h1><span class="material-icons" style="vertical-align: middle;">local_hospital</span> Claims Officers</h1>
         <p>Manage claims processing officers</p>
     </div>
 
     <div class="toolbar">
-        <button class="btn btn-primary" (click)="openCreate()">+ Create Claims Officer</button>
+        <button class="btn btn-primary" (click)="openCreate()"><span class="material-icons"
+                style="vertical-align: middle; font-size: 1.2rem; margin-right: 4px;">add</span> Create Claims
+            Officer</button>
     </div>
 
     @if (loading) {
-    <div class="loading-page"><div class="spinner"></div><p>Loading...</p></div>
+    <div class="loading-page">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
     } @else if (officers.length === 0) {
-    <div class="empty-state card"><h3>No Claims Officers</h3><p>Create your first Claims Officer to start processing claims.</p></div>
+    <div class="empty-state card">
+        <h3>No Claims Officers</h3>
+        <p>Create your first Claims Officer to start processing claims.</p>
+    </div>
     } @else {
     <div class="table-container">
         <table>
             <thead>
-                <tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Department</th><th>Specialization</th><th>Status</th><th>Action</th></tr>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
             </thead>
             <tbody>
                 @for (o of officers; track o.userId) {
@@ -25,9 +40,12 @@
                     <td>{{ o.firstName }} {{ o.lastName }}</td>
                     <td>{{ o.email }}</td>
                     <td>{{ o.department }}</td>
-                    <td>{{ o.specialization }}</td>
-                    <td><span class="badge" [ngClass]="o.isActive ? 'badge-active' : 'badge-inactive'">{{ o.isActive ? 'Active' : 'Inactive' }}</span></td>
-                    <td><button class="btn btn-sm" [ngClass]="o.isActive ? 'btn-danger' : 'btn-success'" (click)="toggleStatus(o)">{{ o.isActive ? 'Deactivate' : 'Activate' }}</button></td>
+
+                    <td><span class="badge" [class.badge-active]="o.isActive" [class.badge-inactive]="!o.isActive">{{
+                            o.isActive ?
+                            'Active' : 'Inactive' }}</span></td>
+                    <td><button class="btn btn-sm" [class.btn-danger]="o.isActive" [class.btn-success]="!o.isActive"
+                            (click)="toggleStatus(o)">{{ o.isActive ? 'Deactivate' : 'Activate' }}</button></td>
                 </tr>
                 }
             </tbody>
@@ -43,20 +61,25 @@
                 <button class="modal-close" (click)="showModal = false">✕</button>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>First Name *</label><input class="form-control" [(ngModel)]="form.firstName"></div>
-                <div class="form-group"><label>Last Name *</label><input class="form-control" [(ngModel)]="form.lastName"></div>
+                <div class="form-group"><label>First Name *</label><input class="form-control"
+                        [(ngModel)]="form.firstName"></div>
+                <div class="form-group"><label>Last Name *</label><input class="form-control"
+                        [(ngModel)]="form.lastName"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Email *</label><input class="form-control" type="email" [(ngModel)]="form.email"></div>
-                <div class="form-group"><label>Password *</label><input class="form-control" type="password" [(ngModel)]="form.password"></div>
+                <div class="form-group"><label>Email *</label><input class="form-control" type="email"
+                        [(ngModel)]="form.email"></div>
+                <div class="form-group"><label>Password *</label><input class="form-control" type="password"
+                        [(ngModel)]="form.password"></div>
             </div>
             <div class="form-row">
                 <div class="form-group"><label>Phone</label><input class="form-control" [(ngModel)]="form.phone"></div>
-                <div class="form-group"><label>Employee ID</label><input class="form-control" [(ngModel)]="form.employeeId" placeholder="EMP-CO-XXX"></div>
+                <div class="form-group"><label>Employee ID</label><input class="form-control"
+                        [(ngModel)]="form.employeeId" placeholder="EMP-CO-XXX"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Department</label><input class="form-control" [(ngModel)]="form.department"></div>
-                <div class="form-group"><label>Specialization</label><input class="form-control" [(ngModel)]="form.specialization" placeholder="e.g., Cardiology, General"></div>
+                <div class="form-group"><label>Department</label><input class="form-control"
+                        [(ngModel)]="form.department"></div>
             </div>
             <div class="form-group">
                 <label>Approval Limit (₹)</label>

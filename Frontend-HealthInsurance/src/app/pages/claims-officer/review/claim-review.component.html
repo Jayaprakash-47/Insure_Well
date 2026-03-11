@@ -4,10 +4,7 @@
         <h1>Claim Review</h1>
     </div>
 
-    @if (loading) {
-    <div class="loading-page"><div class="spinner"></div><p>Loading claim details...</p></div>
-    } @else if (claim) {
-
+    @if (claim) {
     <!-- Claim Summary Card -->
     <div class="review-layout">
         <div class="claim-detail-card card">
@@ -56,7 +53,7 @@
 
             @if (claim.tpaReferenceNumber) {
             <div class="settlement-info">
-                <h4>🏦 Settlement Info</h4>
+                <h4><span class="material-icons" style="vertical-align: middle;">account_balance</span> Settlement Info</h4>
                 <p><strong>TPA Reference:</strong> {{ claim.tpaReferenceNumber }}</p>
                 <p><strong>Settlement Amount:</strong> {{ formatCurrency(claim.settlementAmount) }}</p>
                 <p><strong>Settlement Date:</strong> {{ claim.settlementDate | date:'medium' }}</p>
@@ -67,29 +64,26 @@
         <!-- Decision Panel -->
         @if (canReview) {
         <div class="decision-panel card">
-            <h3>📝 Submit Decision</h3>
+            <h3 style="display: flex; align-items: center; gap: 8px;"><span class="material-icons" style="font-size: 1.25rem;">edit_document</span> Submit Decision</h3>
 
             <div class="decision-buttons">
-                <button class="decision-btn approve" [class.selected]="decision === 'APPROVE'" (click)="setDecision('APPROVE')">
-                    ✅ Approve
+                <button class="decision-btn approve" [class.selected]="decision === 'APPROVED'" (click)="setDecision('APPROVED')">
+                    <span class="material-icons" style="font-size: 1rem; vertical-align: middle;">check_circle</span> Approve
                 </button>
-                <button class="decision-btn partial" [class.selected]="decision === 'PARTIALLY_APPROVE'" (click)="setDecision('PARTIALLY_APPROVE')">
-                    ⚖️ Partial
+                <button class="decision-btn partial" [class.selected]="decision === 'PARTIALLY_APPROVED'" (click)="setDecision('PARTIALLY_APPROVED')">
+                    <span class="material-icons" style="font-size: 1rem; vertical-align: middle;">balance</span> Partial
                 </button>
-                <button class="decision-btn reject" [class.selected]="decision === 'REJECT'" (click)="setDecision('REJECT')">
-                    ❌ Reject
-                </button>
-                <button class="decision-btn escalate" [class.selected]="decision === 'ESCALATE'" (click)="setDecision('ESCALATE')">
-                    ⬆️ Escalate
+                <button class="decision-btn reject" [class.selected]="decision === 'REJECTED'" (click)="setDecision('REJECTED')">
+                    <span class="material-icons" style="font-size: 1rem; vertical-align: middle;">cancel</span> Reject
                 </button>
                 <button class="decision-btn pending" [class.selected]="decision === 'DOCUMENT_PENDING'" (click)="setDecision('DOCUMENT_PENDING')">
-                    📄 Need Docs
+                    <span class="material-icons" style="font-size: 1rem; vertical-align: middle;">description</span> Need Docs
                 </button>
             </div>
 
             @if (decision) {
             <div class="decision-form">
-                @if (decision === 'APPROVE' || decision === 'PARTIALLY_APPROVE') {
+                @if (decision === 'APPROVED' || decision === 'PARTIALLY_APPROVED') {
                 <div class="form-group">
                     <label>Approved Amount (₹)</label>
                     <input class="form-control" type="number" [(ngModel)]="approvedAmount" [max]="claim.claimAmount" placeholder="Enter approved amount">
@@ -97,26 +91,10 @@
                 </div>
                 }
 
-                @if (decision === 'REJECT') {
+                @if (decision === 'REJECTED') {
                 <div class="form-group">
                     <label>Rejection Reason *</label>
                     <textarea class="form-control" [(ngModel)]="rejectionReason" rows="3" placeholder="Explain the reason for rejection"></textarea>
-                </div>
-                }
-
-                @if (decision === 'ESCALATE') {
-                <div class="form-group">
-                    <label>Escalation Reason *</label>
-                    <select class="form-control" [(ngModel)]="escalationReason">
-                        <option value="">Select reason...</option>
-                        @for (r of escalationReasons; track r) {
-                        <option [value]="r">{{ r.replace('_', ' ') }}</option>
-                        }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Escalation Notes</label>
-                    <textarea class="form-control" [(ngModel)]="escalationNotes" rows="2" placeholder="Additional notes for admin"></textarea>
                 </div>
                 }
 
@@ -153,10 +131,6 @@
             }
             @if (claim.rejectionReason) {
             <p><strong>Rejection Reason:</strong> {{ claim.rejectionReason }}</p>
-            }
-            @if (claim.isEscalated) {
-            <p><strong>Escalation Reason:</strong> {{ claim.escalationReason }}</p>
-            <p><strong>Escalation Notes:</strong> {{ claim.escalationNotes }}</p>
             }
             @if (claim.adminRemarks) {
             <p><strong>Admin Decision:</strong> {{ claim.adminRemarks }}</p>

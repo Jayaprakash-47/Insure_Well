@@ -33,14 +33,12 @@
 .decision-btn.approve.selected { border-color: var(--success); background: linear-gradient(135deg, #d1fae5, #ecfdf5); color: #166534; }
 .decision-btn.partial.selected { border-color: var(--info); background: linear-gradient(135deg, #dbeafe, #eff6ff); color: #3730a3; }
 .decision-btn.reject.selected { border-color: var(--danger); background: linear-gradient(135deg, #fee2e2, #fef2f2); color: #991b1b; }
-.decision-btn.escalate.selected { border-color: var(--warning); background: linear-gradient(135deg, #fef3c7, #fffbeb); color: #92400e; }
 .decision-btn.pending.selected { border-color: var(--primary); background: linear-gradient(135deg, #ecfeff, #f0fdfa); color: #0369a1; }
 
 .decision-form { display: flex; flex-direction: column; gap: 4px; }
 .hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 .full-width { width: 100%; }
 
-.badge-escalated { background: #fef3c7; color: #b45309; }
 
 @media (max-width: 768px) {
     .review-layout { grid-template-columns: 1fr; }

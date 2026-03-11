@@ -15,6 +15,6 @@ public class AuthResponse {
     private Long userId;
     private String firstName;
     private String email;
-    private String role;     // ADMIN, AGENT, CUSTOMER, CLAIMS_OFFICER
+    private String role;     // ADMIN, UNDERWRITER, CUSTOMER, CLAIMS_OFFICER
     private String message;
 }

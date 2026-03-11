@@ -1,0 +1,92 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1><span class="material-icons" style="vertical-align: middle;">send</span> Send Premium Quote</h1>
+      <p>Review the policy application and submit your quote for the customer.</p>
+    </div>
+    <a routerLink="/underwriter/pending" class="btn-back">← Back to Pending</a>
+  </div>
+
+  @if (loading) {
+  <div class="loader">Loading policy details...</div>
+  }
+
+  @if (!loading && !policy) {
+  <div class="error-box">
+    Policy not found or no longer available.
+  </div>
+  }
+
+  @if (!loading && policy) {
+  <div class="content-grid">
+    <div class="policy-details card">
+      <h2><span class="material-icons" style="vertical-align: middle;">description</span> Policy Application</h2>
+      <div class="detail-row"><label>Policy Number</label><span>{{ policy.policyNumber }}</span></div>
+      <div class="detail-row"><label>Customer</label><span>{{ policy.customerName }}</span></div>
+      <div class="detail-row"><label>Plan</label><span>{{ policy.planName }}</span></div>
+      <div class="detail-row"><label>Coverage Amount</label><span>₹{{ (policy.coverageAmount || 0).toLocaleString()
+          }}</span></div>
+      <div class="detail-row"><label>Status</label><span class="badge badge-assigned">{{ policy.policyStatus }}</span>
+      </div>
+      <div class="detail-row"><label>Assigned At</label><span>{{ policy.assignedAt | date:'dd MMM yyyy, h:mm a'
+          }}</span></div>
+      @if (policy.members.length) {
+      <div class="member-section">
+        <h3><span class="material-icons" style="vertical-align: middle;">group</span> Members ({{ policy.members.length
+          }})</h3>
+        @for (m of policy.members; track m) {
+        <div class="member-card">
+          <strong>{{ m.memberName }}</strong> <span class="rel-badge">{{ m.relationship }}</span>
+          <div class="member-meta">DOB: {{ m.dateOfBirth | date:'dd MMM yyyy' }} &bull; {{ m.gender }}</div>
+          @if (m.preExistingDiseases) {
+          <div class="member-meta">Pre-existing: {{ m.preExistingDiseases }}</div>
+          }
+        </div>
+        }
+      </div>
+      }
+    </div>
+    <div class="quote-panel card">
+      <h2><span class="material-icons" style="vertical-align: middle;">payments</span> Quote Details</h2>
+      <div class="form-group">
+        <label>Premium Quote Amount (₹) *</label>
+        <input type="number" [(ngModel)]="quoteAmount" placeholder="Enter calculated premium" min="1"
+          class="big-input" />
+        <small>Base this on coverage amount, member ages, and risk factors.</small>
+      </div>
+      <div class="form-group">
+        <label>Remarks</label>
+        <textarea [(ngModel)]="remarks" placeholder="Optional: Explain any surcharges or adjustments"
+          rows="3"></textarea>
+      </div>
+      @if (quoteAmount) {
+      <div class="commission-preview">
+        <div class="preview-row">
+          <span>Quote Amount</span>
+          <strong>₹{{ quoteAmount.toLocaleString() }}</strong>
+        </div>
+        <div class="preview-row commission">
+          <span>Est. Commission ({{ commissionPct }}%)</span>
+          <strong>₹{{ estimatedCommission.toLocaleString() }}</strong>
+        </div>
+      </div>
+      }
+      <button class="btn-submit" (click)="submitQuote()" [disabled]="sending">
+        <span class="material-icons" style="vertical-align: middle; font-size: 1.1rem; margin-right: 4px;">{{ sending ?
+          'hourglass_empty' : 'send' }}</span>
+        {{ sending ? 'Submitting...' : 'Submit Quote to Customer' }}
+      </button>
+
+      @if (success) {
+      <div class="success-msg"><span class="material-icons"
+          style="vertical-align: middle; font-size: 1.1rem;">check_circle</span> Quote submitted! The customer will now
+        be notified to make payment.</div>
+      }
+      @if (error) {
+      <div class="error-msg"><span class="material-icons"
+          style="vertical-align: middle; font-size: 1.1rem;">error</span> {{ error }}</div>
+      }
+    </div>
+  </div>
+  }
+</div>

@@ -20,7 +20,7 @@ export class ManageClaimsOfficersComponent implements OnInit {
 
     form: CreateClaimsOfficerRequest = {
         firstName: '', lastName: '', email: '', password: '',
-        phone: '', employeeId: '', department: '', specialization: '', approvalLimit: 500000
+        phone: '', employeeId: '', department: '', approvalLimit: 500000
     };
 
     constructor(private api: ApiService, private toast: ToastService) { }
@@ -36,7 +36,7 @@ export class ManageClaimsOfficersComponent implements OnInit {
     }
 
     openCreate(): void {
-        this.form = { firstName: '', lastName: '', email: '', password: '', phone: '', employeeId: '', department: 'Claims Processing', specialization: '', approvalLimit: 500000 };
+        this.form = { firstName: '', lastName: '', email: '', password: '', phone: '', employeeId: '', department: 'Claims Processing', approvalLimit: 500000 };
         this.showModal = true;
     }
 
@@ -55,8 +55,11 @@ export class ManageClaimsOfficersComponent implements OnInit {
     toggleStatus(officer: any): void {
         const action = officer.isActive ? this.api.deactivateUser(officer.userId) : this.api.activateUser(officer.userId);
         action.subscribe({
-            next: () => { this.toast.success('Status updated'); this.loadOfficers(); },
-            error: () => { this.toast.error('Failed to update status'); }
+            next: () => {
+                this.toast.success(officer.isActive ? 'Claims Officer deactivated' : 'Claims Officer activated');
+                this.loadOfficers();
+            },
+            error: () => { this.toast.error('Action failed'); }
         });
     }
 }

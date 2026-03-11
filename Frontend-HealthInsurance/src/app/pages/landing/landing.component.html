@@ -69,7 +69,7 @@
                 @for (step of howItWorks; track step.title; let i = $index) {
                 <div class="step-item">
                     <div class="step-number">{{ i + 1 }}</div>
-                    <div class="step-icon-wrap">{{ step.icon }}</div>
+                    <div class="step-icon-wrap"><span class="material-icons" style="font-size: 32px;">{{ step.icon }}</span></div>
                     <h3>{{ step.title }}</h3>
                     <p>{{ step.desc }}</p>
                 </div>
@@ -89,7 +89,7 @@
             <div class="features-grid">
                 @for (feature of features; track feature.title) {
                 <div class="feature-card">
-                    <div class="feature-icon-wrap">{{ feature.icon }}</div>
+                    <div class="feature-icon-wrap"><span class="material-icons" style="font-size: 32px;">{{ feature.icon }}</span></div>
                     <h3>{{ feature.title }}</h3>
                     <p>{{ feature.desc }}</p>
                 </div>
@@ -147,7 +147,13 @@
             <div class="testimonials-grid">
                 @for (t of testimonials; track t.name) {
                 <div class="testimonial-card">
-                    <div class="testimonial-stars">★★★★★</div>
+                    <div class="testimonial-stars" style="color: #fbbf24; display: flex; gap: 2px;">
+                        <span class="material-icons" style="font-size: 1.25rem;">star</span>
+                        <span class="material-icons" style="font-size: 1.25rem;">star</span>
+                        <span class="material-icons" style="font-size: 1.25rem;">star</span>
+                        <span class="material-icons" style="font-size: 1.25rem;">star</span>
+                        <span class="material-icons" style="font-size: 1.25rem;">star</span>
+                    </div>
                     <p class="testimonial-text">"{{ t.text }}"</p>
                     <div class="testimonial-author">
                         <div class="testimonial-avatar">{{ t.name.charAt(0) }}</div>

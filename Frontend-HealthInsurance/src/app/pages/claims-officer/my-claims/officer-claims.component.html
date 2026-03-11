@@ -1,22 +1,29 @@
 <div class="page-wrapper">
     <div class="page-header">
-        <h1>📋 My Assigned Claims</h1>
+        <h1><span class="material-icons" style="vertical-align: middle;">assignment</span> My Assigned Claims</h1>
         <p>Claims currently assigned to you for review</p>
     </div>
 
     @if (loading) {
-    <div class="loading-page"><div class="spinner"></div><p>Loading...</p></div>
+    <div class="loading-page">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
     } @else {
 
     <!-- Filters -->
     <div class="filter-bar">
-        @for (f of ['ALL','UNDER_REVIEW','APPROVED','REJECTED','ESCALATED','DOCUMENT_PENDING']; track f) {
-        <button class="filter-btn" [class.active]="filter === f" (click)="setFilter(f)">{{ f.replace('_', ' ') }}</button>
+        @for (f of ['ALL','UNDER_REVIEW','APPROVED','REJECTED','DOCUMENT_PENDING']; track f) {
+        <button class="filter-btn" [class.active]="filter === f" (click)="setFilter(f)">{{ f.replace('_', ' ')
+            }}</button>
         }
     </div>
 
     @if (filteredClaims.length === 0) {
-    <div class="empty-state card"><h3>No claims found</h3><p>No claims match the selected filter.</p></div>
+    <div class="empty-state card">
+        <h3>No claims found</h3>
+        <p>No claims match the selected filter.</p>
+    </div>
     } @else {
     <div class="table-container">
         <table>
@@ -38,13 +45,16 @@
                     <td>{{ claim.customerName }}</td>
                     <td>{{ claim.hospitalName }}</td>
                     <td class="amount">{{ formatCurrency(claim.claimAmount) }}</td>
-                    <td><span class="badge" [ngClass]="getStatusClass(claim.claimStatus)">{{ claim.claimStatus }}</span></td>
+                    <td><span class="badge" [ngClass]="getStatusClass(claim.claimStatus)">{{ claim.claimStatus }}</span>
+                    </td>
                     <td>{{ claim.createdAt | date:'mediumDate' }}</td>
                     <td>
                         @if (claim.claimStatus === 'UNDER_REVIEW' || claim.claimStatus === 'DOCUMENT_PENDING') {
-                        <a [routerLink]="['/claims-officer/review', claim.claimId]" class="btn btn-sm btn-primary">Review</a>
+                        <a [routerLink]="['/claims-officer/review', claim.claimId]"
+                            class="btn btn-sm btn-primary">Review</a>
                         } @else {
-                        <a [routerLink]="['/claims-officer/review', claim.claimId]" class="btn btn-sm btn-secondary">View</a>
+                        <a [routerLink]="['/claims-officer/review', claim.claimId]"
+                            class="btn btn-sm btn-secondary">View</a>
                         }
                     </td>
                 </tr>

@@ -1,45 +1,33 @@
-.payment-card h3 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 4px;
+.center-text {
+    text-align: center;
+    margin-bottom: 30px;
 }
-
-.summary {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-top: 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-}
-
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.summary-row:last-child {
-    border-bottom: none;
-}
-
-.summary-row span {
+.center-text p {
     color: var(--text-secondary);
 }
 
-.summary-row.total {
-    background: linear-gradient(135deg, #ecfeff, #f0fdfa);
-    border-bottom: none;
-    padding: 16px;
-    border-top: 2px solid var(--primary);
+.payment-card {
+    padding: 30px;
 }
 
-.summary-row.total strong {
-    font-size: 22px;
-    font-family: var(--font-heading);
-    color: var(--primary);
-    font-weight: 800;
+.summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.summary-item .label {
+    color: var(--text-secondary);
+}
+
+.summary-item .value {
+    color: var(--text-primary);
+    font-weight: 500;
 }

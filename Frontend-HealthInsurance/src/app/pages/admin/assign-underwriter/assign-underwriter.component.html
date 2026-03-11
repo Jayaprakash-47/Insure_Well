@@ -1,0 +1,84 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Assign Underwriter</h1>
+      <p>Assign pending policy applications to underwriters for review and quoting.</p>
+    </div>
+    <a routerLink="/admin/dashboard" class="btn-back">← Dashboard</a>
+  </div>
+
+  <div class="two-col">
+    <!-- Left: Pending Applications -->
+    <div class="panel">
+      <h2>Pending Policy Applications</h2>
+      @if (loadingApps) {
+        <div class="loader">Loading...</div>
+      }
+      @if (!loadingApps && pendingApps.length === 0) {
+        <div class="empty">No pending applications</div>
+      }
+      @for (app of pendingApps; track app) {
+        <div class="app-card"
+          [class.selected]="selectedApp?.policyId === app.policyId"
+          (click)="selectApp(app)">
+          <div class="app-header">
+            <strong>{{ app.policyNumber }}</strong>
+            <span class="badge pending">PENDING</span>
+          </div>
+          <div class="app-meta">{{ app.customerName }}</div>
+          <div class="app-meta">{{ app.planName }} &bull; {{ app.planType }}</div>
+          <div class="app-meta">Coverage: ₹{{ (app.coverageAmount || 0).toLocaleString() }} &bull; Members: {{ app.memberCount }}</div>
+          <div class="app-date">{{ app.createdAt | date:'dd MMM yyyy, h:mm a' }}</div>
+        </div>
+      }
+    </div>
+
+    <!-- Right: Assignment Panel -->
+    <div class="panel">
+      <h2>Select Underwriter</h2>
+      @if (!selectedApp) {
+        <div class="empty-select">← Select a policy application first</div>
+      }
+
+      @if (selectedApp) {
+        <div class="assign-form">
+          <div class="selected-app-info">
+            <strong>Assigning:</strong> {{ selectedApp.policyNumber }} ({{ selectedApp.customerName }})
+          </div>
+          @if (loadingUw) {
+            <div class="loader">Loading underwriters...</div>
+          }
+          @if (!loadingUw) {
+            <div class="uw-list">
+              @for (u of underwriters; track u) {
+                <div class="uw-card"
+                  [class.selected]="selectedUwId === u.userId"
+                  (click)="selectedUwId = u.userId">
+                  <div class="uw-info">
+                    <strong>{{ u.firstName }} {{ u.lastName }}</strong>
+                    <span class="spec">{{ u.specialization }}</span>
+                  </div>
+                  <div class="uw-stats">
+                    <span>{{ u.totalQuotesSent }} quotes sent</span>
+                    <span class="status-dot" [class.active]="u.isActive"></span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+          <button class="btn-assign" (click)="assignUnderwriter()"
+            [disabled]="assigning || !selectedUwId">
+            {{ assigning ? 'Assigning...' : 'Assign Underwriter' }}
+          </button>
+          @if (success) {
+            <div class="success-msg">Underwriter assigned successfully!</div>
+          }
+          @if (error) {
+            <div class="error-msg">{{ error }}</div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+

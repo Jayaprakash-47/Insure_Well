@@ -38,7 +38,7 @@ public class PolicyService {
     private final InsurancePlanRepository insurancePlanRepository;
     private final PremiumQuoteRepository premiumQuoteRepository;
     private final UserRepository userRepository;
-    private final AuditService auditService;
+//    private final AuditService auditService;
 
     @Transactional
     public PolicyResponse purchasePolicy(Long userId, PolicyPurchaseRequest request) {
@@ -52,15 +52,14 @@ public class PolicyService {
             throw new BadRequestException("Insurance plan is not active");
         }
 
-        BigDecimal calculatedPremium = calculatePremium(user, plan, request);
-
         String policyNumber = generatePolicyNumber();
 
+        // Premium is NOT calculated here — underwriter will calculate and send the quote
         Policy policy = Policy.builder()
                 .policyNumber(policyNumber)
                 .user(user)
                 .plan(plan)
-                .premiumAmount(calculatedPremium)
+                .premiumAmount(null)          // Set by underwriter when sending quote
                 .coverageAmount(plan.getCoverageAmount())
                 .remainingCoverage(plan.getCoverageAmount())
                 .totalClaimedAmount(BigDecimal.ZERO)
@@ -92,9 +91,9 @@ public class PolicyService {
 
         savedPolicy = policyRepository.findById(savedPolicy.getPolicyId()).orElse(savedPolicy);
 
-        auditService.logCreation("POLICY", savedPolicy.getPolicyId(),
-                "Policy purchased: " + policyNumber + " | Plan: " + plan.getPlanName()
-                        + " | Premium: ₹" + calculatedPremium, user);
+//        auditService.logCreation("POLICY", savedPolicy.getPolicyId(),
+//                "Policy application submitted: " + policyNumber + " | Plan: " + plan.getPlanName()
+//                        + " | Awaiting underwriter assignment", user);
 
         return mapToResponse(savedPolicy);
     }
@@ -139,8 +138,8 @@ public class PolicyService {
         policy.setPolicyStatus(PolicyStatus.CANCELLED);
         Policy saved = policyRepository.save(policy);
 
-        auditService.logStatusChange("POLICY", policyId, previousStatus, "CANCELLED",
-                "Policy cancelled", currentUser);
+//        auditService.logStatusChange("POLICY", policyId, previousStatus, "CANCELLED",
+//                "Policy cancelled", currentUser);
 
         return mapToResponse(saved);
     }
@@ -169,6 +168,17 @@ public class PolicyService {
 
         log.info("Policy {} activated | Start: {} | End: {}",
                 policy.getPolicyNumber(), policy.getStartDate(), policy.getEndDate());
+    }
+
+    /**
+     * For testing purposes, immediately expires a policy.
+     */
+    @Transactional
+    public void expirePolicyForTesting(Long policyId) {
+        Policy policy = policyRepository.findById(policyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Policy not found: " + policyId));
+        policy.setPolicyStatus(PolicyStatus.EXPIRED);
+        policyRepository.save(policy);
     }
 
     // =================== POLICY RENEWAL ===================
@@ -240,7 +250,8 @@ public class PolicyService {
                 .policyNumber(newPolicyNumber)
                 .user(currentUser)
                 .plan(plan)
-                .soldByAgent(originalPolicy.getSoldByAgent())
+                // .soldByAgent(originalPolicy.getSoldByAgent()) // AGENT FIELD REMOVED
+                .assignedUnderwriter(originalPolicy.getAssignedUnderwriter())
                 .premiumAmount(renewalPremium)
                 .coverageAmount(plan.getCoverageAmount())
                 .remainingCoverage(plan.getCoverageAmount())
@@ -256,13 +267,15 @@ public class PolicyService {
                 .payments(new ArrayList<>())
                 .build();
 
-        // Calculate commission if agent was involved
+        // Calculate commission if agent was involved (AGENT FEATURE)
+        /*
         if (originalPolicy.getSoldByAgent() != null) {
             BigDecimal commissionAmount = renewalPremium
                     .multiply(originalPolicy.getSoldByAgent().getCommissionPercentage())
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
             renewedPolicy.setCommissionAmount(commissionAmount);
         }
+        */
 
         Policy saved = policyRepository.save(renewedPolicy);
 
@@ -287,11 +300,11 @@ public class PolicyService {
 
         saved = policyRepository.findById(saved.getPolicyId()).orElse(saved);
 
-        auditService.logCreation("POLICY", saved.getPolicyId(),
-                "Policy renewed from " + originalPolicy.getPolicyNumber()
-                        + " | Renewal #" + newRenewalCount
-                        + " | NCB: " + noClaimBonus + "%"
-                        + " | New Premium: ₹" + renewalPremium, currentUser);
+//        auditService.logCreation("POLICY", saved.getPolicyId(),
+//                "Policy renewed from " + originalPolicy.getPolicyNumber()
+//                        + " | Renewal #" + newRenewalCount
+//                        + " | NCB: " + noClaimBonus + "%"
+//                        + " | New Premium: ₹" + renewalPremium, currentUser);
 
         log.info("Policy {} renewed to {} | NCB: {}% | Premium: ₹{} → ₹{}",
                 originalPolicy.getPolicyNumber(), newPolicyNumber,
@@ -354,9 +367,9 @@ public class PolicyService {
     private boolean isAuthorized(User user, Policy policy) {
         boolean isAdmin = user.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        boolean isAgent = user.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_AGENT"));
-        return isAdmin || isAgent || policy.getUser().getUserId().equals(user.getUserId());
+        boolean isUnderwriter = user.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_UNDERWRITER"));
+        return isAdmin || isUnderwriter || policy.getUser().getUserId().equals(user.getUserId());
     }
 
     private PolicyResponse mapToResponse(Policy policy) {
@@ -387,11 +400,15 @@ public class PolicyService {
                 .members(memberResponses)
                 .commissionAmount(policy.getCommissionAmount())
                 .renewalCount(policy.getRenewalCount())
-                .noClaimBonus(policy.getNoClaimBonus());
+                .noClaimBonus(policy.getNoClaimBonus())
+                .quoteAmount(policy.getQuoteAmount())
+                .waitingPeriodMonths(policy.getPlan().getWaitingPeriodMonths())
+                .assignedAt(policy.getAssignedAt());
 
-        if (policy.getSoldByAgent() != null) {
-            builder.agentId(policy.getSoldByAgent().getUserId())
-                    .agentName(policy.getSoldByAgent().getFirstName() + " " + policy.getSoldByAgent().getLastName());
+        if (policy.getAssignedUnderwriter() != null) {
+            builder.underwriterId(policy.getAssignedUnderwriter().getUserId())
+                    .underwriterName(policy.getAssignedUnderwriter().getFirstName()
+                            + " " + policy.getAssignedUnderwriter().getLastName());
         }
 
         if (policy.getOriginalPolicy() != null) {

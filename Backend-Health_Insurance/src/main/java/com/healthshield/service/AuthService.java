@@ -86,7 +86,7 @@ public class AuthService {
 
     /**
      * Extract the role from the User's discriminator value.
-     * Returns the user_type column value: ADMIN, AGENT, CUSTOMER, CLAIMS_OFFICER
+     * Returns the user_type column value: ADMIN, UNDERWRITER, CUSTOMER, CLAIMS_OFFICER
      */
     private String extractRole(User user) {
         // The discriminator value annotation on each subclass gives us the role

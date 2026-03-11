@@ -1,0 +1,22 @@
+.page { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+.page-header h1 { margin: 0 0 0.4rem; font-size: 1.6rem; color: #0f1f3d; }
+.page-header p { margin: 0; color: #64748b; }
+.btn-back { background: #0f1f3d; color: white; padding: 0.5rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: 600; }
+.loader { text-align: center; padding: 3rem; color: #64748b; }
+.empty-state { text-align: center; padding: 4rem; background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+.empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+.empty-state h3 { color: #0f1f3d; margin: 0 0 0.5rem; }
+.table-wrap { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+th { background: #0f1f3d; color: white; text-align: left; padding: 0.9rem 1rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+td { padding: 0.9rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; color: #374151; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f8fafc; }
+.status-badge { padding: 0.25rem 0.7rem; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
+.status-active { background: #d1fae5; color: #065f46; }
+.status-assigned { background: #fef3c7; color: #d97706; }
+.status-quote_sent { background: #dbeafe; color: #1d4ed8; }
+.status-pending { background: #f1f5f9; color: #64748b; }
+.status-other { background: #f1f5f9; color: #64748b; }
+

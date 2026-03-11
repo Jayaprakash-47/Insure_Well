@@ -1,0 +1,96 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1><span class="material-icons" style="vertical-align: middle;">person</span> Manage Underwriters</h1>
+      <p>View and create underwriters who evaluate policy applications and send premium quotes.</p>
+    </div>
+    <button class="btn-create" (click)="showCreateForm = !showCreateForm">
+      <span class="material-icons" style="vertical-align: middle; font-size: 1.2rem; margin-right: 4px;">{{
+        showCreateForm ? 'close' : 'add' }}</span>
+      {{ showCreateForm ? 'Close' : 'Create Underwriter' }}
+    </button>
+  </div>
+
+  <!-- Create Form -->
+  @if (showCreateForm) {
+  <div class="create-form">
+    <h2>Create New Underwriter</h2>
+    <div class="form-grid">
+      <div class="form-group"><label>First Name *</label><input [(ngModel)]="form.firstName" placeholder="First name" />
+      </div>
+      <div class="form-group"><label>Last Name *</label><input [(ngModel)]="form.lastName" placeholder="Last name" />
+      </div>
+      <div class="form-group"><label>Email *</label><input [(ngModel)]="form.email" type="email"
+          placeholder="Email address" /></div>
+      <div class="form-group"><label>Password *</label><input [(ngModel)]="form.password" type="password"
+          placeholder="Password" /></div>
+      <div class="form-group"><label>Phone</label><input [(ngModel)]="form.phone" placeholder="Phone number" /></div>
+      <div class="form-group"><label>License Number *</label><input [(ngModel)]="form.licenseNumber"
+          placeholder="e.g. LIC-2024-001" /></div>
+      <div class="form-group"><label>Commission % *</label><input [(ngModel)]="form.commissionPercentage" type="number"
+          placeholder="e.g. 10" min="0" max="100" /></div>
+    </div>
+    <button class="btn-submit" (click)="createUnderwriter()" [disabled]="creating">
+      <span class="material-icons" style="vertical-align: middle; font-size: 1.1rem; margin-right: 4px;">{{ creating ?
+        'hourglass_empty' : 'check_circle' }}</span>
+      {{ creating ? 'Creating...' : 'Create Underwriter' }}
+    </button>
+    @if (createSuccess) {
+    <div class="success-msg"><span class="material-icons"
+        style="vertical-align: middle; font-size: 1.1rem;">check_circle</span> Underwriter created successfully!</div>
+    }
+    @if (createError) {
+    <div class="error-msg"><span class="material-icons" style="vertical-align: middle; font-size: 1.1rem;">error</span>
+      {{ createError }}</div>
+    }
+  </div>
+  }
+
+  <!-- List -->
+  @if (loading) {
+  <div class="loader">Loading underwriters...</div>
+  }
+
+  @if (!loading) {
+  <div class="table-wrap">
+    <div class="table-header-row">
+      <h2>Existing Underwriters ({{ underwriters.length }})</h2>
+    </div>
+    @if (underwriters.length === 0) {
+    <div class="empty-state">No underwriters yet. Create one above.</div>
+    }
+    @if (underwriters.length > 0) {
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>License No.</th>
+          <th>Commission</th>
+          <th>Quotes Sent</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (u of underwriters; track u) {
+        <tr>
+          <td><strong>{{ u.firstName }} {{ u.lastName }}</strong></td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.licenseNumber }}</td>
+          <td>{{ u.commissionPercentage }}%</td>
+          <td>{{ u.totalQuotesSent }}</td>
+          <td><span class="status-badge" [class.active]="u.isActive" [class.inactive]="!u.isActive">{{ u.isActive ?
+              'Active' : 'Inactive' }}</span></td>
+          <td class="actions">
+            <button class="btn btn-sm" [class.btn-danger]="u.isActive" [class.btn-success]="!u.isActive"
+              (click)="toggleUser(u.userId, !u.isActive)">{{ u.isActive ? 'Deactivate' : 'Activate' }}</button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    }
+  </div>
+  }
+</div>

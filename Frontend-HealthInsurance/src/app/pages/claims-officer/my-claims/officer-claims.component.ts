@@ -43,7 +43,7 @@ export class OfficerClaimsComponent implements OnInit {
         const map: Record<string, string> = {
             'SUBMITTED': 'badge-submitted', 'UNDER_REVIEW': 'badge-info',
             'APPROVED': 'badge-approved', 'REJECTED': 'badge-rejected',
-            'ESCALATED': 'badge-escalated', 'DOCUMENT_PENDING': 'badge-pending',
+            'ESCALATED': 'badge-info', 'DOCUMENT_PENDING': 'badge-pending',
             'PARTIALLY_APPROVED': 'badge-info', 'SETTLED': 'badge-success'
         };
         return map[status] || 'badge-info';

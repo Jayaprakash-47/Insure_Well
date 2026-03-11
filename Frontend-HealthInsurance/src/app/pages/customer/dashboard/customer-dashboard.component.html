@@ -2,7 +2,7 @@
     <!-- Welcome Banner -->
     <div class="welcome-banner">
         <div class="welcome-content">
-            <h1>Welcome back, {{ auth.getUserName() }}! 👋</h1>
+            <h1>Welcome back, {{ auth.getUserName() }}!</h1>
             <p>Here's an overview of your health insurance portfolio</p>
         </div>
         <a routerLink="/customer/plans" class="btn btn-primary">Browse Plans</a>
@@ -10,28 +10,36 @@
 
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon green">📋</div>
+            <div class="stat-icon green">
+                <span class="material-icons">menu_book</span>
+            </div>
             <div class="stat-info">
                 <h3>{{ policies.length }}</h3>
                 <p>Total Policies</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon blue">✅</div>
+            <div class="stat-icon blue">
+                <span class="material-icons">verified_user</span>
+            </div>
             <div class="stat-info">
                 <h3>{{ activePolicies }}</h3>
                 <p>Active Policies</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon yellow">⏳</div>
+            <div class="stat-icon yellow">
+                <span class="material-icons">hourglass_top</span>
+            </div>
             <div class="stat-info">
                 <h3>{{ pendingPolicies }}</h3>
-                <p>Pending Payment</p>
+                <p>Awaiting Quote / Payment</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon red">🏥</div>
+            <div class="stat-icon red">
+                <span class="material-icons">assignment_late</span>
+            </div>
             <div class="stat-info">
                 <h3>{{ pendingClaims }}</h3>
                 <p>Pending Claims</p>
@@ -43,27 +51,22 @@
         <h2>Quick Actions</h2>
         <div class="actions-grid">
             <a routerLink="/customer/plans" class="action-card">
-                <span class="action-icon">🔍</span>
+                <span class="action-icon"><span class="material-icons">search</span></span>
                 <span class="action-label">Browse Plans</span>
                 <span class="action-desc">Explore insurance options</span>
             </a>
-            <a routerLink="/customer/calculator" class="action-card">
-                <span class="action-icon">💰</span>
-                <span class="action-label">Get Quote</span>
-                <span class="action-desc">Calculate your premium</span>
-            </a>
             <a routerLink="/customer/policies" class="action-card">
-                <span class="action-icon">📋</span>
+                <span class="action-icon"><span class="material-icons">inventory_2</span></span>
                 <span class="action-label">My Policies</span>
                 <span class="action-desc">View & manage policies</span>
             </a>
             <a routerLink="/customer/claims" class="action-card">
-                <span class="action-icon">🏥</span>
+                <span class="action-icon"><span class="material-icons">receipt_long</span></span>
                 <span class="action-label">My Claims</span>
                 <span class="action-desc">Track claim status</span>
             </a>
             <a routerLink="/customer/claims/new" class="action-card">
-                <span class="action-icon">📝</span>
+                <span class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" /></svg></span>
                 <span class="action-label">File Claim</span>
                 <span class="action-desc">Submit a new claim</span>
             </a>

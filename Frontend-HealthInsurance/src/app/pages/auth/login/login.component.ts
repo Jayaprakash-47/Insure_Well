@@ -1,5 +1,5 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -8,7 +8,7 @@ import { ToastService } from '../../../core/services/toast.service';
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
+    imports: [FormsModule, RouterLink],
     templateUrl: './login.component.html',
     styleUrl: './login.component.css'
 })

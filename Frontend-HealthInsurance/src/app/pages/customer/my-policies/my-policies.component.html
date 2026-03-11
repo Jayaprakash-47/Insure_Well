@@ -11,46 +11,128 @@
     } @else if (policies.length === 0) {
     <div class="empty-state">
         <h3>No policies yet</h3>
-        <p>Browse our plans and purchase your first policy!</p><a routerLink="/customer/plans"
-            class="btn btn-primary">Browse Plans</a>
+        <p>Browse our plans and apply for your first policy!</p>
+        <a routerLink="/customer/plans" class="btn btn-primary">Browse Plans</a>
     </div>
     } @else {
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Policy #</th>
-                    <th>Plan</th>
-                    <th>Premium</th>
-                    <th>Coverage</th>
-                    <th>Status</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (p of policies; track p.policyId) {
-                <tr>
-                    <td><strong>{{ p.policyNumber }}</strong></td>
-                    <td>{{ p.planName }}</td>
-                    <td>{{ formatCurrency(p.premiumAmount) }}</td>
-                    <td>{{ formatCurrency(p.coverageAmount) }}</td>
-                    <td><span class="badge" [class.badge-active]="p.policyStatus==='ACTIVE'"
-                            [class.badge-pending]="p.policyStatus==='PENDING'"
-                            [class.badge-cancelled]="p.policyStatus==='CANCELLED'">{{ p.policyStatus }}</span></td>
-                    <td>{{ p.startDate || '-' }}</td>
-                    <td>{{ p.endDate || '-' }}</td>
-                    <td>
-                        @if (p.policyStatus === 'PENDING') { <a [routerLink]="['/customer/payment', p.policyId]"
-                            class="btn btn-sm btn-primary">Pay</a> }
-                        @if (p.policyStatus === 'ACTIVE') { <button class="btn btn-sm btn-danger"
-                            (click)="cancel(p.policyId)">Cancel</button> }
-                    </td>
-                </tr>
+
+    <!-- Quote Ready Banner -->
+    @if (quotedPolicies.length > 0) {
+    <div class="quote-banner">
+        <div class="quote-banner-icon"><span class="material-icons" style="font-size: 2.5rem;">campaign</span></div>
+        <div>
+            <strong>You have {{ quotedPolicies.length }} quote(s) ready!</strong>
+            <p>Your underwriter has reviewed your application and sent a premium quote. Pay now to activate your policy.
+            </p>
+        </div>
+    </div>
+    }
+
+    <div class="cards-list">
+        @for (p of policies; track p.policyId) {
+        <div class="policy-card" [class.quote-ready]="p.policyStatus === 'QUOTE_SENT'"
+            [class.active]="p.policyStatus === 'ACTIVE'">
+
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="policy-num">{{ p.policyNumber }}</span>
+                    <span class="badge" [class.badge-active]="p.policyStatus==='ACTIVE'"
+                        [class.badge-pending]="p.policyStatus==='PENDING'"
+                        [class.badge-assigned]="p.policyStatus==='ASSIGNED'"
+                        [class.badge-quote]="p.policyStatus==='QUOTE_SENT'"
+                        [class.badge-cancelled]="p.policyStatus==='CANCELLED'"
+                        [class.badge-expired]="p.policyStatus==='EXPIRED'">
+                        {{ getStatusLabel(p.policyStatus) }}
+                    </span>
+                </div>
+                <span class="plan-name">{{ p.planName }}</span>
+            </div>
+
+            <!-- Quote Highlight Box -->
+            @if (p.policyStatus === 'QUOTE_SENT') {
+            <div class="quote-box">
+                <div class="quote-left">
+                    <div class="quote-label">Premium Quote from your Underwriter</div>
+                    <div class="quote-amount">₹{{ formatCurrency(p.quoteAmount) }}<span>/year</span></div>
+                    @if (p.underwriterName) {
+                    <div class="quote-by">Quoted by: {{ p.underwriterName }}</div>
+                    }
+                </div>
+                <a [routerLink]="['/customer/payment', p.policyId]" class="btn-pay-now">
+                    Pay Now & Activate →
+                </a>
+            </div>
+            }
+
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Total Coverage</label>
+                        <strong>{{ formatCurrency(p.coverageAmount) }}</strong>
+                    </div>
+                    @if (p.policyStatus === 'ACTIVE') {
+                    <div class="info-item">
+                        <label>Remaining Coverage</label>
+                        <strong style="color: var(--primary);">{{ formatCurrency(p.remainingCoverage ||
+                            p.coverageAmount) }}</strong>
+                    </div>
+                    }
+                    <div class="info-item">
+                        @if (p.policyStatus === 'QUOTE_SENT') {
+                        <label>Quoted Premium</label>
+                        <strong class="highlight">{{ formatCurrency(p.quoteAmount) }}/yr</strong>
+                        } @else {
+                        <label>Premium</label>
+                        <strong>{{ formatCurrency(p.premiumAmount) }}/yr</strong>
+                        }
+                    </div>
+                    <div class="info-item">
+                        <label>Start Date</label>
+                        <strong>{{ p.startDate || 'Not Active Yet' }}</strong>
+                    </div>
+                    <div class="info-item">
+                        <label>End Date</label>
+                        <strong>{{ p.endDate || 'Not Active Yet' }}</strong>
+                    </div>
+                </div>
+
+                <!-- Status Help Text -->
+                @if (p.policyStatus === 'PENDING') {
+                <div class="status-info pending">
+                    Your application is under review. The admin will assign an underwriter to evaluate your policy.
+                </div>
                 }
-            </tbody>
-        </table>
+                @if (p.policyStatus === 'ASSIGNED') {
+                <div class="status-info assigned">
+                    An underwriter has been assigned and is calculating your premium quote. Please wait.
+                </div>
+                }
+
+                <!-- Actions -->
+                <div class="card-actions">
+                    @if (p.policyStatus === 'PENDING' || p.policyStatus === 'ASSIGNED') {
+                    <button class="btn btn-sm btn-primary" disabled style="opacity: 0.5; cursor: not-allowed;"
+                        title="Wait for Underwriter to send quote">Pay via Dashboard Tracker</button>
+                    }
+                    @if (p.policyStatus === 'ACTIVE') {
+                    @if (isEligibleForClaim(p)) {
+                    <a [routerLink]="['/customer/claims/new']" class="btn btn-sm btn-outline">File Claim</a>
+                    } @else {
+                    <button class="btn btn-sm btn-outline" disabled style="opacity: 0.5; cursor: not-allowed;"
+                        title="Eligible to claim after {{ getClaimEligibilityDate(p) }}">
+                        <span class="material-icons"
+                            style="font-size: 0.9rem; vertical-align: middle;">lock_clock</span> Waiting Period
+                    </button>
+                    }
+                    <button class="btn btn-sm btn-danger" (click)="cancel(p.policyId)">Cancel</button>
+                    }
+                    @if (p.policyStatus === 'EXPIRED') {
+                    <a [routerLink]="['/customer/payment', p.policyId]" class="btn btn-sm btn-outline">Renew</a>
+                    }
+                </div>
+            </div>
+        </div>
+        }
     </div>
     }
 </div>

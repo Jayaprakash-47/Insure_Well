@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { DashboardResponse } from '../../../core/models/models';
@@ -7,7 +7,7 @@ import { DashboardResponse } from '../../../core/models/models';
 @Component({
     selector: 'app-admin-dashboard',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [RouterLink],
     templateUrl: './admin-dashboard.component.html',
     styleUrl: './admin-dashboard.component.css'
 })

@@ -1,12 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { PolicyResponse } from '../../../core/models/models';
 
-@Component({ selector: 'app-file-claim', standalone: true, imports: [CommonModule, FormsModule], templateUrl: './file-claim.component.html', styleUrl: './file-claim.component.css' })
+@Component({ selector: 'app-file-claim', standalone: true, imports: [FormsModule], templateUrl: './file-claim.component.html', styleUrl: './file-claim.component.css' })
 export class FileClaimComponent implements OnInit {
     policies: PolicyResponse[] = [];
     filing = false;

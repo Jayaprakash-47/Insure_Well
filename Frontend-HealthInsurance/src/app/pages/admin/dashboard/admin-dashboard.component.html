@@ -16,70 +16,72 @@
     <!-- Stats Cards -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon blue">👥</div>
+            <div class="stat-icon blue"><span class="material-icons">people</span></div>
             <div class="stat-info">
                 <h3>{{ stats.totalCustomers }}</h3>
                 <p>Total Customers</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon purple">🧑‍💼</div>
+            <div class="stat-icon purple"><span class="material-icons">admin_panel_settings</span></div>
             <div class="stat-info">
-                <h3>{{ stats.totalAgents }}</h3>
-                <p>Total Agents</p>
+                <h3>{{ stats.totalUnderwriters }}</h3>
+                <p>Total Underwriters</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon blue">👨‍⚕️</div>
+            <div class="stat-icon blue"><span class="material-icons">gavel</span></div>
             <div class="stat-info">
                 <h3>{{ stats.totalClaimsOfficers }}</h3>
                 <p>Claims Officers</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green">📋</div>
+            <div class="stat-icon green"><span class="material-icons">article</span></div>
             <div class="stat-info">
                 <h3>{{ stats.totalPolicies }}</h3>
                 <p>Total Policies</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green">✅</div>
+            <div class="stat-icon green"><span class="material-icons">check_circle</span></div>
             <div class="stat-info">
                 <h3>{{ stats.totalActivePolicies }}</h3>
                 <p>Active Policies</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon yellow">⏳</div>
+            <div class="stat-icon yellow"><span class="material-icons">hourglass_empty</span></div>
             <div class="stat-info">
                 <h3>{{ stats.totalPendingClaims }}</h3>
                 <p>Pending Claims</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon red">⚠️</div>
+            <div class="stat-icon yellow"><span class="material-icons">pending</span></div>
             <div class="stat-info">
-                <h3>{{ stats.totalEscalatedClaims }}</h3>
-                <p>Escalated Claims</p>
+                <h3>{{ stats.totalPendingPolicies }}</h3>
+                <p>Pending Applications</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green">💰</div>
+            <div class="stat-icon green"><span class="material-icons">account_balance_wallet</span></div>
             <div class="stat-info">
                 <h3>{{ formatCurrency(stats.totalRevenue) }}</h3>
                 <p>Total Revenue</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon red">💸</div>
+            <div class="stat-icon red">
+                <span class="material-icons">payments</span>
+            </div>
             <div class="stat-info">
                 <h3>{{ formatCurrency(stats.totalClaimsPaidOut) }}</h3>
                 <p>Claims Paid Out</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon purple">📊</div>
+            <div class="stat-icon purple"><span class="material-icons">pie_chart</span></div>
             <div class="stat-info">
                 <h3>{{ stats.claimSettlementRatio }}%</h3>
                 <p>Settlement Ratio</p>
@@ -92,47 +94,42 @@
         <h2>Quick Actions</h2>
         <div class="actions-grid">
             <a routerLink="/admin/customers" class="action-card">
-                <span class="action-icon">👥</span>
+                <span class="action-icon"><span class="material-icons">people</span></span>
                 <span class="action-label">Customers</span>
                 <span class="action-desc">Manage users</span>
             </a>
-            <a routerLink="/admin/agents" class="action-card">
-                <span class="action-icon">🧑‍💼</span>
-                <span class="action-label">Agents</span>
-                <span class="action-desc">Manage agents</span>
+            <a routerLink="/admin/underwriters" class="action-card">
+                <span class="action-icon"><span class="material-icons">admin_panel_settings</span></span>
+                <span class="action-label">Underwriters</span>
+                <span class="action-desc">Manage underwriters</span>
+            </a>
+            <a routerLink="/admin/assign-underwriter" class="action-card">
+                <span class="action-icon"><span class="material-icons">pending_actions</span></span>
+                <span class="action-label">Assign Underwriter</span>
+                <span class="action-desc">Policy quoting workflow</span>
+                @if (stats.totalPendingPolicies > 0) {
+                <span class="action-badge">{{ stats.totalPendingPolicies }}</span>
+                }
             </a>
             <a routerLink="/admin/claims-officers" class="action-card">
-                <span class="action-icon">👨‍⚕️</span>
+                <span class="action-icon"><span class="material-icons">gavel</span></span>
                 <span class="action-label">Officers</span>
                 <span class="action-desc">Claims officers</span>
             </a>
             <a routerLink="/admin/plans" class="action-card">
-                <span class="action-icon">📋</span>
+                <span class="action-icon"><span class="material-icons">health_and_safety</span></span>
                 <span class="action-label">Plans</span>
                 <span class="action-desc">Insurance plans</span>
             </a>
-            <a routerLink="/admin/claims" class="action-card">
-                <span class="action-icon">🏥</span>
-                <span class="action-label">Claims</span>
-                <span class="action-desc">All claims</span>
-            </a>
-            <a routerLink="/admin/escalated-claims" class="action-card">
-                <span class="action-icon">⚠️</span>
-                <span class="action-label">Escalated</span>
-                <span class="action-desc">Needs attention</span>
-                @if (stats.totalEscalatedClaims > 0) {
-                <span class="action-badge">{{ stats.totalEscalatedClaims }}</span>
-                }
+            <a routerLink="/admin/assign-claims-officer" class="action-card">
+                <span class="action-icon"><span class="material-icons">assignment_ind</span></span>
+                <span class="action-label">Assign Officer</span>
+                <span class="action-desc">Claims assignment</span>
             </a>
             <a routerLink="/admin/policies" class="action-card">
-                <span class="action-icon">📄</span>
+                <span class="action-icon"><span class="material-icons">policy</span></span>
                 <span class="action-label">Policies</span>
                 <span class="action-desc">View all policies</span>
-            </a>
-            <a routerLink="/admin/audit-logs" class="action-card">
-                <span class="action-icon">📜</span>
-                <span class="action-label">Audit Trail</span>
-                <span class="action-desc">System logs</span>
             </a>
         </div>
     </div>

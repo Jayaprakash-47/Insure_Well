@@ -1,11 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { InsurancePlan, PremiumQuoteResponse } from '../../../core/models/models';
 
-@Component({ selector: 'app-calculator', standalone: true, imports: [CommonModule, FormsModule], templateUrl: './calculator.component.html', styleUrl: './calculator.component.css' })
+@Component({ selector: 'app-calculator', standalone: true, imports: [FormsModule], templateUrl: './calculator.component.html', styleUrl: './calculator.component.css' })
 export class CalculatorComponent implements OnInit {
     plans: InsurancePlan[] = [];
     quotes: PremiumQuoteResponse[] = [];

@@ -45,8 +45,11 @@ public class SecurityConfig {
                         // Admin endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // Agent endpoints
-                        .requestMatchers("/api/agent/**").hasRole("AGENT")
+                        // Agent endpoints - COMMENTED OUT
+                        // .requestMatchers("/api/agent/**").hasRole("AGENT")
+
+                        // Underwriter endpoints
+                        .requestMatchers("/api/underwriter/**").hasRole("UNDERWRITER")
 
                         // Claims Officer endpoints
                         .requestMatchers("/api/claims-officer/**").hasRole("CLAIMS_OFFICER")
@@ -72,7 +75,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:3000", "http://localhost:5173","http://localhost:62486"));
+        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:3000", "http://localhost:55983","http://localhost:62486"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

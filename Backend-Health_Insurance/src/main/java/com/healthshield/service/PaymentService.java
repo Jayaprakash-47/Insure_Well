@@ -44,15 +44,15 @@ public class PaymentService {
             throw new UnauthorizedException("This policy does not belong to you");
         }
 
-        // Validate policy is in PENDING status (not already paid or cancelled)
-        if (policy.getPolicyStatus() != PolicyStatus.PENDING) {
-            throw new BadRequestException("Payment can only be made for PENDING policies. Current status: " + policy.getPolicyStatus());
+        // Validate policy is in PENDING or QUOTE_SENT status (not already paid or cancelled)
+        if (policy.getPolicyStatus() != PolicyStatus.PENDING && policy.getPolicyStatus() != PolicyStatus.QUOTE_SENT) {
+            throw new BadRequestException("Payment can only be made for policies awaiting payment. Current status: " + policy.getPolicyStatus());
         }
 
         // Validate payment amount matches premium
-        if (request.getAmount().compareTo(policy.getPremiumAmount()) != 0) {
-            throw new BadRequestException("Payment amount (₹" + request.getAmount() +
-                    ") does not match policy premium (₹" + policy.getPremiumAmount() + ")");
+        if (request.getAmount() == null || policy.getPremiumAmount() == null || request.getAmount().compareTo(policy.getPremiumAmount()) != 0) {
+            throw new BadRequestException("Payment amount (\u20B9" + request.getAmount() +
+                    ") does not match policy premium (\u20B9" + policy.getPremiumAmount() + ")");
         }
 
         String transactionId = UUID.randomUUID().toString();

@@ -1,41 +1,51 @@
 <div class="page-wrapper">
-    <div class="page-header">
-        <h1>💳 Secure Payment</h1>
-        <p>Complete your policy activation — all transactions are encrypted</p>
+    <div class="page-header center-text">
+        <h1>Payment Details</h1>
+        <p>Review and complete your payment safely.</p>
     </div>
     @if (loading) {
     <div class="loading-page">
         <div class="spinner"></div>
-        <p>Loading payment details...</p>
+        <p>Loading...</p>
     </div>
     } @else if (policy) {
-    <div class="payment-card card" style="max-width:500px;">
-        <h3>Payment Summary</h3>
-        <div class="summary">
-            <div class="summary-row"><span>Policy</span><strong>{{ policy.policyNumber }}</strong></div>
-            <div class="summary-row"><span>Plan</span><strong>{{ policy.planName }}</strong></div>
-            <div class="summary-row"><span>Coverage</span><strong>{{ formatCurrency(policy.coverageAmount) }}</strong>
+    <div class="payment-card card" style="max-width:450px; margin: 0 auto;">
+        <h3 style="margin-bottom: 20px; font-weight: 600; font-size: 1.1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 15px;">Summary</h3>
+        <div class="summary-list">
+            <div class="summary-item">
+                <span class="label">Policy Number</span>
+                <span class="value">{{ policy.policyNumber }}</span>
             </div>
-            <div class="summary-row total"><span>Amount Due</span><strong>{{ formatCurrency(policy.premiumAmount)
-                    }}</strong></div>
+            <div class="summary-item">
+                <span class="label">Plan Name</span>
+                <span class="value">{{ policy.planName }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Coverage</span>
+                <span class="value">{{ formatCurrency(policy.coverageAmount) }}</span>
+            </div>
+            <div class="summary-item total-item" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border);">
+                <span class="label" style="font-weight: 600; color: var(--text-primary);">Total Amount</span>
+                <span class="value" style="font-weight: 700; font-size: 1.25rem; color: var(--primary);">{{ formatCurrency(policy.premiumAmount) }}</span>
+            </div>
         </div>
-        <div class="form-group" style="margin-top:20px;">
-            <label>Payment Method</label>
+        
+        <div class="form-group" style="margin-top:25px;">
+            <label style="font-size: 0.9rem; margin-bottom: 8px;">Select Payment Method</label>
             <select class="form-control" [(ngModel)]="paymentMethod">
-                <option value="UPI">UPI</option>
+                <option value="UPI">UPI Interface</option>
                 <option value="CREDIT_CARD">Credit Card</option>
                 <option value="DEBIT_CARD">Debit Card</option>
                 <option value="NET_BANKING">Net Banking</option>
             </select>
         </div>
-        <button class="btn btn-primary btn-lg" style="width:100%; margin-top:16px;" (click)="pay()"
-            [disabled]="paying || policy.policyStatus !== 'PENDING'">
-            @if (paying) { <span class="spinner"></span> Processing... } @else if (policy.policyStatus !== 'PENDING') {
-            Already {{ policy.policyStatus }} } @else { 🔒 Pay {{ formatCurrency(policy.premiumAmount) }} }
+        
+        <button class="btn btn-primary" style="width:100%; margin-top:25px; padding: 12px 0;" (click)="pay()"
+            [disabled]="paying || policy.policyStatus !== 'QUOTE_SENT'">
+            @if (paying) { <span class="spinner" style="width:16px;height:16px;margin-right:8px;border-width:2px;border-top-color:#fff;"></span> Processing... } 
+            @else if (policy.policyStatus !== 'QUOTE_SENT') { Status: {{ policy.policyStatus }} } 
+            @else { Pay {{ formatCurrency(policy.premiumAmount) }} }
         </button>
-        <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-top:16px;">
-            🔒 Your payment is secured with 256-bit SSL encryption
-        </p>
     </div>
     }
 </div>

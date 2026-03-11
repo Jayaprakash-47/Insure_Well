@@ -21,7 +21,6 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.H2Dialect
-    defer-datasource-initialization: true
 
 jwt:
   secret: YTJiM2M0ZDVlNmY3ZzhoOWkwajFrMmwzbTRuNW82cDdxOHI5czB0MXUydjN3NHg1eTZ6N2E4YjljMGQxZTJm
@@ -35,3 +34,7 @@ springdoc:
 
 server:
   port: 8080
+
+file:
+  upload:
+    dir: uploads/claims

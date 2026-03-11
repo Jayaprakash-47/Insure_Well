@@ -13,12 +13,14 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class DashboardResponse {
     private Long totalCustomers;
-    private Long totalAgents;
+    private Long totalUnderwriters;
     private Long totalClaimsOfficers;
     private Long totalAdmins;
     private Long totalPolicies;
     private Long totalActivePolicies;
     private Long totalPendingPolicies;
+    private Long totalAssignedPolicies;
+    private Long totalQuoteSentPolicies;
     private Long totalExpiredPolicies;
     private Long totalClaims;
     private Long totalPendingClaims;
@@ -30,7 +32,8 @@ public class DashboardResponse {
     private Long totalPayments;
     private BigDecimal totalRevenue;
     private BigDecimal totalClaimsPaidOut;
-    private BigDecimal claimSettlementRatio; // percentage of claims approved
+    private BigDecimal claimSettlementRatio;
     private Long totalActivePlans;
     private Long totalNetworkHospitals;
 }
+

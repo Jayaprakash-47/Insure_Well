@@ -83,8 +83,8 @@ export class AuthService {
         return this.getRole() === 'ROLE_CUSTOMER';
     }
 
-    isAgent(): boolean {
-        return this.getRole() === 'ROLE_AGENT';
+    isUnderwriter(): boolean {
+        return this.getRole() === 'ROLE_UNDERWRITER';
     }
 
     isClaimsOfficer(): boolean {
@@ -94,7 +94,7 @@ export class AuthService {
     getDashboardRoute(): string {
         const role = this.getRole();
         if (role === 'ROLE_ADMIN') return '/admin/dashboard';
-        if (role === 'ROLE_AGENT') return '/agent/dashboard';
+        if (role === 'ROLE_UNDERWRITER') return '/underwriter/dashboard';
         if (role === 'ROLE_CLAIMS_OFFICER') return '/claims-officer/dashboard';
         return '/customer/dashboard';
     }

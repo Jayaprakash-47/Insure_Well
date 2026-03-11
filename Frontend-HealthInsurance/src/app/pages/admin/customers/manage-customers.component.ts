@@ -1,9 +1,9 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ApiService } from '../../../core/services/api.service';
 import { ToastService } from '../../../core/services/toast.service';
 
-@Component({ selector: 'app-manage-customers', standalone: true, imports: [CommonModule], templateUrl: './manage-customers.component.html', styleUrl: './manage-customers.component.css' })
+@Component({ selector: 'app-manage-customers', standalone: true, imports: [], templateUrl: './manage-customers.component.html', styleUrl: './manage-customers.component.css' })
 export class ManageCustomersComponent implements OnInit {
     customers: any[] = [];
     loading = true;

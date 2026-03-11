@@ -1,0 +1,83 @@
+<div class="page-wrapper">
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="welcome-content">
+            <h1>Welcome, {{ profile?.underwriterName || 'Underwriter' }}</h1>
+            <p>License: {{ profile?.licenseNumber }}</p>
+        </div>
+    </div>
+
+    @if (profile) {
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card stat-urgent">
+            <div class="stat-icon yellow"><span class="material-icons">pending_actions</span></div>
+            <div class="stat-info">
+                <h3>{{ profile.pendingAssignments }}</h3>
+                <p>Pending Assignments</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue"><span class="material-icons">send</span></div>
+            <div class="stat-info">
+                <h3>{{ profile.totalQuotesSent }}</h3>
+                <p>Quotes Sent</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><span class="material-icons">verified_user</span></div>
+            <div class="stat-info">
+                <h3>{{ profile.activePolicies }}</h3>
+                <p>Active Policies</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple"><span class="material-icons">people</span></div>
+            <div class="stat-info">
+                <h3>{{ profile.totalCustomersServed }}</h3>
+                <p>Customers Served</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><span class="material-icons">account_balance_wallet</span></div>
+            <div class="stat-info">
+                <h3>{{ formatAmount(profile.totalPremiumGenerated) }}</h3>
+                <p>Total Premium</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon teal"><span class="material-icons">payments</span></div>
+            <div class="stat-info">
+                <h3>{{ formatAmount(profile.totalCommissionEarned) }}</h3>
+                <p>Commission Earned</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="actions-grid">
+            <a routerLink="/underwriter/pending" class="action-card">
+                <span class="action-icon"><span class="material-icons">pending_actions</span></span>
+                <span class="action-label">Pending</span>
+                <span class="action-desc">View and quote</span>
+                @if (profile.pendingAssignments > 0) {
+                <span class="action-badge">{{ profile.pendingAssignments }}</span>
+                }
+            </a>
+            <a routerLink="/underwriter/policies" class="action-card">
+                <span class="action-icon"><span class="material-icons">policy</span></span>
+                <span class="action-label">All Policies</span>
+                <span class="action-desc">View assigned policies</span>
+            </a>
+            <a routerLink="/underwriter/plans" class="action-card">
+                <span class="action-icon"><span class="material-icons">health_and_safety</span></span>
+                <span class="action-label">Browse Plans</span>
+                <span class="action-desc">View insurance products</span>
+            </a>
+        </div>
+    </div>
+    }
+</div>
+

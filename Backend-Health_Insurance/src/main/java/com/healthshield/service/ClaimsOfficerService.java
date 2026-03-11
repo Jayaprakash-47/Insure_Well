@@ -33,7 +33,7 @@ public class ClaimsOfficerService {
 
     private final ClaimsOfficerRepository claimsOfficerRepository;
     private final ClaimRepository claimRepository;
-    private final AuditService auditService;
+//    private final AuditService auditService;
 
     // =================== DASHBOARD ===================
 
@@ -41,14 +41,12 @@ public class ClaimsOfficerService {
         ClaimsOfficer officer = claimsOfficerRepository.findById(officerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Claims Officer not found with id: " + officerId));
 
-        long pendingReviewCount = claimRepository.findByAssignedOfficerUserIdAndClaimStatus(
-                officerId, ClaimStatus.UNDER_REVIEW).size();
-        long unassignedCount = claimRepository.findByAssignedOfficerIsNullAndClaimStatus(
-                ClaimStatus.SUBMITTED).size();
+        long pendingReviewCount = claimRepository.countByAssignedOfficerUserIdAndClaimStatus(
+                officerId, ClaimStatus.UNDER_REVIEW);
+        long unassignedCount = claimRepository.countByAssignedOfficerIsNullAndClaimStatus(
+                ClaimStatus.SUBMITTED);
 
-        long escalatedByOfficer = claimRepository.findByAssignedOfficerUserId(officerId).stream()
-                .filter(c -> Boolean.TRUE.equals(c.getIsEscalated()))
-                .count();
+        long escalatedByOfficer = claimRepository.countByAssignedOfficerUserIdAndIsEscalatedTrue(officerId);
 
         int totalProcessed = officer.getTotalClaimsProcessed() != null ? officer.getTotalClaimsProcessed() : 0;
         int totalApproved = officer.getTotalClaimsApproved() != null ? officer.getTotalClaimsApproved() : 0;
@@ -78,6 +76,7 @@ public class ClaimsOfficerService {
     /**
      * Get unassigned claims waiting for review.
      */
+    @Transactional(readOnly = true)
     public List<ClaimResponse> getUnassignedClaims() {
         return claimRepository.findByAssignedOfficerIsNullAndClaimStatus(ClaimStatus.SUBMITTED).stream()
                 .map(this::mapToResponse)
@@ -87,6 +86,7 @@ public class ClaimsOfficerService {
     /**
      * Get all claims assigned to this officer.
      */
+    @Transactional(readOnly = true)
     public List<ClaimResponse> getMyAssignedClaims(Long officerId) {
         return claimRepository.findByAssignedOfficerUserId(officerId).stream()
                 .map(this::mapToResponse)
@@ -96,6 +96,7 @@ public class ClaimsOfficerService {
     /**
      * Get claims assigned to this officer filtered by status.
      */
+    @Transactional(readOnly = true)
     public List<ClaimResponse> getMyClaimsByStatus(Long officerId, String status) {
         ClaimStatus claimStatus = ClaimStatus.valueOf(status.toUpperCase());
         return claimRepository.findByAssignedOfficerUserIdAndClaimStatus(officerId, claimStatus).stream()
@@ -106,6 +107,7 @@ public class ClaimsOfficerService {
     /**
      * Get the history of claims this officer has already reviewed/decided.
      */
+    @Transactional(readOnly = true)
     public List<ClaimResponse> getMyDecisionHistory(Long officerId) {
         return claimRepository.findByAssignedOfficerUserIdAndReviewedAtIsNotNull(officerId).stream()
                 .map(this::mapToResponse)
@@ -141,12 +143,12 @@ public class ClaimsOfficerService {
 
         Claim saved = claimRepository.save(claim);
 
-        auditService.logStatusChange("CLAIM", claimId,
-                ClaimStatus.SUBMITTED.name(), ClaimStatus.UNDER_REVIEW.name(),
-                "Claim picked up for review by officer: " + officer.getFirstName() + " " + officer.getLastName(),
-                officer);
-
-        log.info("Claim {} picked up by officer {}", claim.getClaimNumber(), officer.getEmployeeId());
+//        auditService.logStatusChange("CLAIM", claimId,
+//                ClaimStatus.SUBMITTED.name(), ClaimStatus.UNDER_REVIEW.name(),
+//                "Claim picked up for review by officer: " + officer.getFirstName() + " " + officer.getLastName(),
+//                officer);
+//
+//        log.info("Claim {} picked up by officer {}", claim.getClaimNumber(), officer.getEmployeeId());
         return mapToResponse(saved);
     }
 
@@ -188,9 +190,9 @@ public class ClaimsOfficerService {
             case REJECTED:
                 processRejection(claim, officer, request);
                 break;
-            case ESCALATED:
-                processEscalation(claim, officer, request);
-                break;
+//            case ESCALATED:
+//                processEscalation(claim, officer, request);
+//                break;
             case DOCUMENT_PENDING:
                 processDocumentRequest(claim, officer, request);
                 break;
@@ -201,13 +203,13 @@ public class ClaimsOfficerService {
 
         Claim saved = claimRepository.save(claim);
 
-        auditService.logStatusChange("CLAIM", claimId,
-                previousStatus, claim.getClaimStatus().name(),
-                "Decision: " + request.getDecision() + " | Remarks: " + request.getReviewerRemarks(),
-                officer);
-
-        log.info("Claim {} reviewed by officer {} | Decision: {}",
-                claim.getClaimNumber(), officer.getEmployeeId(), request.getDecision());
+//        auditService.logStatusChange("CLAIM", claimId,
+//                previousStatus, claim.getClaimStatus().name(),
+//                "Decision: " + request.getDecision() + " | Remarks: " + request.getReviewerRemarks(),
+//                officer);
+//
+//        log.info("Claim {} reviewed by officer {} | Decision: {}",
+//                claim.getClaimNumber(), officer.getEmployeeId(), request.getDecision());
 
         return mapToResponse(saved);
     }
@@ -255,7 +257,6 @@ public class ClaimsOfficerService {
             throw new BadRequestException("Approved amount must be greater than zero. " +
                     "Use REJECTED if you want to deny the claim.");
         }
-
         // Check officer limit
         if (request.getApprovedAmount().compareTo(officer.getApprovalLimit()) > 0) {
             throw new BadRequestException(
@@ -291,18 +292,18 @@ public class ClaimsOfficerService {
         claimsOfficerRepository.save(officer);
     }
 
-    private void processEscalation(Claim claim, ClaimsOfficer officer, ClaimReviewRequest request) {
-        if (request.getEscalationReason() == null) {
-            throw new BadRequestException("Escalation reason is required");
-        }
-
-        claim.setClaimStatus(ClaimStatus.ESCALATED);
-        claim.setIsEscalated(true);
-        claim.setEscalationReason(request.getEscalationReason());
-        claim.setEscalationNotes(request.getEscalationNotes());
-        claim.setEscalatedAt(LocalDateTime.now());
-        claim.setReviewerRemarks(request.getReviewerRemarks());
-    }
+//    private void processEscalation(Claim claim, ClaimsOfficer officer, ClaimReviewRequest request) {
+//        if (request.getEscalationReason() == null) {
+//            throw new BadRequestException("Escalation reason is required");
+//        }
+//
+//        claim.setClaimStatus(ClaimStatus.ESCALATED);
+//        claim.setIsEscalated(true);
+//        claim.setEscalationReason(request.getEscalationReason());
+//        claim.setEscalationNotes(request.getEscalationNotes());
+//        claim.setEscalatedAt(LocalDateTime.now());
+//        claim.setReviewerRemarks(request.getReviewerRemarks());
+//    }
 
     private void processDocumentRequest(Claim claim, ClaimsOfficer officer, ClaimReviewRequest request) {
         claim.setClaimStatus(ClaimStatus.DOCUMENT_PENDING);
@@ -359,13 +360,13 @@ public class ClaimsOfficerService {
     }
 
     // =================== CLAIM DETAIL ===================
-
+    
+    @Transactional(readOnly = true)
     public ClaimResponse getClaimDetail(Long officerId, Long claimId) {
-        ClaimsOfficer officer = claimsOfficerRepository.findById(officerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Claims Officer not found"));
-
-        Claim claim = claimRepository.findById(claimId)
-                .orElseThrow(() -> new ResourceNotFoundException("Claim not found with id: " + claimId));
+        Claim claim = claimRepository.findByIdWithDetails(claimId);
+        if (claim == null) {
+            throw new ResourceNotFoundException("Claim not found with id: " + claimId);
+        }
 
         return mapToResponse(claim);
     }
@@ -395,7 +396,7 @@ public class ClaimsOfficerService {
                 .reviewedAt(claim.getReviewedAt())
                 .reviewerRemarks(claim.getReviewerRemarks())
                 .isEscalated(claim.getIsEscalated())
-                .escalationReason(claim.getEscalationReason() != null ? claim.getEscalationReason().name() : null)
+                // .escalationReason(claim.getEscalationReason() != null ? claim.getEscalationReason().name() : null) // ESCALATION COMMENTED OUT
                 .escalationNotes(claim.getEscalationNotes())
                 .escalatedAt(claim.getEscalatedAt())
                 .adminRemarks(claim.getAdminRemarks())

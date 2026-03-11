@@ -1,0 +1,48 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1><span class="material-icons" style="vertical-align: middle;">local_hospital</span> Available Plans</h1>
+      <p>Insurance plans you can reference when evaluating policy applications.</p>
+    </div>
+    <a routerLink="/underwriter/dashboard" class="btn-back">← Dashboard</a>
+  </div>
+
+  @if (loading) {
+    <div class="loader">Loading plans...</div>
+  }
+
+  @if (!loading) {
+    <div class="plans-grid">
+      @for (p of plans; track p) {
+        <div class="plan-card" [class.inactive]="!p.isActive">
+          <div class="plan-type-badge">{{ p.planType | titlecase }}</div>
+          <h3>{{ p.planName }}</h3>
+          <p class="plan-desc">{{ p.description }}</p>
+          <div class="plan-stats">
+            <div class="plan-stat">
+              <label>Base Premium</label>
+              <strong>₹{{ (p.basePremiumAmount || 0).toLocaleString() }}/yr</strong>
+            </div>
+            <div class="plan-stat">
+              <label>Coverage</label>
+              <strong>₹{{ formatCoverage(p.coverageAmount) }}</strong>
+            </div>
+            <div class="plan-stat">
+              <label>Age Limit</label>
+              <strong>{{ p.minAgeLimit }}–{{ p.maxAgeLimit }} yrs</strong>
+            </div>
+            <div class="plan-stat">
+              <label>Waiting Period</label>
+              <strong>{{ p.waitingPeriodMonths }} months</strong>
+            </div>
+          </div>
+          <div class="plan-features">
+            <div><span class="material-icons" [style.color]="p.maternityCover ? '#10b981' : '#dc2626'" style="font-size: 1rem; vertical-align: middle;">{{ p.maternityCover ? 'check' : 'close' }}</span> Maternity Cover</div>
+            <div><span class="material-icons" [style.color]="p.preExistingDiseaseCover ? '#10b981' : '#dc2626'" style="font-size: 1rem; vertical-align: middle;">{{ p.preExistingDiseaseCover ? 'check' : 'close' }}</span> Pre-existing Diseases</div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+

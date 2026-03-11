@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -15,35 +15,37 @@ import { ClaimResponse, ClaimReviewRequest } from '../../../core/models/models';
 })
 export class ClaimReviewComponent implements OnInit {
     claim: ClaimResponse | null = null;
-    loading = true;
     submitting = false;
 
     decision = '';
     approvedAmount: number | null = null;
     reviewerRemarks = '';
     rejectionReason = '';
-    escalationReason = '';
-    escalationNotes = '';
     additionalDocumentsRequired = '';
 
-    escalationReasons = [
-        'HIGH_VALUE_CLAIM', 'FRAUD_SUSPECTED', 'COMPLEX_MEDICAL_CASE',
-        'POLICY_INTERPRETATION_NEEDED', 'MULTIPLE_CLAIMS_SAME_PERIOD',
-        'PRE_EXISTING_DISEASE_DISPUTE', 'HOSPITAL_NETWORK_ISSUE', 'OTHER'
-    ];
 
     constructor(
         private api: ApiService,
         private toast: ToastService,
         private route: ActivatedRoute,
-        private router: Router
+        private router: Router,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
         const id = Number(this.route.snapshot.paramMap.get('claimId'));
+        console.log('Loading claim with ID:', id);
         this.api.getOfficerClaimDetail(id).subscribe({
-            next: (data) => { this.claim = data; this.loading = false; },
-            error: () => { this.loading = false; this.toast.error('Failed to load claim'); }
+            next: (data) => { 
+                console.log('Claim data received:', JSON.stringify(data, null, 2));
+                this.claim = data;
+                console.log('Claim assigned to component:', this.claim);
+                this.cdr.detectChanges();
+            },
+            error: (err) => { 
+                console.error('Error loading claim:', err);
+                this.toast.error('Failed to load claim: ' + (err.error?.message || err.message || 'Unknown error')); 
+            }
         });
     }
 
@@ -62,7 +64,7 @@ export class ClaimReviewComponent implements OnInit {
             reviewerRemarks: this.reviewerRemarks
         };
 
-        if (this.decision === 'APPROVE' || this.decision === 'PARTIALLY_APPROVE') {
+        if (this.decision === 'APPROVED' || this.decision === 'PARTIALLY_APPROVED') {
             if (!this.approvedAmount || this.approvedAmount <= 0) {
                 this.toast.error('Please enter a valid approved amount');
                 return;
@@ -70,7 +72,7 @@ export class ClaimReviewComponent implements OnInit {
             request.approvedAmount = this.approvedAmount;
         }
 
-        if (this.decision === 'REJECT') {
+        if (this.decision === 'REJECTED') {
             if (!this.rejectionReason.trim()) {
                 this.toast.error('Please provide a rejection reason');
                 return;
@@ -78,14 +80,6 @@ export class ClaimReviewComponent implements OnInit {
             request.rejectionReason = this.rejectionReason;
         }
 
-        if (this.decision === 'ESCALATE') {
-            if (!this.escalationReason) {
-                this.toast.error('Please select an escalation reason');
-                return;
-            }
-            request.escalationReason = this.escalationReason;
-            request.escalationNotes = this.escalationNotes;
-        }
 
         if (this.decision === 'DOCUMENT_PENDING') {
             request.additionalDocumentsRequired = this.additionalDocumentsRequired;
@@ -106,8 +100,8 @@ export class ClaimReviewComponent implements OnInit {
 
     setDecision(d: string): void {
         this.decision = d;
-        if (d === 'APPROVE') this.approvedAmount = this.claim?.claimAmount || 0;
-        if (d === 'PARTIALLY_APPROVE') this.approvedAmount = null;
+        if (d === 'APPROVED') this.approvedAmount = this.claim?.claimAmount || 0;
+        if (d === 'PARTIALLY_APPROVED') this.approvedAmount = null;
     }
 
     formatCurrency(amount: number): string {
@@ -118,7 +112,7 @@ export class ClaimReviewComponent implements OnInit {
         const map: Record<string, string> = {
             'SUBMITTED': 'badge-submitted', 'UNDER_REVIEW': 'badge-info',
             'APPROVED': 'badge-approved', 'REJECTED': 'badge-rejected',
-            'ESCALATED': 'badge-escalated', 'DOCUMENT_PENDING': 'badge-pending',
+            'DOCUMENT_PENDING': 'badge-pending',
             'PARTIALLY_APPROVED': 'badge-info', 'SETTLED': 'badge-success'
         };
         return map[status] || 'badge-info';

@@ -1,9 +1,9 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ApiService } from '../../../core/services/api.service';
 import { PolicyResponse } from '../../../core/models/models';
 
-@Component({ selector: 'app-manage-policies', standalone: true, imports: [CommonModule], templateUrl: './manage-policies.component.html', styleUrl: './manage-policies.component.css' })
+@Component({ selector: 'app-manage-policies', standalone: true, imports: [], templateUrl: './manage-policies.component.html', styleUrl: './manage-policies.component.css' })
 export class ManagePoliciesComponent implements OnInit {
     policies: PolicyResponse[] = [];
     loading = true;

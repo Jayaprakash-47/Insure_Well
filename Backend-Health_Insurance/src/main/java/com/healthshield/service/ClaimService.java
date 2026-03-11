@@ -16,6 +16,7 @@ import com.healthshield.repository.PolicyRepository;
 import com.healthshield.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,7 +43,10 @@ public class ClaimService {
     private final ClaimDocumentRepository claimDocumentRepository;
     private final PolicyRepository policyRepository;
     private final UserRepository userRepository;
-    private final AuditService auditService;
+//    private final AuditService auditService;
+
+    @Value("${file.upload.dir:uploads/claims}")
+    private String uploadDir;
 
     @Transactional
     public ClaimResponse fileClaim(Long userId, ClaimRequest request, List<MultipartFile> documents) {
@@ -59,6 +63,16 @@ public class ClaimService {
         // Only allow claims on ACTIVE policies
         if (policy.getPolicyStatus() != com.healthshield.enums.PolicyStatus.ACTIVE) {
             throw new BadRequestException("Claims can only be filed for ACTIVE policies. Current status: " + policy.getPolicyStatus());
+        }
+
+        // Validate Waiting Period
+        if (policy.getStartDate() != null && policy.getPlan() != null && policy.getPlan().getWaitingPeriodMonths() > 0) {
+            java.time.LocalDate claimEligibilityDate = policy.getStartDate().plusMonths(policy.getPlan().getWaitingPeriodMonths());
+            if (java.time.LocalDate.now().isBefore(claimEligibilityDate)) {
+                throw new BadRequestException("Claims cannot be filed within the waiting period of " 
+                    + policy.getPlan().getWaitingPeriodMonths() + " months. You will be eligible to file a claim on " 
+                    + claimEligibilityDate + ".");
+            }
         }
 
         // Validate claim amount doesn't exceed total coverage
@@ -96,8 +110,8 @@ public class ClaimService {
         Claim saved = claimRepository.save(claim);
 
         if (documents != null && !documents.isEmpty()) {
-            String uploadDir = "uploads/claims/" + claimNumber;
-            Path uploadPath = Paths.get(uploadDir);
+            String claimUploadDir = uploadDir + "/" + claimNumber;
+            Path uploadPath = Paths.get(claimUploadDir);
             try {
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
@@ -124,14 +138,14 @@ public class ClaimService {
             }
         }
 
-        // Audit trail
-        auditService.logCreation("CLAIM", saved.getClaimId(),
-                "Claim filed: " + claimNumber + " | Amount: ₹" + request.getClaimAmount()
-                        + " | Hospital: " + request.getHospitalName()
-                        + " | Diagnosis: " + request.getDiagnosis(), user);
-
-        log.info("New claim filed: {} by user {} for policy {}", claimNumber, userId, policy.getPolicyNumber());
-
+//        // Audit trail
+//        auditService.logCreation("CLAIM", saved.getClaimId(),
+//                "Claim filed: " + claimNumber + " | Amount: ₹" + request.getClaimAmount()
+//                        + " | Hospital: " + request.getHospitalName()
+//                        + " | Diagnosis: " + request.getDiagnosis(), user);
+//
+//        log.info("New claim filed: {} by user {} for policy {}", claimNumber, userId, policy.getPolicyNumber());
+//
         return mapToResponse(saved);
     }
 
@@ -220,12 +234,12 @@ public class ClaimService {
 
         Claim saved = claimRepository.save(claim);
 
-        auditService.logStatusChange("CLAIM", claimId,
-                "APPROVED", "SETTLED",
-                "Claim settled for ₹" + settlementAmount + " | TPA Ref: " + claim.getTpaReferenceNumber(),
-                performedBy);
-
-        log.info("Claim {} settled for ₹{}", claim.getClaimNumber(), settlementAmount);
+//        auditService.logStatusChange("CLAIM", claimId,
+//                "APPROVED", "SETTLED",
+//                "Claim settled for ₹" + settlementAmount + " | TPA Ref: " + claim.getTpaReferenceNumber(),
+//                performedBy);
+//
+//        log.info("Claim {} settled for ₹{}", claim.getClaimNumber(), settlementAmount);
 
         return mapToResponse(saved);
     }
@@ -246,12 +260,9 @@ public class ClaimService {
     private String generateClaimNumber() {
         Random random = new Random();
         String number;
-        boolean exists;
         do {
             number = "CLM-" + Year.now().getValue() + "-" + String.format("%06d", random.nextInt(999999));
-            final String candidate = number;
-            exists = claimRepository.findAll().stream().anyMatch(c -> c.getClaimNumber().equals(candidate));
-        } while (exists);
+        } while (claimRepository.existsByClaimNumber(number));
         return number;
     }
 
@@ -299,7 +310,7 @@ public class ClaimService {
                 .reviewedAt(claim.getReviewedAt())
                 .reviewerRemarks(claim.getReviewerRemarks())
                 .isEscalated(claim.getIsEscalated())
-                .escalationReason(claim.getEscalationReason() != null ? claim.getEscalationReason().name() : null)
+                // .escalationReason(claim.getEscalationReason() != null ? claim.getEscalationReason().name() : null) // ESCALATION COMMENTED OUT
                 .escalationNotes(claim.getEscalationNotes())
                 .escalatedAt(claim.getEscalatedAt())
                 .adminRemarks(claim.getAdminRemarks())

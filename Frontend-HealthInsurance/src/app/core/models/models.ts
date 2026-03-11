@@ -31,26 +31,26 @@ export interface AuthResponse {
 // =================== DASHBOARD ===================
 export interface DashboardResponse {
     totalCustomers: number;
-    totalAgents: number;
+    totalUnderwriters: number;
     totalClaimsOfficers: number;
     totalAdmins: number;
     totalPolicies: number;
     totalActivePolicies: number;
     totalPendingPolicies: number;
+    totalAssignedPolicies: number;
+    totalQuoteSentPolicies: number;
     totalExpiredPolicies: number;
     totalClaims: number;
     totalPendingClaims: number;
     totalUnderReviewClaims: number;
     totalApprovedClaims: number;
     totalRejectedClaims: number;
-    totalEscalatedClaims: number;
     totalSettledClaims: number;
     totalPayments: number;
     totalRevenue: number;
     totalClaimsPaidOut: number;
     claimSettlementRatio: number;
     totalActivePlans: number;
-    totalNetworkHospitals: number;
 }
 
 // =================== PLANS ===================
@@ -140,9 +140,12 @@ export interface PolicyResponse {
     nomineeRelationship: string;
     createdAt: string;
     members: PolicyMemberResponse[];
-    agentId: number;
-    agentName: string;
+    underwriterId: number;
+    underwriterName: string;
     commissionAmount: number;
+    quoteAmount: number;
+    waitingPeriodMonths: number;
+    assignedAt: string;
     renewalCount: number;
     noClaimBonus: number;
     originalPolicyId: number;
@@ -198,12 +201,7 @@ export interface ClaimResponse {
     reviewStartedAt: string;
     reviewedAt: string;
     reviewerRemarks: string;
-    isEscalated: boolean;
-    escalationReason: string;
-    escalationNotes: string;
-    escalatedAt: string;
     adminRemarks: string;
-    escalationResolvedAt: string;
     settlementDate: string;
     tpaReferenceNumber: string;
 }
@@ -219,8 +217,6 @@ export interface ClaimReviewRequest {
     approvedAmount?: number;
     reviewerRemarks?: string;
     rejectionReason?: string;
-    escalationReason?: string;
-    escalationNotes?: string;
     additionalDocumentsRequired?: string;
 }
 
@@ -245,39 +241,36 @@ export interface PaymentResponse {
     message: string;
 }
 
-// =================== AGENT ===================
-export interface CreateAgentRequest {
+// =================== UNDERWRITER ===================
+export interface CreateUnderwriterRequest {
     firstName: string;
     lastName: string;
     email: string;
     password: string;
     phone: string;
     licenseNumber: string;
-    territory: string;
+    specialization: string;
     commissionPercentage: number;
 }
 
-export interface AgentSellPolicyRequest {
-    customerId: number;
-    planId: number;
-    nomineeName: string;
-    nomineeRelationship: string;
-    quoteId?: number;
-    members?: PolicyMemberRequest[];
+export interface UnderwriterQuoteRequest {
+    quoteAmount: number;
+    remarks?: string;
 }
 
-export interface AgentDashboardResponse {
-    agentId: number;
-    agentName: string;
+export interface UnderwriterDashboardResponse {
+    underwriterId: number;
+    underwriterName: string;
     email: string;
     licenseNumber: string;
-    territory: string;
+    specialization: string;
     commissionPercentage: number;
-    totalPoliciesSold: number;
+    totalQuotesSent: number;
     totalCommissionEarned: number;
     totalCustomersServed: number;
     activePolicies: number;
     totalPremiumGenerated: number;
+    pendingAssignments: number;
 }
 
 // =================== CLAIMS OFFICER ===================
@@ -289,7 +282,6 @@ export interface CreateClaimsOfficerRequest {
     phone: string;
     employeeId: string;
     department: string;
-    specialization: string;
     approvalLimit: number;
 }
 
@@ -307,25 +299,5 @@ export interface ClaimsOfficerDashboardResponse {
     approvalRate: number;
     pendingReviewCount: number;
     unassignedClaimCount: number;
-    escalatedCount: number;
 }
 
-export interface AdminClaimDecisionRequest {
-    decision: string;
-    approvedAmount?: number;
-    adminRemarks: string;
-    rejectionReason?: string;
-}
-
-// =================== AUDIT ===================
-export interface AuditLogResponse {
-    auditId: number;
-    entityType: string;
-    entityId: number;
-    action: string;
-    previousValue: string;
-    newValue: string;
-    remarks: string;
-    performedByName: string;
-    timestamp: string;
-}

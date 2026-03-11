@@ -8,74 +8,74 @@
   }
 </div>
 
-<!-- Hartford-Style Navbar -->
+
 @if (showNavbar) {
 <div class="navbar-wrapper" [class.scrolled]="isScrolled">
-  <!-- Top Utility Bar -->
-  <div class="top-bar">
-    <div class="top-bar-container">
-      <div class="top-links">
-         <span class="top-info">📞 1800-123-4567 (Toll Free)</span>
-         <span class="top-divider">|</span>
-         <a routerLink="/plans">View Plans</a>
-         <span class="top-divider">|</span>
-         <a routerLink="/register">Get Insured Today</a>
-      </div>
-
-      @if (auth.isLoggedIn()) {
-      <div class="account-block">
-        <span class="role-badge" [ngClass]="getRoleBadgeClass()">{{ getRoleBadge() }}</span>
-        <div class="dropdown">
-           <button class="account-btn">My Account ({{ auth.getUserName() }}) ▼</button>
-           <div class="dropdown-content">
-              <a [routerLink]="auth.getDashboardRoute()">Dashboard</a>
-              <a (click)="logout()">Logout</a>
-           </div>
-        </div>
-      </div>
-      } @else {
-      <div class="account-block">
-        <a routerLink="/login" class="account-btn">My Account</a>
-      </div>
-      }
-    </div>
-  </div>
-
   <!-- Main Navigation -->
   <nav class="navbar main-nav">
-    <div class="nav-container">
+    <div class="nav-container text-center">
       <a class="nav-brand" routerLink="/">
-        <span class="brand-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-        </span>
+        <div class="brand-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="M9 12l2 2 4-4" />
+          </svg>
+        </div>
         <span class="brand-text">InsureWell</span>
       </a>
 
+      <!-- Center Links -->
       <div class="nav-links" [class.active]="mobileMenuOpen">
         @if (auth.isLoggedIn()) {
-          @for (link of getNavLinks(); track link.route) {
-          <a [routerLink]="link.route" routerLinkActive="active" (click)="mobileMenuOpen = false">
-            {{ link.label }}
-          </a>
-          }
-        } @else {
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="mobileMenuOpen = false">Home</a>
-          <a routerLink="/plans" routerLinkActive="active" (click)="mobileMenuOpen = false">Our Plans</a>
-          <a routerLink="/login" routerLinkActive="active" (click)="mobileMenuOpen = false">Login</a>
-          <a routerLink="/register" routerLinkActive="active" (click)="mobileMenuOpen = false">Register</a>
+        @for (link of getNavLinks(); track link.route) {
+        <a [routerLink]="link.route" routerLinkActive="active" (click)="mobileMenuOpen = false">
+          {{ link.label }}
+        </a>
+        }
         }
       </div>
 
+      <!-- Right Side Actions -->
       <div class="nav-right">
-         @if (auth.isLoggedIn() && auth.isCustomer()) {
-         <a routerLink="/customer/calculator" class="btn btn-primary btn-sm nav-cta">Get Quote</a>
-         } @else if (!auth.isLoggedIn()) {
-         <a routerLink="/register" class="btn btn-primary btn-sm nav-cta">Get Started</a>
-         }
+        @if (auth.isLoggedIn()) {
+        <div class="user-profile-menu">
+          <button class="user-menu-btn">
+            <div class="user-avatar">{{ auth.getUserName().charAt(0) || 'U' }}</div>
+            <div class="user-info">
+              <span class="user-name">{{ auth.getUserName() }}</span>
+              @if (auth.getRole() !== 'ADMIN') {
+              <span class="user-role">{{ getRoleBadge() }}</span>
+              }
+            </div>
+            <span class="material-icons dropdown-arrow" style="font-size:18px;">expand_more</span>
+          </button>
+          <div class="dropdown-content modern-dropdown">
+            <a [routerLink]="auth.getDashboardRoute()">
+              <span class="material-icons"
+                style="font-size: 18px; margin-right: 8px; vertical-align: middle;">dashboard</span> Dashboard
+            </a>
+            <div class="dropdown-divider"></div>
+            <a (click)="logout()" class="logout-link">
+              <span class="material-icons"
+                style="font-size: 18px; margin-right: 8px; vertical-align: middle;">logout</span> Sign Out
+            </a>
+          </div>
+        </div>
+        @if (auth.isCustomer()) {
+        <a routerLink="/customer/calculator" class="btn btn-primary btn-sm nav-cta ml-3" style="margin-left:12px;">Get
+          Quote</a>
+        }
+        } @else {
+        <div class="auth-buttons">
+          <a routerLink="/login" class="btn-outline-glow">Sign In</a>
+          <a routerLink="/register" class="btn-primary-glow">Get Started Free</a>
+        </div>
+        }
       </div>
 
       <button class="mobile-toggle" (click)="mobileMenuOpen = !mobileMenuOpen">
-        {{ mobileMenuOpen ? '✕' : '☰' }}
+        <span class="material-icons">{{ mobileMenuOpen ? 'close' : 'menu' }}</span>
       </button>
     </div>
   </nav>

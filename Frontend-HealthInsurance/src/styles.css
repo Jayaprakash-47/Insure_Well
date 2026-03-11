@@ -365,7 +365,7 @@ select.form-control {
 .badge-submitted, .badge-active { background-color: var(--success-light); color: #047857; }
 .badge-inactive { background-color: #f1f5f9; color: #64748b; }
 .badge-info { background-color: var(--info-light); color: #1e40af; }
-.badge-escalated { background: #fef3c7; color: #b45309; }
+
 .badge-success { background-color: var(--success-light); color: #047857; }
 
 /* =================== TOAST =================== */
@@ -615,65 +615,7 @@ button .spinner, .btn .spinner {
 /* =================== AMOUNT =================== */
 .amount { font-family: var(--font-heading); font-weight: 700; }
 
-/* =================== ESCALATION INFO =================== */
-.escalation-info {
-  font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;
-  padding: 12px 16px; background: var(--bg-primary);
-  border-radius: var(--radius); border-left: 3px solid var(--warning);
-}
 
-/* =================== AUDIT TIMELINE =================== */
-.audit-timeline { display: flex; flex-direction: column; gap: 2px; }
-
-.audit-entry {
-  display: flex; gap: 16px;
-  padding: 16px 20px; background: white;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  transition: var(--transition);
-  animation: fadeInUp 0.3s ease-out;
-}
-
-.audit-entry:hover { box-shadow: var(--shadow); border-color: var(--border); }
-
-.audit-icon {
-  font-size: 24px; width: 44px; height: 44px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: var(--radius-md); background: var(--bg-primary); flex-shrink: 0;
-}
-
-.action-create .audit-icon { background: #d1fae5; }
-.action-update .audit-icon { background: #dbeafe; }
-.action-settle .audit-icon { background: #fef3c7; }
-
-.audit-content { flex: 1; min-width: 0; }
-
-.audit-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-
-.audit-action {
-  font-weight: 700; font-size: 13px; color: var(--text-primary);
-  text-transform: uppercase; letter-spacing: 0.03em;
-}
-
-.audit-entity {
-  font-size: 12px; color: var(--text-muted);
-  background: var(--bg-primary); padding: 2px 8px;
-  border-radius: 4px; font-weight: 500;
-}
-
-.audit-remarks { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.5; }
-.audit-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); }
-
-.audit-change {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 13px; margin-top: 8px;
-  padding: 8px 12px; background: var(--bg-primary);
-  border-radius: var(--radius-sm);
-}
-
-.change-from { color: var(--danger); text-decoration: line-through; }
-.change-arrow { color: var(--text-muted); }
-.change-to { color: var(--success); font-weight: 600; }
 
 /* =================== STAT URGENT =================== */
 .stat-urgent { border-left: 4px solid var(--warning); border-radius: var(--radius-lg); }

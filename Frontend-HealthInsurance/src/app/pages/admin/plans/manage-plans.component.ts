@@ -1,11 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { InsurancePlan } from '../../../core/models/models';
 
-@Component({ selector: 'app-manage-plans', standalone: true, imports: [CommonModule, FormsModule], templateUrl: './manage-plans.component.html', styleUrl: './manage-plans.component.css' })
+@Component({ selector: 'app-manage-plans', standalone: true, imports: [FormsModule], templateUrl: './manage-plans.component.html', styleUrl: './manage-plans.component.css' })
 export class ManagePlansComponent implements OnInit {
     plans: InsurancePlan[] = [];
     loading = true;

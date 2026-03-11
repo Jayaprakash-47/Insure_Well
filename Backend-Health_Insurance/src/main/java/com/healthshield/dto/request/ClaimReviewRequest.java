@@ -1,7 +1,6 @@
 package com.healthshield.dto.request;
 
 import com.healthshield.enums.ClaimStatus;
-import com.healthshield.enums.EscalationReason;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +17,7 @@ import java.math.BigDecimal;
 public class ClaimReviewRequest {
 
     @NotNull(message = "Decision status is required")
-    private ClaimStatus decision;  // APPROVED, PARTIALLY_APPROVED, REJECTED, ESCALATED, DOCUMENT_PENDING
+    private ClaimStatus decision;
 
     /** Approved/partial amount (required for APPROVED and PARTIALLY_APPROVED) */
     private BigDecimal approvedAmount;
@@ -30,7 +29,7 @@ public class ClaimReviewRequest {
     private String rejectionReason;
 
     /** Required when decision is ESCALATED */
-    private EscalationReason escalationReason;
+//    private EscalationReason escalationReason;
 
     /** Additional notes for escalation */
     private String escalationNotes;

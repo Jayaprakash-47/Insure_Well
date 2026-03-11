@@ -1,3 +1,4 @@
+/*
 package com.healthshield.entity;
 
 import jakarta.persistence.*;
@@ -21,4 +22,4 @@ public class Agent extends User {
     @Column(columnDefinition = "integer default 0")
     private Integer totalPoliciesSold = 0;
 }
-
+*/

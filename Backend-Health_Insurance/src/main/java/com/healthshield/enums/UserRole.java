@@ -2,7 +2,7 @@ package com.healthshield.enums;
 
 public enum UserRole {
     ADMIN,
-    AGENT,
+    UNDERWRITER,
     CUSTOMER,
     CLAIMS_OFFICER
 }

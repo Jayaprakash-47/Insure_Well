@@ -33,10 +33,16 @@ public class Policy {
     @JoinColumn(name = "plan_id")
     private InsurancePlan plan;
 
-    /** The agent who sold this policy (null if purchased directly by customer) */
+    /** The underwriter assigned by admin to calculate the quote */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "agent_id")
-    private Agent soldByAgent;
+    @JoinColumn(name = "underwriter_id")
+    private Underwriter assignedUnderwriter;
+
+    /** When admin assigned the underwriter */
+    private LocalDateTime assignedAt;
+
+    /** Premium quote amount sent by underwriter */
+    private BigDecimal quoteAmount;
 
     private BigDecimal premiumAmount;
     private BigDecimal coverageAmount;
@@ -73,9 +79,7 @@ public class Policy {
     @Column(columnDefinition = "decimal(5,2) default 0")
     private BigDecimal noClaimBonus = BigDecimal.ZERO;
 
-    // =================== COMMISSION TRACKING ===================
-
-    /** Commission amount paid to the agent for this sale */
+    /** Commission amount paid to the underwriter for this policy */
     private BigDecimal commissionAmount;
 
     @CreationTimestamp
@@ -90,3 +94,4 @@ public class Policy {
     @OneToMany(mappedBy = "policy", cascade = CascadeType.ALL)
     private List<Payment> payments;
 }
+

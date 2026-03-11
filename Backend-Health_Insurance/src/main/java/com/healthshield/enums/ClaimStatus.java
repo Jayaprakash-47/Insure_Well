@@ -7,7 +7,6 @@ public enum ClaimStatus {
     APPROVED,            // Fully approved
     PARTIALLY_APPROVED,  // Approved but with reduced amount
     REJECTED,            // Rejected with reason
-    ESCALATED,           // Escalated to Admin for complex cases
     SETTLEMENT_IN_PROGRESS, // Approved and payment being processed
     SETTLED,             // Final — money disbursed to customer/hospital
     APPEAL_REQUESTED     // Customer appealed a rejection

@@ -2,7 +2,7 @@ package com.healthshield.entity;
 
 import com.healthshield.enums.ClaimStatus;
 import com.healthshield.enums.ClaimType;
-import com.healthshield.enums.EscalationReason;
+// import com.healthshield.enums.EscalationReason; // ESCALATION COMMENTED OUT
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -80,8 +80,8 @@ public class Claim {
     @Column(columnDefinition = "boolean default false")
     private Boolean isEscalated = false;
 
-    @Enumerated(EnumType.STRING)
-    private EscalationReason escalationReason;
+    // @Enumerated(EnumType.STRING)
+    // private EscalationReason escalationReason; // ESCALATION COMMENTED OUT
 
     @Column(columnDefinition = "TEXT")
     private String escalationNotes;

@@ -1,0 +1,35 @@
+.page { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+.page-header h1 { margin: 0 0 0.4rem; font-size: 1.6rem; color: #0f1f3d; }
+.page-header p { margin: 0; color: #64748b; }
+.btn-back { background: #0f1f3d; color: white; padding: 0.5rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: 600; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media(max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+.panel { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.07); max-height: 75vh; overflow-y: auto; }
+.panel h2 { font-size: 1rem; color: #0f1f3d; margin: 0 0 1rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.75rem; }
+.loader { text-align: center; padding: 2rem; color: #64748b; }
+.empty { text-align: center; padding: 2rem; color: #94a3b8; }
+.claim-card, .officer-card { border: 2px solid #e2e8f0; border-radius: 12px; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; }
+.claim-card:hover, .officer-card:hover { border-color: #00b4d8; background: #f0fdff; }
+.claim-card.selected, .officer-card.selected { border-color: #00b4d8; background: #e0f7fc; }
+.claim-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+.badge { padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.7rem; font-weight: 700; }
+.badge.submitted { background: #dbeafe; color: #1d4ed8; }
+.claim-meta { font-size: 0.85rem; color: #64748b; margin-top: 0.2rem; }
+.claim-date { font-size: 0.75rem; color: #94a3b8; margin-top: 0.4rem; }
+.empty-select { text-align: center; padding: 3rem; color: #94a3b8; font-style: italic; }
+.selected-info { background: #f0fdff; border: 1px solid #b2ebf2; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.9rem; color: #0f1f3d; }
+.selected-info div { font-size: 0.8rem; color: #64748b; margin-top: 0.25rem; }
+.officer-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
+.officer-info strong { display: block; color: #0f1f3d; }
+.dept { font-size: 0.8rem; color: #64748b; }
+.officer-stats { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: #64748b; flex-wrap: wrap; }
+.approval-rate { color: #059669; font-weight: 600; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #d1d5db; }
+.status-dot.active { background: #10b981; }
+.btn-assign { width: 100%; padding: 0.85rem; background: linear-gradient(135deg, #0f1f3d, #1a3a6b); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.btn-assign:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(15,31,61,0.3); }
+.btn-assign:disabled { opacity: 0.6; cursor: not-allowed; }
+.success-msg { margin-top: 0.75rem; color: #059669; font-weight: 600; text-align: center; }
+.error-msg { margin-top: 0.75rem; color: #dc2626; text-align: center; }
+

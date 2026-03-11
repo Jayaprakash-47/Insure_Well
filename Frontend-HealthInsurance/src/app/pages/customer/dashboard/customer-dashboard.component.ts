@@ -1,11 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { PolicyResponse, ClaimResponse } from '../../../core/models/models';
 
-@Component({ selector: 'app-customer-dashboard', standalone: true, imports: [CommonModule, RouterLink], templateUrl: './customer-dashboard.component.html', styleUrl: './customer-dashboard.component.css' })
+@Component({ selector: 'app-customer-dashboard', standalone: true, imports: [RouterLink], templateUrl: './customer-dashboard.component.html', styleUrl: './customer-dashboard.component.css' })
 export class CustomerDashboardComponent implements OnInit {
     policies: PolicyResponse[] = [];
     claims: ClaimResponse[] = [];
@@ -19,7 +19,7 @@ export class CustomerDashboardComponent implements OnInit {
     }
 
     get activePolicies(): number { return this.policies.filter(p => p.policyStatus === 'ACTIVE').length; }
-    get pendingPolicies(): number { return this.policies.filter(p => p.policyStatus === 'PENDING').length; }
+    get pendingPolicies(): number { return this.policies.filter(p => ['PENDING', 'ASSIGNED', 'QUOTE_SENT'].includes(p.policyStatus)).length; }
     get pendingClaims(): number { return this.claims.filter(c => c.claimStatus === 'SUBMITTED').length; }
     formatCurrency(n: number): string { return '₹' + (n || 0).toLocaleString('en-IN'); }
 }

@@ -1,11 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ClaimResponse } from '../../../core/models/models';
 
-@Component({ selector: 'app-manage-claims', standalone: true, imports: [CommonModule, FormsModule], templateUrl: './manage-claims.component.html', styleUrl: './manage-claims.component.css' })
+@Component({ selector: 'app-manage-claims', standalone: true, imports: [FormsModule], templateUrl: './manage-claims.component.html', styleUrl: './manage-claims.component.css' })
 export class ManageClaimsComponent implements OnInit {
     claims: ClaimResponse[] = [];
     loading = true;

@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
     selector: 'app-landing',
     standalone: true,
-    imports: [RouterLink, CommonModule],
+    imports: [RouterLink],
     templateUrl: './landing.component.html',
     styleUrl: './landing.component.css'
 })
@@ -14,19 +14,19 @@ export class LandingComponent {
     constructor(public auth: AuthService) { }
 
     howItWorks = [
-        { icon: '📋', title: 'Choose a Plan', desc: 'Browse our range of plans designed for individuals, families, and seniors.' },
-        { icon: '🧮', title: 'Get a Quote', desc: 'Use our premium calculator to get an instant, personalized quote.' },
-        { icon: '💳', title: 'Make Payment', desc: 'Complete your purchase with secure online payment options.' },
-        { icon: '🛡️', title: 'Get Covered', desc: 'Your policy is activated instantly. Enjoy cashless treatment at 5000+ hospitals.' }
+        { icon: 'assignment', title: 'Choose a Plan', desc: 'Browse our range of plans designed for individuals, families, and seniors.' },
+        { icon: 'calculate', title: 'Get a Quote', desc: 'Use our premium calculator to get an instant, personalized quote.' },
+        { icon: 'credit_card', title: 'Make Payment', desc: 'Complete your purchase with secure online payment options.' },
+        { icon: 'security', title: 'Get Covered', desc: 'Your policy is activated instantly. Enjoy cashless treatment at 5000+ hospitals.' }
     ];
 
     features = [
-        { icon: '🏥', title: 'Cashless Treatment', desc: 'Walk into any of our 5000+ network hospitals for hassle-free cashless treatment.' },
-        { icon: '⚡', title: 'Instant Processing', desc: 'Claims processed within 24 hours with our AI-powered automated system.' },
-        { icon: '🛡️', title: 'Comprehensive Cover', desc: 'From hospitalization to day care procedures, we have you fully covered.' },
-        { icon: '👨‍👩‍👧‍👦', title: 'Family Floater', desc: 'Cover your entire family under a single plan at affordable premiums.' },
-        { icon: '📱', title: 'Digital First', desc: 'Manage your policies, file claims, and track status all online.' },
-        { icon: '🤝', title: 'Dedicated Support', desc: '24/7 customer support with dedicated relationship managers.' }
+        { icon: 'local_hospital', title: 'Cashless Treatment', desc: 'Walk into any of our 5000+ network hospitals for hassle-free cashless treatment.' },
+        { icon: 'bolt', title: 'Instant Processing', desc: 'Claims processed within 24 hours with our AI-powered automated system.' },
+        { icon: 'security', title: 'Comprehensive Cover', desc: 'From hospitalization to day care procedures, we have you fully covered.' },
+        { icon: 'family_restroom', title: 'Family Floater', desc: 'Cover your entire family under a single plan at affordable premiums.' },
+        { icon: 'smartphone', title: 'Digital First', desc: 'Manage your policies, file claims, and track status all online.' },
+        { icon: 'handshake', title: 'Dedicated Support', desc: '24/7 customer support with dedicated relationship managers.' }
     ];
 
     plans = [
