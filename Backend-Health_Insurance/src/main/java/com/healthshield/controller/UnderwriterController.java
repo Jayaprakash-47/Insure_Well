@@ -8,12 +8,20 @@ import com.healthshield.entity.User;
 import com.healthshield.service.UnderwriterService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/underwriter")
@@ -71,5 +79,16 @@ public class UnderwriterController {
         UnderwriterQuoteRequest res = new UnderwriterQuoteRequest();
         res.setQuoteAmount(amount);
         return ResponseEntity.ok(res);
+    }
+
+    /** Raise a concern about a policy - request additional documents */
+    @PostMapping("/policy/{policyId}/raise-concern")
+    public ResponseEntity<Map<String, String>> raiseConcern(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long policyId,
+            @RequestBody Map<String, String> request) {
+        String remarks = request.getOrDefault("remarks", "");
+        underwriterService.raiseConcern(user.getUserId(), policyId, remarks);
+        return ResponseEntity.ok(Map.of("message", "Concern raised successfully"));
     }
 }

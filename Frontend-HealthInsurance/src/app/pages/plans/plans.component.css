@@ -1,3 +1,25 @@
+.search-filter-bar {
+    margin-bottom: 24px;
+}
+
+.search-box {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.search-box .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 20px;
+}
+
+.search-box .form-control {
+    padding-left: 44px;
+}
+
 .plans-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -19,7 +41,7 @@
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #0891b2, #06b6d4);
+    background: linear-gradient(90deg, #800020, #a3243b);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -27,7 +49,7 @@
 .plan-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 16px 40px rgba(0,0,0,0.06);
-    border-color: #cffafe;
+    border-color: #f9d5dc;
 }
 
 .plan-card:hover::before { opacity: 1; }
@@ -43,7 +65,7 @@
     background: var(--accent-light);
     color: var(--accent);
     margin-bottom: 14px;
-    border: 1px solid #cffafe;
+    border: 1px solid #f9d5dc;
 }
 
 .plan-card h3 {

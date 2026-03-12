@@ -18,16 +18,16 @@
 .member-section h3 { font-size: 0.9rem; color: #0f1f3d; margin: 0 0 1rem; }
 .member-card { background: #f8fafc; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 0.75rem; }
 .member-card strong { color: #0f1f3d; }
-.rel-badge { font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 6px; margin-left: 0.5rem; }
+.rel-badge { font-size: 0.75rem; background: #fdf2f4; color: #800020; padding: 0.2rem 0.5rem; border-radius: 6px; margin-left: 0.5rem; }
 .member-meta { font-size: 0.8rem; color: #64748b; margin-top: 0.2rem; }
 .form-group { margin-bottom: 1.25rem; }
 .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.4rem; }
 .form-group small { display: block; font-size: 0.75rem; color: #94a3b8; margin-top: 0.3rem; }
 .big-input, textarea { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem; transition: border-color 0.2s; box-sizing: border-box; }
-.big-input:focus, textarea:focus { outline: none; border-color: #00b4d8; }
-.commission-preview { background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 1px solid #bae6fd; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; }
+.big-input:focus, textarea:focus { outline: none; border-color: #800020; }
+.commission-preview { background: linear-gradient(135deg, #f0f9ff, #fdf2f4); border: 1px solid #f9d5dc; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; }
 .preview-row { display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.9rem; }
-.preview-row.commission { border-top: 1px solid #bae6fd; margin-top: 0.4rem; padding-top: 0.6rem; color: #0369a1; }
+.preview-row.commission { border-top: 1px solid #f9d5dc; margin-top: 0.4rem; padding-top: 0.6rem; color: #800020; }
 .btn-submit { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #0f1f3d, #1a3a6b); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(15,31,61,0.35); }
 .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }

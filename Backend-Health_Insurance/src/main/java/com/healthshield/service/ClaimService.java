@@ -43,7 +43,6 @@ public class ClaimService {
     private final ClaimDocumentRepository claimDocumentRepository;
     private final PolicyRepository policyRepository;
     private final UserRepository userRepository;
-//    private final AuditService auditService;
 
     @Value("${file.upload.dir:uploads/claims}")
     private String uploadDir;
@@ -103,7 +102,6 @@ public class ClaimService {
                 .dischargeDate(request.getDischargeDate())
                 .diagnosis(request.getDiagnosis())
                 .claimStatus(ClaimStatus.SUBMITTED)
-                .isEscalated(false)
                 .documents(new ArrayList<>())
                 .build();
 
@@ -138,14 +136,6 @@ public class ClaimService {
             }
         }
 
-//        // Audit trail
-//        auditService.logCreation("CLAIM", saved.getClaimId(),
-//                "Claim filed: " + claimNumber + " | Amount: ₹" + request.getClaimAmount()
-//                        + " | Hospital: " + request.getHospitalName()
-//                        + " | Diagnosis: " + request.getDiagnosis(), user);
-//
-//        log.info("New claim filed: {} by user {} for policy {}", claimNumber, userId, policy.getPolicyNumber());
-//
         return mapToResponse(saved);
     }
 
@@ -234,12 +224,6 @@ public class ClaimService {
 
         Claim saved = claimRepository.save(claim);
 
-//        auditService.logStatusChange("CLAIM", claimId,
-//                "APPROVED", "SETTLED",
-//                "Claim settled for ₹" + settlementAmount + " | TPA Ref: " + claim.getTpaReferenceNumber(),
-//                performedBy);
-//
-//        log.info("Claim {} settled for ₹{}", claim.getClaimNumber(), settlementAmount);
 
         return mapToResponse(saved);
     }
@@ -309,12 +293,6 @@ public class ClaimService {
                 .reviewStartedAt(claim.getReviewStartedAt())
                 .reviewedAt(claim.getReviewedAt())
                 .reviewerRemarks(claim.getReviewerRemarks())
-                .isEscalated(claim.getIsEscalated())
-                // .escalationReason(claim.getEscalationReason() != null ? claim.getEscalationReason().name() : null) // ESCALATION COMMENTED OUT
-                .escalationNotes(claim.getEscalationNotes())
-                .escalatedAt(claim.getEscalatedAt())
-                .adminRemarks(claim.getAdminRemarks())
-                .escalationResolvedAt(claim.getEscalationResolvedAt())
                 .settlementDate(claim.getSettlementDate())
                 .tpaReferenceNumber(claim.getTpaReferenceNumber());
 

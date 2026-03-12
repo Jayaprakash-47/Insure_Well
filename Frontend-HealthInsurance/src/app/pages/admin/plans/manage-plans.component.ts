@@ -39,7 +39,6 @@ export class ManagePlansComponent implements OnInit {
             error: (err) => { this.saving = false; this.toast.error(err.error?.message || 'Failed'); this.cdr.detectChanges(); }
         });
     }
-
     formatCurrency(n: number): string { return '₹' + n.toLocaleString('en-IN'); }
 
     resetForm(): void {

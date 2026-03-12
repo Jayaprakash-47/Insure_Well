@@ -10,19 +10,19 @@
 .loader { text-align: center; padding: 2rem; color: #64748b; }
 .empty { text-align: center; padding: 2rem; color: #94a3b8; }
 .app-card { border: 2px solid #e2e8f0; border-radius: 12px; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; }
-.app-card:hover { border-color: #00b4d8; background: #f0fdff; }
-.app-card.selected { border-color: #00b4d8; background: #e0f7fc; }
+.app-card:hover { border-color: #800020; background: #fdf2f4; }
+.app-card.selected { border-color: #800020; background: #fce8ec; }
 .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
 .badge { padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.7rem; font-weight: 700; }
 .badge.pending { background: #fef3c7; color: #d97706; }
 .app-meta { font-size: 0.85rem; color: #64748b; margin-top: 0.2rem; }
 .app-date { font-size: 0.75rem; color: #94a3b8; margin-top: 0.4rem; }
 .empty-select { text-align: center; padding: 3rem; color: #94a3b8; font-style: italic; }
-.selected-app-info { background: #f0fdff; border: 1px solid #b2ebf2; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.9rem; color: #0f1f3d; }
+.selected-app-info { background: #fdf2f4; border: 1px solid #b2ebf2; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.9rem; color: #0f1f3d; }
 .uw-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
 .uw-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
-.uw-card:hover { border-color: #00b4d8; }
-.uw-card.selected { border-color: #00b4d8; background: #e0f7fc; }
+.uw-card:hover { border-color: #800020; }
+.uw-card.selected { border-color: #800020; background: #fce8ec; }
 .uw-info strong { display: block; color: #0f1f3d; }
 .spec { font-size: 0.8rem; color: #64748b; }
 .uw-stats { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #64748b; }

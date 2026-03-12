@@ -8,12 +8,20 @@ import com.healthshield.entity.User;
 import com.healthshield.service.PolicyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -28,6 +36,14 @@ public class PolicyController {
     public ResponseEntity<PolicyResponse> purchasePolicy(@AuthenticationPrincipal User user,
                                                           @Valid @RequestBody PolicyPurchaseRequest request) {
         return new ResponseEntity<>(policyService.purchasePolicy(user.getUserId(), request), HttpStatus.CREATED);
+    }
+
+    @PostMapping(value = "/with-document", consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<PolicyResponse> purchasePolicyWithDocument(@AuthenticationPrincipal User user,
+                                                                       @RequestPart("policy") @Valid PolicyPurchaseRequest request,
+                                                                       @RequestPart(value = "healthCheckReport", required = false) MultipartFile healthCheckReport) {
+        return new ResponseEntity<>(policyService.purchasePolicyWithDocument(user.getUserId(), request, healthCheckReport), HttpStatus.CREATED);
     }
 
     @GetMapping("/my-policies")
@@ -71,9 +87,28 @@ public class PolicyController {
                                                        @RequestBody PolicyRenewalRequest request) {
         return new ResponseEntity<>(policyService.renewPolicy(user, id, request), HttpStatus.CREATED);
     }
-    @GetMapping("/test-expire/{policyId}")
-    public ResponseEntity<String> testExpirePolicy(@PathVariable Long policyId) {
-        policyService.expirePolicyForTesting(policyId);
-        return ResponseEntity.ok("Policy " + policyId + " has been forced to EXPIRED state for testing.");
+
+    /** Download health check report document for a policy */
+    @GetMapping("/{id}/document/download")
+    @PreAuthorize("hasAnyRole('ADMIN','UNDERWRITER','CUSTOMER')")
+    public ResponseEntity<Resource> downloadPolicyDocument(@AuthenticationPrincipal User user,
+                                                            @PathVariable Long id) {
+        String docPath = policyService.getPolicyDocumentPath(id);
+        if (docPath == null || docPath.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            Path filePath = Paths.get(docPath);
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filePath.getFileName() + "\"")
+                        .body(resource);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (MalformedURLException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

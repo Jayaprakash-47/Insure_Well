@@ -146,9 +146,12 @@ export interface PolicyResponse {
     quoteAmount: number;
     waitingPeriodMonths: number;
     assignedAt: string;
-    renewalCount: number;
-    noClaimBonus: number;
-    originalPolicyId: number;
+    // Renewal tracking
+    renewalCount?: number;
+    noClaimBonus?: number;
+    originalPolicyId?: number;
+    
+    underwriterRemarks?: string;
 }
 
 export interface PolicyMemberResponse {

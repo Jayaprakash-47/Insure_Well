@@ -64,6 +64,9 @@ public class Policy {
     private String nomineeName;
     private String nomineeRelationship;
 
+    @Column(columnDefinition = "TEXT")
+    private String underwriterRemarks;
+
     // =================== RENEWAL TRACKING ===================
 
     /** Number of times this policy has been renewed */

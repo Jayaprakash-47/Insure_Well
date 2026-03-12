@@ -15,11 +15,18 @@ import com.healthshield.exception.UnauthorizedException;
 import com.healthshield.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.Year;
@@ -38,7 +45,9 @@ public class PolicyService {
     private final InsurancePlanRepository insurancePlanRepository;
     private final PremiumQuoteRepository premiumQuoteRepository;
     private final UserRepository userRepository;
-//    private final AuditService auditService;
+
+    @Value("${file.upload.dir:uploads/policies}")
+    private String uploadDir;
 
     @Transactional
     public PolicyResponse purchasePolicy(Long userId, PolicyPurchaseRequest request) {
@@ -91,11 +100,32 @@ public class PolicyService {
 
         savedPolicy = policyRepository.findById(savedPolicy.getPolicyId()).orElse(savedPolicy);
 
-//        auditService.logCreation("POLICY", savedPolicy.getPolicyId(),
-//                "Policy application submitted: " + policyNumber + " | Plan: " + plan.getPlanName()
-//                        + " | Awaiting underwriter assignment", user);
-
         return mapToResponse(savedPolicy);
+    }
+
+    @Transactional
+    public PolicyResponse purchasePolicyWithDocument(Long userId, PolicyPurchaseRequest request, MultipartFile healthCheckReport) {
+        PolicyResponse response = purchasePolicy(userId, request);
+
+        if (healthCheckReport != null && !healthCheckReport.isEmpty()) {
+            String policyUploadDir = uploadDir + "/" + response.getPolicyNumber();
+            Path uploadPath = Paths.get(policyUploadDir);
+            try {
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                String fileName = org.springframework.util.StringUtils.cleanPath(healthCheckReport.getOriginalFilename());
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(healthCheckReport.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                log.info("Health check report uploaded for policy {}: {}", response.getPolicyNumber(), fileName);
+            } catch (IOException e) {
+                log.error("Failed to upload health check report: {}", e.getMessage());
+            }
+        }
+
+        return response;
     }
 
     public List<PolicyResponse> getPoliciesByUser(Long userId) {
@@ -134,12 +164,8 @@ public class PolicyService {
             throw new BadRequestException("Policy is already cancelled");
         }
 
-        String previousStatus = policy.getPolicyStatus().name();
         policy.setPolicyStatus(PolicyStatus.CANCELLED);
         Policy saved = policyRepository.save(policy);
-
-//        auditService.logStatusChange("POLICY", policyId, previousStatus, "CANCELLED",
-//                "Policy cancelled", currentUser);
 
         return mapToResponse(saved);
     }
@@ -250,7 +276,6 @@ public class PolicyService {
                 .policyNumber(newPolicyNumber)
                 .user(currentUser)
                 .plan(plan)
-                // .soldByAgent(originalPolicy.getSoldByAgent()) // AGENT FIELD REMOVED
                 .assignedUnderwriter(originalPolicy.getAssignedUnderwriter())
                 .premiumAmount(renewalPremium)
                 .coverageAmount(plan.getCoverageAmount())
@@ -266,16 +291,6 @@ public class PolicyService {
                 .claims(new ArrayList<>())
                 .payments(new ArrayList<>())
                 .build();
-
-        // Calculate commission if agent was involved (AGENT FEATURE)
-        /*
-        if (originalPolicy.getSoldByAgent() != null) {
-            BigDecimal commissionAmount = renewalPremium
-                    .multiply(originalPolicy.getSoldByAgent().getCommissionPercentage())
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-            renewedPolicy.setCommissionAmount(commissionAmount);
-        }
-        */
 
         Policy saved = policyRepository.save(renewedPolicy);
 
@@ -299,12 +314,6 @@ public class PolicyService {
         policyRepository.save(originalPolicy);
 
         saved = policyRepository.findById(saved.getPolicyId()).orElse(saved);
-
-//        auditService.logCreation("POLICY", saved.getPolicyId(),
-//                "Policy renewed from " + originalPolicy.getPolicyNumber()
-//                        + " | Renewal #" + newRenewalCount
-//                        + " | NCB: " + noClaimBonus + "%"
-//                        + " | New Premium: ₹" + renewalPremium, currentUser);
 
         log.info("Policy {} renewed to {} | NCB: {}% | Premium: ₹{} → ₹{}",
                 originalPolicy.getPolicyNumber(), newPolicyNumber,
@@ -415,6 +424,8 @@ public class PolicyService {
             builder.originalPolicyId(policy.getOriginalPolicy().getPolicyId());
         }
 
+        builder.underwriterRemarks(policy.getUnderwriterRemarks());
+
         return builder.build();
     }
 
@@ -427,5 +438,27 @@ public class PolicyService {
                 .gender(member.getGender() != null ? member.getGender().name() : null)
                 .preExistingDiseases(member.getPreExistingDiseases())
                 .build();
+    }
+
+    /** Get the path to the health check report document for a policy */
+    public String getPolicyDocumentPath(Long policyId) {
+        Policy policy = policyRepository.findById(policyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Policy not found with id: " + policyId));
+
+        String policyDir = uploadDir + "/" + policy.getPolicyNumber();
+        Path dirPath = Paths.get(policyDir);
+        if (Files.exists(dirPath) && Files.isDirectory(dirPath)) {
+            try {
+                return Files.list(dirPath)
+                        .filter(Files::isRegularFile)
+                        .findFirst()
+                        .map(Path::toString)
+                        .orElse(null);
+            } catch (IOException e) {
+                log.error("Error reading policy document directory: {}", e.getMessage());
+                return null;
+            }
+        }
+        return null;
     }
 }

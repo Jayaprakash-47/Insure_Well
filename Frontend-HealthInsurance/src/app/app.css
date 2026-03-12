@@ -53,13 +53,13 @@
 .brand-icon {
   width: 42px;
   height: 42px;
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  background: linear-gradient(135deg, #800020 0%, #6b001a 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+  box-shadow: 0 4px 12px rgba(128, 0, 32, 0.25);
 }
 
 .brand-text {
@@ -88,19 +88,19 @@
 }
 
 .nav-links a:hover {
-  color: #0284c7;
-  background: rgba(2, 132, 199, 0.08);
+  color: #800020;
+  background: rgba(128, 0, 32, 0.08);
 }
 
 .nav-links a.active {
-  color: #0284c7;
-  background: rgba(2, 132, 199, 0.08);
+  color: #800020;
+  background: rgba(128, 0, 32, 0.08);
 }
 
 /* Role Badges */
 .role-badge {
-  background: rgba(2, 132, 199, 0.1);
-  color: #0284c7;
+  background: rgba(128, 0, 32, 0.1);
+  color: #800020;
   padding: 4px 10px;
   font-size: 11px;
   font-weight: 700;
@@ -156,13 +156,13 @@
 }
 
 .btn-text:hover {
-  color: #0284c7;
+  color: #800020;
 }
 
 .btn-outline-glow {
   background: transparent;
-  color: #0284c7;
-  border: 2px solid #0284c7;
+  color: #800020;
+  border: 2px solid #800020;
   padding: 8px 20px;
   border-radius: 100px;
   font-weight: 600;
@@ -172,27 +172,27 @@
 }
 
 .btn-outline-glow:hover {
-  background: rgba(2, 132, 199, 0.05);
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+  background: rgba(128, 0, 32, 0.05);
+  box-shadow: 0 4px 12px rgba(128, 0, 32, 0.15);
   transform: translateY(-2px);
 }
 
 .btn-primary-glow {
-  background: #0284c7;
+  background: #800020;
   color: white;
   padding: 10px 24px;
   border-radius: 100px;
   font-weight: 600;
   font-size: 15px;
   text-decoration: none;
-  box-shadow: 0 4px 14px 0 rgba(2, 132, 199, 0.35);
+  box-shadow: 0 4px 14px 0 rgba(128, 0, 32, 0.35);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-primary-glow:hover {
-  background: #0369a1;
+  background: #6b001a;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.45);
+  box-shadow: 0 6px 20px rgba(128, 0, 32, 0.45);
   color: white;
 }
 
@@ -223,7 +223,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0284c7 0%, #0891b2 100%);
+  background: linear-gradient(135deg, #800020 0%, #6b001a 100%);
   color: white;
   display: flex;
   align-items: center;
@@ -318,7 +318,7 @@
 
 .modern-dropdown a:hover {
   background: #f8fafc;
-  color: #0284c7;
+  color: #800020;
 }
 
 .modern-dropdown a.logout-link:hover {

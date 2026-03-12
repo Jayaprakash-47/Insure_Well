@@ -33,7 +33,6 @@ public class ClaimsOfficerService {
 
     private final ClaimsOfficerRepository claimsOfficerRepository;
     private final ClaimRepository claimRepository;
-//    private final AuditService auditService;
 
     // =================== DASHBOARD ===================
 
@@ -46,7 +45,6 @@ public class ClaimsOfficerService {
         long unassignedCount = claimRepository.countByAssignedOfficerIsNullAndClaimStatus(
                 ClaimStatus.SUBMITTED);
 
-        long escalatedByOfficer = claimRepository.countByAssignedOfficerUserIdAndIsEscalatedTrue(officerId);
 
         int totalProcessed = officer.getTotalClaimsProcessed() != null ? officer.getTotalClaimsProcessed() : 0;
         int totalApproved = officer.getTotalClaimsApproved() != null ? officer.getTotalClaimsApproved() : 0;
@@ -67,7 +65,6 @@ public class ClaimsOfficerService {
                 .approvalRate(Math.round(approvalRate * 100.0) / 100.0)
                 .pendingReviewCount(pendingReviewCount)
                 .unassignedClaimCount(unassignedCount)
-                .escalatedCount(escalatedByOfficer)
                 .build();
     }
 
@@ -143,12 +140,6 @@ public class ClaimsOfficerService {
 
         Claim saved = claimRepository.save(claim);
 
-//        auditService.logStatusChange("CLAIM", claimId,
-//                ClaimStatus.SUBMITTED.name(), ClaimStatus.UNDER_REVIEW.name(),
-//                "Claim picked up for review by officer: " + officer.getFirstName() + " " + officer.getLastName(),
-//                officer);
-//
-//        log.info("Claim {} picked up by officer {}", claim.getClaimNumber(), officer.getEmployeeId());
         return mapToResponse(saved);
     }
 
@@ -203,13 +194,6 @@ public class ClaimsOfficerService {
 
         Claim saved = claimRepository.save(claim);
 
-//        auditService.logStatusChange("CLAIM", claimId,
-//                previousStatus, claim.getClaimStatus().name(),
-//                "Decision: " + request.getDecision() + " | Remarks: " + request.getReviewerRemarks(),
-//                officer);
-//
-//        log.info("Claim {} reviewed by officer {} | Decision: {}",
-//                claim.getClaimNumber(), officer.getEmployeeId(), request.getDecision());
 
         return mapToResponse(saved);
     }
@@ -395,12 +379,6 @@ public class ClaimsOfficerService {
                 .reviewStartedAt(claim.getReviewStartedAt())
                 .reviewedAt(claim.getReviewedAt())
                 .reviewerRemarks(claim.getReviewerRemarks())
-                .isEscalated(claim.getIsEscalated())
-                // .escalationReason(claim.getEscalationReason() != null ? claim.getEscalationReason().name() : null) // ESCALATION COMMENTED OUT
-                .escalationNotes(claim.getEscalationNotes())
-                .escalatedAt(claim.getEscalatedAt())
-                .adminRemarks(claim.getAdminRemarks())
-                .escalationResolvedAt(claim.getEscalationResolvedAt())
                 .settlementDate(claim.getSettlementDate())
                 .tpaReferenceNumber(claim.getTpaReferenceNumber());
 

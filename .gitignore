@@ -1,0 +1,22 @@
+# IDE
+.idea/
+*.iml
+
+# Backend
+Backend-Health_Insurance/target/
+Backend-Health_Insurance/uploads/
+Backend-Health_Insurance/startup.log
+*.log
+
+# Frontend
+Frontend-HealthInsurance/node_modules/
+Frontend-HealthInsurance/dist/
+Frontend-HealthInsurance/.angular/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Implementation notes
+IMPLEMENTATION_SUMMARY.md
+

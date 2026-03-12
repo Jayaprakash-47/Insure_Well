@@ -70,13 +70,7 @@
                         <label>Total Coverage</label>
                         <strong>{{ formatCurrency(p.coverageAmount) }}</strong>
                     </div>
-                    @if (p.policyStatus === 'ACTIVE') {
-                    <div class="info-item">
-                        <label>Remaining Coverage</label>
-                        <strong style="color: var(--primary);">{{ formatCurrency(p.remainingCoverage ||
-                            p.coverageAmount) }}</strong>
-                    </div>
-                    }
+
                     <div class="info-item">
                         @if (p.policyStatus === 'QUOTE_SENT') {
                         <label>Quoted Premium</label>
@@ -105,6 +99,13 @@
                 @if (p.policyStatus === 'ASSIGNED') {
                 <div class="status-info assigned">
                     An underwriter has been assigned and is calculating your premium quote. Please wait.
+                </div>
+                }
+                
+                @if (p.underwriterRemarks && p.policyStatus === 'PENDING') {
+                <div class="status-info assigned" style="background: #fef2f2; color: #b91c1c; border-left-color: #ef4444;">
+                    <strong style="display: block; margin-bottom: 4px;">Attention Required: Underwriter Feedback</strong>
+                    {{ p.underwriterRemarks }}
                 </div>
                 }
 

@@ -11,3 +11,33 @@ td strong {
     background-color: var(--info-light);
     color: #1e40af;
 }
+
+.coverage-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 130px;
+}
+
+.coverage-amount {
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.coverage-pct {
+    font-size: 0.72rem;
+    color: #64748b;
+}
+
+.coverage-bar-wrap {
+    height: 5px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.coverage-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}

@@ -10,7 +10,7 @@
   <div class="two-col">
     <!-- Left: Pending Applications -->
     <div class="panel">
-      <h2>Pending Policy Applications</h2>
+      <h2>Pending & Assigned Applications</h2>
       @if (loadingApps) {
         <div class="loader">Loading...</div>
       }
@@ -23,9 +23,16 @@
           (click)="selectApp(app)">
           <div class="app-header">
             <strong>{{ app.policyNumber }}</strong>
-            <span class="badge pending">PENDING</span>
+            @if (app.policyStatus === 'ASSIGNED') {
+              <span class="badge" style="background: #e0e7ff; color: #4f46e5;">ASSIGNED</span>
+            } @else {
+              <span class="badge pending">PENDING</span>
+            }
           </div>
           <div class="app-meta">{{ app.customerName }}</div>
+          @if (app.assignedUnderwriterName) {
+            <div class="app-meta" style="color: #4f46e5; font-weight: 500;">Current: {{ app.assignedUnderwriterName }}</div>
+          }
           <div class="app-meta">{{ app.planName }} &bull; {{ app.planType }}</div>
           <div class="app-meta">Coverage: ₹{{ (app.coverageAmount || 0).toLocaleString() }} &bull; Members: {{ app.memberCount }}</div>
           <div class="app-date">{{ app.createdAt | date:'dd MMM yyyy, h:mm a' }}</div>
@@ -67,11 +74,11 @@
             </div>
           }
           <button class="btn-assign" (click)="assignUnderwriter()"
-            [disabled]="assigning || !selectedUwId">
-            {{ assigning ? 'Assigning...' : 'Assign Underwriter' }}
+            [disabled]="assigning || !selectedUwId || selectedApp.assignedUnderwriterId === selectedUwId">
+            {{ assigning ? 'Assigning...' : (selectedApp.assignedUnderwriterId ? 'Reassign Underwriter' : 'Assign Underwriter') }}
           </button>
           @if (success) {
-            <div class="success-msg">Underwriter assigned successfully!</div>
+            <div class="success-msg">Underwriter assigned/reassigned successfully!</div>
           }
           @if (error) {
             <div class="error-msg">{{ error }}</div>

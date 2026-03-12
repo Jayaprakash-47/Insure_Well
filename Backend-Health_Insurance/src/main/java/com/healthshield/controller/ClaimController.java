@@ -8,13 +8,20 @@ import com.healthshield.entity.User;
 import com.healthshield.service.ClaimService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -46,7 +53,7 @@ public class ClaimController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','CLAIMS_OFFICER')")
+    @PreAuthorize("hasAnyRole('CLAIMS_OFFICER')")
     public ResponseEntity<List<ClaimResponse>> getAllClaims() {
         return ResponseEntity.ok(claimService.getAllClaims());
     }
@@ -71,9 +78,35 @@ public class ClaimController {
     }
 
     @GetMapping("/{id}/documents")
-    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','CLAIMS_OFFICER')")
+    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','CLAIMS_OFFICER','UNDERWRITER')")
     public ResponseEntity<List<ClaimDocumentResponse>> getDocuments(@AuthenticationPrincipal User user,
                                                                      @PathVariable Long id) {
         return ResponseEntity.ok(claimService.getClaimDocuments(user, id));
+    }
+
+    @GetMapping("/{claimId}/documents/{docId}/download")
+    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','CLAIMS_OFFICER','UNDERWRITER')")
+    public ResponseEntity<Resource> downloadDocument(@AuthenticationPrincipal User user,
+                                                      @PathVariable Long claimId,
+                                                      @PathVariable Long docId) {
+        List<ClaimDocumentResponse> docs = claimService.getClaimDocuments(user, claimId);
+        ClaimDocumentResponse doc = docs.stream()
+                .filter(d -> d.getDocumentId().equals(docId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+
+        try {
+            Path filePath = Paths.get(doc.getFilePath());
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + doc.getFileName() + "\"")
+                        .body(resource);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (MalformedURLException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

@@ -11,11 +11,14 @@
         </div>
         } @else {
         <form (ngSubmit)="submit()">
-            <div class="form-group"><label>Select Policy *</label>
-                <select class="form-control" [(ngModel)]="form.policyId" name="pid">
+            <div class="form-group"><label>Select Policy <span class="required">*</span></label>
+                <select class="form-control" [(ngModel)]="form.policyId" name="pid" [class.error]="errors.policyId" (blur)="onBlur('policyId')">
                     @for (p of policies; track p.policyId) { <option [value]="p.policyId">{{ p.policyNumber }} - {{
                         p.planName }}</option> }
                 </select>
+                @if (errors.policyId) {
+                    <span class="error-message">{{ errors.policyId }}</span>
+                }
             </div>
             <div class="form-group"><label>Claim Type</label>
                 <select class="form-control" [(ngModel)]="form.claimType" name="ct">
@@ -23,26 +26,55 @@
                     <option value="REIMBURSEMENT">Reimbursement</option>
                 </select>
             </div>
-            <div class="form-group"><label>Claim Amount (₹) *</label><input class="form-control"
-                    [(ngModel)]="form.claimAmount" name="ca" type="number" /></div>
-            <div class="form-group"><label>Hospital Name *</label><input class="form-control"
-                    [(ngModel)]="form.hospitalName" name="hn" placeholder="Apollo Hospital" /></div>
-            <div class="form-row">
-                <div class="form-group"><label>Admission Date *</label><input class="form-control"
-                        [(ngModel)]="form.admissionDate" name="ad" type="date" /></div>
-                <div class="form-group"><label>Discharge Date *</label><input class="form-control"
-                        [(ngModel)]="form.dischargeDate" name="dd" type="date" /></div>
+            <div class="form-group"><label>Claim Amount (₹) <span class="required">*</span></label><input class="form-control"
+                    [(ngModel)]="form.claimAmount" name="ca" type="number" [class.error]="errors.claimAmount" (blur)="onBlur('claimAmount')" />
+                @if (errors.claimAmount) {
+                    <span class="error-message">{{ errors.claimAmount }}</span>
+                }
             </div>
-            <div class="form-group"><label>Diagnosis *</label><textarea class="form-control"
+            <div class="form-group"><label>Hospital Name <span class="required">*</span></label><input class="form-control"
+                    [(ngModel)]="form.hospitalName" name="hn" placeholder="Apollo Hospital" [class.error]="errors.hospitalName" (blur)="onBlur('hospitalName')" />
+                @if (errors.hospitalName) {
+                    <span class="error-message">{{ errors.hospitalName }}</span>
+                }
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Admission Date <span class="required">*</span></label><input class="form-control"
+                        [(ngModel)]="form.admissionDate" name="ad" type="date" [class.error]="errors.admissionDate" (blur)="onBlur('admissionDate')" />
+                    @if (errors.admissionDate) {
+                        <span class="error-message">{{ errors.admissionDate }}</span>
+                    }
+                </div>
+                <div class="form-group"><label>Discharge Date <span class="required">*</span></label><input class="form-control"
+                        [(ngModel)]="form.dischargeDate" name="dd" type="date" [class.error]="errors.dischargeDate" (blur)="onBlur('dischargeDate')" />
+                    @if (errors.dischargeDate) {
+                        <span class="error-message">{{ errors.dischargeDate }}</span>
+                    }
+                </div>
+            </div>
+            <div class="form-group"><label>Diagnosis <span class="required">*</span></label><textarea class="form-control"
                     [(ngModel)]="form.diagnosis" name="diag" rows="3"
-                    placeholder="Describe the diagnosis..."></textarea></div>
+                    placeholder="Describe the diagnosis..." [class.error]="errors.diagnosis" (blur)="onBlur('diagnosis')"></textarea>
+                @if (errors.diagnosis) {
+                    <span class="error-message">{{ errors.diagnosis }}</span>
+                }
+            </div>
 
             <div class="form-group">
-                <label>Upload Documents (Optional)</label>
-                <input type="file" class="form-control" (change)="onFileSelect($event)" multiple accept="image/*,.pdf"
+                <label>Supporting Documents <span class="required">*</span></label>
+                <input type="file" class="form-control" [class.error]="errors.documents" (change)="onFileSelect($event)" multiple accept="image/*,.pdf"
                     style="padding-bottom: 35px;" />
-                <small style="color: #666; margin-top: 5px; display: block;">You can select multiple photos/PDFs (bills,
-                    prescriptions, reports)</small>
+                @if (selectedFiles.length > 0) {
+                    <small style="color: #10b981; margin-top: 5px; display: block;">
+                        <span class="material-icons" style="font-size:14px;vertical-align:middle;">check_circle</span>
+                        {{ selectedFiles.length }} file(s) selected
+                    </small>
+                } @else {
+                    <small style="color: #666; margin-top: 5px; display: block;">Required: Upload bills, prescriptions, or diagnostic reports (PDF/images)</small>
+                }
+                @if (errors.documents) {
+                    <span class="error-message file-upload-error">{{ errors.documents }}</span>
+                }
             </div>
             <button type="submit" class="btn btn-primary btn-lg" style="width:100%;" [disabled]="filing">{{ filing ?
                 'Filing...' : 'Submit Claim' }}</button>

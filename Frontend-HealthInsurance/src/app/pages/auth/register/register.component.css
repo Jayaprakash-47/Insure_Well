@@ -3,7 +3,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #0c4a6e 0%, #155e75 40%, #0e7490 100%);
+    background: linear-gradient(135deg, #3d0010 0%, #560015 40%, #6b001a 100%);
     padding: 24px;
     position: relative;
     overflow: hidden;
@@ -14,8 +14,8 @@
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background:
-        radial-gradient(circle at 20% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(8, 145, 178, 0.1) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(163, 36, 59, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(128, 0, 32, 0.1) 0%, transparent 50%);
     pointer-events: none;
 }
 
@@ -54,7 +54,7 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 24px;
-    background: linear-gradient(135deg, #0c4a6e, #0891b2);
+    background: linear-gradient(135deg, #3d0010, #800020);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

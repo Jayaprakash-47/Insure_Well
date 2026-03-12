@@ -76,27 +76,6 @@ public class Claim {
 
     // =================== ESCALATION FIELDS ===================
 
-    /** Whether claim was escalated to admin */
-    @Column(columnDefinition = "boolean default false")
-    private Boolean isEscalated = false;
-
-    // @Enumerated(EnumType.STRING)
-    // private EscalationReason escalationReason; // ESCALATION COMMENTED OUT
-
-    @Column(columnDefinition = "TEXT")
-    private String escalationNotes;
-
-    private LocalDateTime escalatedAt;
-
-    /** Admin who handled the escalated claim */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "escalation_resolved_by")
-    private User escalationResolvedBy;
-
-    private LocalDateTime escalationResolvedAt;
-
-    @Column(columnDefinition = "TEXT")
-    private String adminRemarks;
 
     // =================== SETTLEMENT FIELDS ===================
 

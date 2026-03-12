@@ -59,6 +59,34 @@
                 <p><strong>Settlement Date:</strong> {{ claim.settlementDate | date:'medium' }}</p>
             </div>
             }
+
+            <!-- Documents Section -->
+            <div class="documents-section">
+                <h4><span class="material-icons" style="vertical-align: middle; margin-right: 4px;">folder_open</span> Submitted Documents</h4>
+                @if (claim.documents && claim.documents.length > 0) {
+                <div class="documents-list">
+                    @for (doc of claim.documents; track doc) {
+                    <div class="document-item">
+                        <span class="material-icons doc-icon">description</span>
+                        <div class="doc-info">
+                            <span class="doc-name">{{ doc.fileName || doc.originalFileName || 'Document' }}</span>
+                            <span class="doc-meta">{{ doc.fileType || 'PDF' }}</span>
+                        </div>
+                        <div style="display: flex; gap: 4px;">
+                            <button class="btn btn-sm btn-secondary" (click)="viewDocument(doc)">
+                                <span class="material-icons" style="font-size: 16px;">visibility</span> View
+                            </button>
+                            <button class="btn btn-sm btn-secondary" (click)="downloadDocument(doc)">
+                                <span class="material-icons" style="font-size: 16px;">download</span> Download
+                            </button>
+                        </div>
+                    </div>
+                    }
+                </div>
+                } @else {
+                <p class="no-docs">No documents uploaded by the customer.</p>
+                }
+            </div>
         </div>
 
         <!-- Decision Panel -->

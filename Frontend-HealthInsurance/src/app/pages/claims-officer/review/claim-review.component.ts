@@ -34,17 +34,13 @@ export class ClaimReviewComponent implements OnInit {
 
     ngOnInit(): void {
         const id = Number(this.route.snapshot.paramMap.get('claimId'));
-        console.log('Loading claim with ID:', id);
         this.api.getOfficerClaimDetail(id).subscribe({
-            next: (data) => { 
-                console.log('Claim data received:', JSON.stringify(data, null, 2));
+            next: (data) => {
                 this.claim = data;
-                console.log('Claim assigned to component:', this.claim);
                 this.cdr.detectChanges();
             },
-            error: (err) => { 
-                console.error('Error loading claim:', err);
-                this.toast.error('Failed to load claim: ' + (err.error?.message || err.message || 'Unknown error')); 
+            error: (err) => {
+                this.toast.error('Failed to load claim: ' + (err.error?.message || err.message || 'Unknown error'));
             }
         });
     }
@@ -116,5 +112,45 @@ export class ClaimReviewComponent implements OnInit {
             'PARTIALLY_APPROVED': 'badge-info', 'SETTLED': 'badge-success'
         };
         return map[status] || 'badge-info';
+    }
+
+    viewDocument(doc: any): void {
+        if (doc.documentId && this.claim) {
+            this.api.downloadDocument(this.claim.claimId, doc.documentId).subscribe({
+                next: (blob) => {
+                    const url = window.URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                },
+                error: () => this.toast.error('Failed to view document')
+            });
+        } else if (doc.filePath) {
+            window.open(doc.filePath, '_blank');
+        }
+    }
+
+    downloadDocument(doc: any): void {
+        if (doc.documentId && this.claim) {
+            this.api.downloadDocument(this.claim.claimId, doc.documentId).subscribe({
+                next: (blob) => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = doc.fileName || doc.originalFileName || `Document_${doc.documentId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                },
+                error: () => this.toast.error('Failed to download document')
+            });
+        } else if (doc.filePath) {
+            const a = document.createElement('a');
+            a.href = doc.filePath;
+            a.download = doc.fileName || doc.originalFileName || 'Document';
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
     }
 }

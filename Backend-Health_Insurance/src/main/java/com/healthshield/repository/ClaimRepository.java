@@ -24,11 +24,6 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     /** Unassigned claims (no officer assigned yet) */
     List<Claim> findByAssignedOfficerIsNullAndClaimStatus(ClaimStatus status);
 
-    /** Escalated claims for admin review */
-    List<Claim> findByIsEscalatedTrue();
-
-    /** Escalated and unresolved claims */
-    List<Claim> findByIsEscalatedTrueAndEscalationResolvedByIsNull();
 
     /** Claims reviewed by a specific officer (completed reviews) */
     List<Claim> findByAssignedOfficerUserIdAndReviewedAtIsNotNull(Long officerId);
@@ -36,12 +31,8 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     /** Count claims by status */
     long countByClaimStatus(ClaimStatus status);
 
-    /** Count claims assigned to officer */
-    long countByAssignedOfficerUserId(Long officerId);
-
     long countByAssignedOfficerUserIdAndClaimStatus(Long officerId, ClaimStatus status);
     long countByAssignedOfficerIsNullAndClaimStatus(ClaimStatus status);
-    long countByAssignedOfficerUserIdAndIsEscalatedTrue(Long officerId);
 
     /** Check if claim number exists */
     boolean existsByClaimNumber(String claimNumber);

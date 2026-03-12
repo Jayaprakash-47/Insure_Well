@@ -2,7 +2,6 @@ package com.healthshield.service;
 
 import com.healthshield.dto.request.AdminAssignUnderwriterRequest;
 import com.healthshield.dto.request.AdminAssignClaimsOfficerRequest;
-import com.healthshield.dto.request.AdminClaimDecisionRequest;
 import com.healthshield.dto.request.CreateUnderwriterRequest;
 import com.healthshield.dto.request.CreateClaimsOfficerRequest;
 import com.healthshield.dto.response.AuthResponse;
@@ -45,7 +44,6 @@ public class AdminService {
     private final InsurancePlanRepository insurancePlanRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-//    private final AuditService auditService;
 
     // =================== USER MANAGEMENT ===================
 
@@ -120,7 +118,6 @@ public class AdminService {
 
         return DashboardResponse.builder()
                 .totalCustomers(customerRepository.count())
-                // .totalAgents(agentRepository.count()) // AGENT COMMENTED OUT
                 .totalUnderwriters(underwriterRepository.count())
                 .totalClaimsOfficers(claimsOfficerRepository.count())
                 .totalAdmins(adminRepository.count())
@@ -136,7 +133,6 @@ public class AdminService {
                 .totalApprovedClaims(claimRepository.countByClaimStatus(ClaimStatus.APPROVED)
                         + claimRepository.countByClaimStatus(ClaimStatus.PARTIALLY_APPROVED))
                 .totalRejectedClaims(claimRepository.countByClaimStatus(ClaimStatus.REJECTED))
-                // .totalEscalatedClaims((long) claimRepository.findByIsEscalatedTrueAndEscalationResolvedByIsNull().size()) // ESCALATION COMMENTED OUT
                 .totalSettledClaims(claimRepository.countByClaimStatus(ClaimStatus.SETTLED))
                 .totalPayments(paymentRepository.count())
                 .totalRevenue(totalRevenue)
@@ -217,20 +213,25 @@ public class AdminService {
     public Map<String, Object> assignUnderwriter(Long policyId, AdminAssignUnderwriterRequest request, User admin) {
         Policy policy = policyRepository.findById(policyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Policy not found with id: " + policyId));
-        if (policy.getPolicyStatus() != PolicyStatus.PENDING) {
-            throw new BadRequestException("Can only assign underwriter to PENDING policies. Current: " + policy.getPolicyStatus());
+        if (policy.getPolicyStatus() != PolicyStatus.PENDING && policy.getPolicyStatus() != PolicyStatus.ASSIGNED) {
+            throw new BadRequestException("Can only assign underwriter to PENDING or ASSIGNED policies. Current: " + policy.getPolicyStatus());
         }
         Underwriter underwriter = underwriterRepository.findById(request.getUnderwriterId())
                 .orElseThrow(() -> new ResourceNotFoundException("Underwriter not found with id: " + request.getUnderwriterId()));
         if (!Boolean.TRUE.equals(underwriter.getIsActive())) {
             throw new BadRequestException("Cannot assign to an inactive underwriter");
         }
+        
+        boolean isReassignment = policy.getAssignedUnderwriter() != null;
+        
         policy.setAssignedUnderwriter(underwriter);
         policy.setAssignedAt(LocalDateTime.now());
-        policy.setPolicyStatus(PolicyStatus.ASSIGNED);
+        
+        if (!isReassignment) {
+            policy.setPolicyStatus(PolicyStatus.ASSIGNED);
+        }
+        
         policyRepository.save(policy);
-//        auditService.logStatusChange("POLICY", policyId, PolicyStatus.PENDING.name(), PolicyStatus.ASSIGNED.name(),
-//                "Underwriter " + underwriter.getFirstName() + " " + underwriter.getLastName() + " assigned by Admin", admin);
         log.info("Policy {} assigned to underwriter {}", policy.getPolicyNumber(), underwriter.getUserId());
         return Map.of("message", "Underwriter assigned successfully", "policyId", policyId,
                 "policyNumber", policy.getPolicyNumber(), "underwriterId", underwriter.getUserId(),
@@ -244,20 +245,24 @@ public class AdminService {
     public Map<String, Object> assignClaimsOfficer(Long claimId, AdminAssignClaimsOfficerRequest request, User admin) {
         Claim claim = claimRepository.findById(claimId)
                 .orElseThrow(() -> new ResourceNotFoundException("Claim not found with id: " + claimId));
-        if (claim.getClaimStatus() != ClaimStatus.SUBMITTED) {
-            throw new BadRequestException("Can only assign officer to SUBMITTED claims. Current: " + claim.getClaimStatus());
+        if (claim.getClaimStatus() != ClaimStatus.SUBMITTED && claim.getClaimStatus() != ClaimStatus.UNDER_REVIEW) {
+            throw new BadRequestException("Can only assign officer to SUBMITTED or UNDER_REVIEW claims. Current: " + claim.getClaimStatus());
         }
         ClaimsOfficer officer = claimsOfficerRepository.findById(request.getClaimsOfficerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Claims Officer not found with id: " + request.getClaimsOfficerId()));
         if (!Boolean.TRUE.equals(officer.getIsActive())) {
             throw new BadRequestException("Cannot assign to an inactive Claims Officer");
         }
+        
+        boolean isReassignment = claim.getAssignedOfficer() != null;
+        
         claim.setAssignedOfficer(officer);
-        claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
-        claim.setReviewStartedAt(LocalDateTime.now());
+        if (!isReassignment) {
+            claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
+            claim.setReviewStartedAt(LocalDateTime.now());
+        }
+        
         claimRepository.save(claim);
-//        auditService.logStatusChange("CLAIM", claimId, ClaimStatus.SUBMITTED.name(), ClaimStatus.UNDER_REVIEW.name(),
-//                "Claims Officer " + officer.getFirstName() + " " + officer.getLastName() + " assigned by Admin", admin);
         log.info("Claim {} assigned to officer {}", claim.getClaimNumber(), officer.getEmployeeId());
         return Map.of("message", "Claims Officer assigned successfully", "claimId", claimId,
                 "claimNumber", claim.getClaimNumber(), "officerId", officer.getUserId(),
@@ -269,7 +274,9 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getPendingPolicyApplications() {
-        return policyRepository.findByPolicyStatus(PolicyStatus.PENDING).stream().map(p -> {
+        return policyRepository.findAll().stream()
+                .filter(p -> p.getPolicyStatus() == PolicyStatus.PENDING || p.getPolicyStatus() == PolicyStatus.ASSIGNED)
+                .map(p -> {
             Map<String, Object> map = new HashMap<>();
             map.put("policyId", p.getPolicyId()); map.put("policyNumber", p.getPolicyNumber());
             map.put("customerId", p.getUser().getUserId());
@@ -277,7 +284,14 @@ public class AdminService {
             map.put("customerEmail", p.getUser().getEmail()); map.put("planName", p.getPlan().getPlanName());
             map.put("planType", p.getPlan().getPlanType().name()); map.put("coverageAmount", p.getCoverageAmount());
             map.put("policyStatus", p.getPolicyStatus().name()); map.put("createdAt", p.getCreatedAt());
-            map.put("memberCount", p.getMembers() != null ? p.getMembers().size() : 0); return map;
+            map.put("memberCount", p.getMembers() != null ? p.getMembers().size() : 0);
+            
+            if (p.getAssignedUnderwriter() != null) {
+                map.put("assignedUnderwriterId", p.getAssignedUnderwriter().getUserId());
+                map.put("assignedUnderwriterName", p.getAssignedUnderwriter().getFirstName() + " " + p.getAssignedUnderwriter().getLastName());
+            }
+            
+            return map;
         }).collect(Collectors.toList());
     }
 
@@ -285,7 +299,9 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getSubmittedClaims() {
-        return claimRepository.findByAssignedOfficerIsNullAndClaimStatus(ClaimStatus.SUBMITTED).stream().map(c -> {
+        return claimRepository.findAll().stream()
+                .filter(c -> c.getClaimStatus() == ClaimStatus.SUBMITTED || c.getClaimStatus() == ClaimStatus.UNDER_REVIEW)
+                .map(c -> {
             Map<String, Object> map = new HashMap<>();
             map.put("claimId", c.getClaimId()); map.put("claimNumber", c.getClaimNumber());
             map.put("customerName", c.getUser().getFirstName() + " " + c.getUser().getLastName());
@@ -293,66 +309,17 @@ public class AdminService {
             map.put("policyNumber", c.getPolicy().getPolicyNumber()); map.put("claimAmount", c.getClaimAmount());
             map.put("claimType", c.getClaimType().name()); map.put("hospitalName", c.getHospitalName());
             map.put("diagnosis", c.getDiagnosis()); map.put("claimStatus", c.getClaimStatus().name());
-            map.put("createdAt", c.getCreatedAt()); return map;
-        }).collect(Collectors.toList());
-    }
-
-    // =================== ESCALATED CLAIMS - COMMENTED OUT ===================
-    /*
-    public List<Map<String, Object>> getEscalatedClaims() {
-        return claimRepository.findByIsEscalatedTrueAndEscalationResolvedByIsNull().stream().map(claim -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("claimId", claim.getClaimId()); map.put("claimNumber", claim.getClaimNumber());
-            map.put("customerName", claim.getUser().getFirstName() + " " + claim.getUser().getLastName());
-            map.put("policyNumber", claim.getPolicy().getPolicyNumber()); map.put("claimAmount", claim.getClaimAmount());
-            map.put("diagnosis", claim.getDiagnosis()); map.put("hospitalName", claim.getHospitalName());
-            map.put("claimStatus", claim.getClaimStatus().name());
-            map.put("escalationReason", claim.getEscalationReason() != null ? claim.getEscalationReason().name() : null);
-            map.put("escalationNotes", claim.getEscalationNotes()); map.put("escalatedAt", claim.getEscalatedAt());
-            if (claim.getAssignedOfficer() != null) {
-                map.put("escalatedByOfficer", claim.getAssignedOfficer().getFirstName() + " " + claim.getAssignedOfficer().getLastName());
+            map.put("createdAt", c.getCreatedAt());
+            
+            if (c.getAssignedOfficer() != null) {
+                map.put("assignedOfficerId", c.getAssignedOfficer().getUserId());
+                map.put("assignedOfficerName", c.getAssignedOfficer().getFirstName() + " " + c.getAssignedOfficer().getLastName());
             }
-            map.put("reviewerRemarks", claim.getReviewerRemarks()); return map;
+            
+            return map;
         }).collect(Collectors.toList());
     }
 
-    @Transactional
-    public Map<String, Object> resolveEscalatedClaim(Long claimId, AdminClaimDecisionRequest request, User admin) {
-        Claim claim = claimRepository.findById(claimId)
-                .orElseThrow(() -> new ResourceNotFoundException("Claim not found with id: " + claimId));
-        if (!Boolean.TRUE.equals(claim.getIsEscalated())) throw new BadRequestException("This claim was not escalated");
-        if (claim.getEscalationResolvedBy() != null) throw new BadRequestException("Already resolved");
-        String previousStatus = claim.getClaimStatus().name();
-        ClaimStatus newStatus = ClaimStatus.valueOf(request.getDecision().toUpperCase());
-        switch (newStatus) {
-            case APPROVED -> { claim.setClaimStatus(ClaimStatus.APPROVED);
-                claim.setApprovedAmount(request.getApprovedAmount() != null ? request.getApprovedAmount() : claim.getClaimAmount()); }
-            case PARTIALLY_APPROVED -> { if (request.getApprovedAmount() == null) throw new BadRequestException("Approved amount required");
-                claim.setClaimStatus(ClaimStatus.PARTIALLY_APPROVED); claim.setApprovedAmount(request.getApprovedAmount()); }
-            case REJECTED -> { claim.setClaimStatus(ClaimStatus.REJECTED); claim.setRejectionReason(request.getRejectionReason()); }
-            default -> throw new BadRequestException("Invalid decision. Must be APPROVED, PARTIALLY_APPROVED, or REJECTED");
-        }
-        claim.setAdminRemarks(request.getAdminRemarks()); claim.setEscalationResolvedBy(admin);
-        claim.setEscalationResolvedAt(LocalDateTime.now()); claim.setReviewedAt(LocalDateTime.now());
-        if (claim.getAssignedOfficer() != null) {
-            ClaimsOfficer officer = claim.getAssignedOfficer();
-            officer.setTotalClaimsProcessed(officer.getTotalClaimsProcessed() + 1);
-            if (newStatus == ClaimStatus.APPROVED || newStatus == ClaimStatus.PARTIALLY_APPROVED)
-                officer.setTotalClaimsApproved(officer.getTotalClaimsApproved() + 1);
-            else officer.setTotalClaimsRejected(officer.getTotalClaimsRejected() + 1);
-            claimsOfficerRepository.save(officer);
-        }
-        claimRepository.save(claim);
-//        auditService.logStatusChange("CLAIM", claimId, previousStatus, newStatus.name(),
-//                "Escalated claim resolved by Admin. Remarks: " + request.getAdminRemarks(), admin);
-        log.info("Escalated claim {} resolved by admin. Decision: {}", claim.getClaimNumber(), newStatus);
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Escalated claim resolved successfully"); response.put("claimId", claimId);
-        response.put("claimNumber", claim.getClaimNumber()); response.put("decision", newStatus.name());
-        response.put("approvedAmount", claim.getApprovedAmount()); response.put("adminRemarks", claim.getAdminRemarks());
-        return response;
-    }
-    */
 
     // =================== UNDERWRITER PERFORMANCE ===================
 

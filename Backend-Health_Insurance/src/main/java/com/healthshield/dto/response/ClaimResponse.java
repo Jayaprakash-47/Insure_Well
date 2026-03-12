@@ -41,13 +41,13 @@ public class ClaimResponse {
     private LocalDateTime reviewedAt;
     private String reviewerRemarks;
 
-    // Escalation info
-    private Boolean isEscalated;
-    private String escalationReason;
-    private String escalationNotes;
-    private LocalDateTime escalatedAt;
-    private String adminRemarks;
-    private LocalDateTime escalationResolvedAt;
+    // Escalation info - COMMENTED OUT
+    // private Boolean isEscalated;
+    // private String escalationReason;
+    // private String escalationNotes;
+    // private LocalDateTime escalatedAt;
+    // private String adminRemarks;
+    // private LocalDateTime escalationResolvedAt;
 
     // Settlement info
     private LocalDate settlementDate;

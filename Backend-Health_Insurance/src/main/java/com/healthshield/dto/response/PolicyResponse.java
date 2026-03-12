@@ -45,5 +45,7 @@ public class PolicyResponse {
     private Integer renewalCount;
     private BigDecimal noClaimBonus;
     private Long originalPolicyId;
+
+    private String underwriterRemarks;
 }
 

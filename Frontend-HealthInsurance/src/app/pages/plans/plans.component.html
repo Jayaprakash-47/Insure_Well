@@ -10,8 +10,29 @@
         <p>Loading plans...</p>
     </div>
     } @else {
+    <!-- Search & Filter -->
+    <div class="search-filter-bar">
+        <div class="search-box">
+            <span class="material-icons search-icon">search</span>
+            <input type="text" class="form-control" placeholder="Search plans by name..." [(ngModel)]="searchTerm" />
+        </div>
+        <div class="filter-bar">
+            <button class="filter-btn" [class.active]="selectedPlanType === 'ALL'" (click)="setFilter('ALL')">All</button>
+            @for (type of planTypes; track type) {
+            <button class="filter-btn" [class.active]="selectedPlanType === type" (click)="setFilter(type)">{{ type.replace('_', ' ') }}</button>
+            }
+        </div>
+    </div>
+
+    @if (filteredPlans.length === 0) {
+    <div class="empty-state">
+        <span class="empty-icon">🔍</span>
+        <h3>No plans found</h3>
+        <p>Try adjusting your search or filter criteria</p>
+    </div>
+    } @else {
     <div class="plans-grid">
-        @for (plan of plans; track plan.planId) {
+        @for (plan of filteredPlans; track plan.planId) {
         <div class="plan-card">
             <div class="plan-type-badge">{{ plan.planType }}</div>
             <h3>{{ plan.planName }}</h3>
@@ -58,5 +79,6 @@
         </div>
         }
     </div>
+    }
     }
 </div>

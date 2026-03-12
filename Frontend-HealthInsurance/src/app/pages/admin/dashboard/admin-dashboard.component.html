@@ -13,80 +13,91 @@
         <p>Loading dashboard...</p>
     </div>
     } @else if (stats) {
-    <!-- Stats Cards -->
+    <!-- Policy Pipeline Cards -->
+    <h2 style="margin-top: 10px; margin-bottom: 20px;">Policy Pipeline</h2>
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon blue"><span class="material-icons">people</span></div>
+        <div class="stat-card" style="border-top: 4px solid #f59e0b;">
             <div class="stat-info">
-                <h3>{{ stats.totalCustomers }}</h3>
-                <p>Total Customers</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon purple"><span class="material-icons">admin_panel_settings</span></div>
-            <div class="stat-info">
-                <h3>{{ stats.totalUnderwriters }}</h3>
-                <p>Total Underwriters</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon blue"><span class="material-icons">gavel</span></div>
-            <div class="stat-info">
-                <h3>{{ stats.totalClaimsOfficers }}</h3>
-                <p>Claims Officers</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon green"><span class="material-icons">article</span></div>
-            <div class="stat-info">
-                <h3>{{ stats.totalPolicies }}</h3>
-                <p>Total Policies</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon green"><span class="material-icons">check_circle</span></div>
-            <div class="stat-info">
-                <h3>{{ stats.totalActivePolicies }}</h3>
-                <p>Active Policies</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon yellow"><span class="material-icons">hourglass_empty</span></div>
-            <div class="stat-info">
-                <h3>{{ stats.totalPendingClaims }}</h3>
-                <p>Pending Claims</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon yellow"><span class="material-icons">pending</span></div>
-            <div class="stat-info">
-                <h3>{{ stats.totalPendingPolicies }}</h3>
                 <p>Pending Applications</p>
+                <h3 style="color: #f59e0b;">{{ stats.totalPendingPolicies }}</h3>
             </div>
+            <div class="stat-icon yellow"><span class="material-icons">pending</span></div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon green"><span class="material-icons">account_balance_wallet</span></div>
+        <div class="stat-card" style="border-top: 4px solid #3b82f6;">
             <div class="stat-info">
-                <h3>{{ formatCurrency(stats.totalRevenue) }}</h3>
-                <p>Total Revenue</p>
+                <p>Under Evaluation</p>
+                <h3 style="color: #3b82f6;">{{ stats.totalAssignedPolicies }}</h3>
             </div>
+            <div class="stat-icon blue"><span class="material-icons">assignment</span></div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon red">
-                <span class="material-icons">payments</span>
-            </div>
+        <div class="stat-card" style="border-top: 4px solid #8b5cf6;">
             <div class="stat-info">
-                <h3>{{ formatCurrency(stats.totalClaimsPaidOut) }}</h3>
-                <p>Claims Paid Out</p>
+                <p>Quotes Sent</p>
+                <h3 style="color: #8b5cf6;">{{ stats.totalQuoteSentPolicies }}</h3>
             </div>
+            <div class="stat-icon purple"><span class="material-icons">request_quote</span></div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon purple"><span class="material-icons">pie_chart</span></div>
+        <div class="stat-card" style="border-top: 4px solid #10b981;">
             <div class="stat-info">
-                <h3>{{ stats.claimSettlementRatio }}%</h3>
-                <p>Settlement Ratio</p>
+                <p>Active Policies</p>
+                <h3 style="color: #10b981;">{{ stats.totalActivePolicies }}</h3>
             </div>
+            <div class="stat-icon green"><span class="material-icons">verified_user</span></div>
         </div>
+        <div class="stat-card" style="border-top: 4px solid #64748b;">
+            <div class="stat-info">
+                <p>Expired</p>
+                <h3 style="color: #64748b;">{{ stats.totalExpiredPolicies }}</h3>
+            </div>
+            <div class="stat-icon grey" style="background: #f1f5f9; color: #64748b;"><span class="material-icons">history</span></div>
+        </div>
+    </div>
+
+    <!-- Claims Pipeline Table (Summary) -->
+    <h2 style="margin-top: 36px; margin-bottom: 20px;">Claims Pipeline</h2>
+    <div class="table-container" style="margin-bottom: 36px;">
+        <table class="pipeline-table">
+            <thead>
+                <tr>
+                    <th>Stage</th>
+                    <th>Status</th>
+                    <th>Count</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><span class="badge badge-submitted">SUBMITTED</span></td>
+                    <td><strong>{{ stats.totalPendingClaims }}</strong></td>
+                    <td>Awaiting Claims Officer Assignment</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><span class="badge badge-info">UNDER_REVIEW</span></td>
+                    <td><strong>{{ stats.totalUnderReviewClaims }}</strong></td>
+                    <td>Currently being investigated by assigned officer</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><span class="badge badge-approved">APPROVED/PARTIAL</span></td>
+                    <td><strong>{{ stats.totalApprovedClaims }}</strong></td>
+                    <td>Approved but awaiting final payout (settlement)</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><span class="badge badge-success">SETTLED</span></td>
+                    <td><strong>{{ stats.totalSettledClaims }}</strong></td>
+                    <td>Payout completed and claim closed</td>
+                </tr>
+                <tr>
+                    <td>-</td>
+                    <td><span class="badge badge-rejected">REJECTED</span></td>
+                    <td><strong>{{ stats.totalRejectedClaims }}</strong></td>
+                    <td>Claims denied during evaluation</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- Quick Actions -->
@@ -133,5 +144,78 @@
             </a>
         </div>
     </div>
+
+
+
+    <!-- Policy History -->
+    @if (recentPolicies.length > 0) {
+    <div class="overview-section">
+        <div class="overview-header">
+            <h2><span class="material-icons" style="vertical-align: middle; margin-right: 8px;">history</span>Policy History</h2>
+            <a routerLink="/admin/policies" class="btn btn-sm btn-secondary">View All</a>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Policy #</th>
+                        <th>Customer</th>
+                        <th>Plan</th>
+                        <th>Premium</th>
+                        <th>Status</th>
+                        <th>Start Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (p of recentPolicies; track p.policyId) {
+                    <tr>
+                        <td><strong>{{ p.policyNumber }}</strong></td>
+                        <td>{{ p.customerName }}</td>
+                        <td>{{ p.planName }}</td>
+                        <td>{{ formatCurrency(p.premiumAmount) }}</td>
+                        <td><span class="badge" [ngClass]="getStatusClass(p.policyStatus)">{{ p.policyStatus }}</span></td>
+                        <td>{{ p.startDate | date:'dd MMM yyyy' }}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
     }
+
+    <!-- Claim History -->
+    @if (recentClaims.length > 0) {
+    <div class="overview-section">
+        <div class="overview-header">
+            <h2><span class="material-icons" style="vertical-align: middle; margin-right: 8px;">history_edu</span>Claim History</h2>
+            <a routerLink="/admin/claims" class="btn btn-sm btn-secondary">View All</a>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Claim #</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Filed On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (c of recentClaims; track c.claimId) {
+                    <tr>
+                        <td><strong>{{ c.claimNumber }}</strong></td>
+                        <td>{{ c.customerName }}</td>
+                        <td>{{ formatCurrency(c.claimAmount) }}</td>
+                        <td><span class="badge" [ngClass]="getStatusClass(c.claimStatus)">{{ c.claimStatus }}</span></td>
+                        <td>{{ c.createdAt | date:'dd MMM yyyy' }}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+    }
+
 </div>

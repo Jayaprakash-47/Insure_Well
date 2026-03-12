@@ -123,6 +123,10 @@ export class ApiService {
         return this.http.post<PolicyResponse>(`${this.api}/policies`, req);
     }
 
+    purchasePolicyWithDocument(formData: FormData): Observable<PolicyResponse> {
+        return this.http.post<PolicyResponse>(`${this.api}/policies/with-document`, formData);
+    }
+
     getMyPolicies(): Observable<PolicyResponse[]> {
         return this.http.get<PolicyResponse[]>(`${this.api}/policies/my-policies`);
     }
@@ -229,5 +233,23 @@ export class ApiService {
 
     reviewClaim(claimId: number, req: ClaimReviewRequest): Observable<ClaimResponse> {
         return this.http.post<ClaimResponse>(`${this.api}/claims-officer/claim/${claimId}/review`, req);
+    }
+
+    // ====== DOCUMENT REVIEW ======
+    getClaimDocuments(claimId: number): Observable<any[]> {
+        return this.http.get<any[]>(`${this.api}/claims/${claimId}/documents`);
+    }
+
+    downloadDocument(claimId: number, docId: number): Observable<Blob> {
+        return this.http.get(`${this.api}/claims/${claimId}/documents/${docId}/download`, { responseType: 'blob' });
+    }
+
+    getPolicyDocument(policyId: number): Observable<Blob> {
+        return this.http.get(`${this.api}/policies/${policyId}/document/download`, { responseType: 'blob' });
+    }
+
+    // ====== UNDERWRITER RAISE CONCERN ======
+    raiseConcern(policyId: number, remarks: string): Observable<any> {
+        return this.http.post(`${this.api}/underwriter/policy/${policyId}/raise-concern`, { remarks });
     }
 }

@@ -45,8 +45,6 @@ public class SecurityConfig {
                         // Admin endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // Agent endpoints - COMMENTED OUT
-                        // .requestMatchers("/api/agent/**").hasRole("AGENT")
 
                         // Underwriter endpoints
                         .requestMatchers("/api/underwriter/**").hasRole("UNDERWRITER")

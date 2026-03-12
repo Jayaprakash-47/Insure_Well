@@ -29,5 +29,5 @@ public class ClaimsOfficerDashboardResponse {
     // Current workload
     private Long pendingReviewCount;    // Claims assigned but not yet reviewed
     private Long unassignedClaimCount;  // Claims in queue waiting assignment
-    private Long escalatedCount;        // Claims this officer escalated
+    // private Long escalatedCount;        // Claims this officer escalated - ESCALATION COMMENTED OUT
 }

@@ -69,6 +69,31 @@
                 </table>
               </div>
             }
+
+            <!-- Document Review & Raise Concern -->
+            <div class="review-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-sm btn-secondary" (click)="downloadHealthReport(p.policyId)">
+                <span class="material-icons" style="font-size: 16px; vertical-align: middle;">download</span> Download Report
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="toggleConcernForm(p.policyId)">
+                <span class="material-icons" style="font-size: 16px; vertical-align: middle;">flag</span> Raise Concern
+              </button>
+            </div>
+
+            @if (showConcernForm[p.policyId]) {
+            <div class="concern-form">
+              <div class="form-group">
+                <label>Concern / Additional Documents Needed</label>
+                <textarea class="form-control" [(ngModel)]="concernRemarks[p.policyId]" rows="2" placeholder="Describe the concern or documents required..."></textarea>
+              </div>
+              <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button class="btn btn-sm btn-secondary" (click)="showConcernForm[p.policyId] = false">Cancel</button>
+                <button class="btn btn-sm btn-primary" (click)="submitConcern(p.policyId)" [disabled]="sendingConcern[p.policyId]">
+                  {{ sendingConcern[p.policyId] ? 'Sending...' : 'Submit Concern' }}
+                </button>
+              </div>
+            </div>
+            }
             <!-- Quote Form -->
             <div class="quote-form">
               <h4 style="display: flex; align-items: center; gap: 8px;">

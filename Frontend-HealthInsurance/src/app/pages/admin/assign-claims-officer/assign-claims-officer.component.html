@@ -10,7 +10,7 @@
   <div class="two-col">
     <!-- Left: Submitted Claims -->
     <div class="panel">
-      <h2>Submitted Claims (Unassigned)</h2>
+      <h2>Submitted & Under Review Claims</h2>
       @if (loadingClaims) {
       <div class="loader">Loading...</div>
       }
@@ -21,9 +21,16 @@
       <div class="claim-card" [class.selected]="selectedClaim?.claimId === c.claimId" (click)="selectClaim(c)">
         <div class="claim-header">
           <strong>{{ c.claimNumber }}</strong>
-          <span class="badge submitted">SUBMITTED</span>
+          @if (c.claimStatus === 'UNDER_REVIEW') {
+            <span class="badge" style="background: #e0f2fe; color: #0284c7;">UNDER REVIEW</span>
+          } @else {
+            <span class="badge submitted">SUBMITTED</span>
+          }
         </div>
         <div class="claim-meta">{{ c.customerName }} &bull; {{ c.claimType }}</div>
+        @if (c.assignedOfficerName) {
+          <div class="claim-meta" style="color: #0284c7; font-weight: 500;">Current: {{ c.assignedOfficerName }}</div>
+        }
         <div class="claim-meta">Hospital: {{ c.hospitalName }}</div>
         <div class="claim-meta">Amount: ₹{{ (c.claimAmount || 0).toLocaleString() }}</div>
         @if (c.diagnosis) {
@@ -68,11 +75,11 @@
           }
         </div>
         }
-        <button class="btn-assign" (click)="assignOfficer()" [disabled]="assigning || !selectedOfficerId">
-          {{ assigning ? 'Assigning...' : 'Assign Officer' }}
+        <button class="btn-assign" (click)="assignOfficer()" [disabled]="assigning || !selectedOfficerId || selectedClaim.assignedOfficerId === selectedOfficerId">
+          {{ assigning ? 'Assigning...' : (selectedClaim.assignedOfficerId ? 'Reassign Officer' : 'Assign Officer') }}
         </button>
         @if (success) {
-        <div class="success-msg">Claims Officer assigned! Claim is now UNDER REVIEW.</div>
+        <div class="success-msg">Claims Officer assigned/reassigned! Claim is now UNDER REVIEW.</div>
         }
         @if (error) {
         <div class="error-msg">{{ error }}</div>

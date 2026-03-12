@@ -2,7 +2,7 @@
     <div class="auth-card register-card">
         <div class="auth-header">
             <a routerLink="/" class="auth-brand">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#800020" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
                 InsureWell
             </a>
             <h1>Create Account</h1>
@@ -12,39 +12,57 @@
         <form (ngSubmit)="onSubmit()">
             <div class="form-row">
                 <div class="form-group">
-                    <label for="firstName">First Name *</label>
+                    <label for="firstName">First Name <span class="required">*</span></label>
                     <input id="firstName" type="text" class="form-control" [(ngModel)]="form.firstName" name="firstName"
-                        placeholder="First name" />
+                        placeholder="First name" [class.error]="errors.firstName && touched.firstName" (blur)="onBlur('firstName')" />
+                    @if (errors.firstName && touched.firstName) {
+                        <span class="error-message">{{ errors.firstName }}</span>
+                    }
                 </div>
                 <div class="form-group">
-                    <label for="lastName">Last Name *</label>
+                    <label for="lastName">Last Name <span class="required">*</span></label>
                     <input id="lastName" type="text" class="form-control" [(ngModel)]="form.lastName" name="lastName"
-                        placeholder="Last name" />
+                        placeholder="Last name" [class.error]="errors.lastName && touched.lastName" (blur)="onBlur('lastName')" />
+                    @if (errors.lastName && touched.lastName) {
+                        <span class="error-message">{{ errors.lastName }}</span>
+                    }
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="regEmail">Email Address *</label>
+                <label for="regEmail">Email Address <span class="required">*</span></label>
                 <input id="regEmail" type="email" class="form-control" [(ngModel)]="form.email" name="email"
-                    placeholder="you@example.com" />
+                    placeholder="you@example.com" [class.error]="errors.email && touched.email" (blur)="onBlur('email')" />
+                @if (errors.email && touched.email) {
+                    <span class="error-message">{{ errors.email }}</span>
+                }
             </div>
 
             <div class="form-group">
-                <label for="regPassword">Password *</label>
+                <label for="regPassword">Password <span class="required">*</span></label>
                 <input id="regPassword" type="password" class="form-control" [(ngModel)]="form.password" name="password"
-                    placeholder="Min 6 characters" />
+                    placeholder="Min 6 characters" [class.error]="errors.password && touched.password" (blur)="onBlur('password')" />
+                @if (errors.password && touched.password) {
+                    <span class="error-message">{{ errors.password }}</span>
+                }
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="phone">Phone Number *</label>
+                    <label for="phone">Phone Number <span class="required">*</span></label>
                     <input id="phone" type="tel" class="form-control" [(ngModel)]="form.phone" name="phone"
-                        placeholder="9876543210" />
+                        placeholder="9876543210" [class.error]="errors.phone && touched.phone" (blur)="onBlur('phone')" />
+                    @if (errors.phone && touched.phone) {
+                        <span class="error-message">{{ errors.phone }}</span>
+                    }
                 </div>
                 <div class="form-group">
-                    <label for="dob">Date of Birth *</label>
+                    <label for="dob">Date of Birth <span class="required">*</span></label>
                     <input id="dob" type="date" class="form-control" [(ngModel)]="form.dateOfBirth"
-                        name="dateOfBirth" />
+                        name="dateOfBirth" [class.error]="errors.dateOfBirth && touched.dateOfBirth" (blur)="onBlur('dateOfBirth')" />
+                    @if (errors.dateOfBirth && touched.dateOfBirth) {
+                        <span class="error-message">{{ errors.dateOfBirth }}</span>
+                    }
                 </div>
             </div>
 

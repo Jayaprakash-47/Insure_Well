@@ -27,7 +27,6 @@ public class DashboardResponse {
     private Long totalUnderReviewClaims;
     private Long totalApprovedClaims;
     private Long totalRejectedClaims;
-    private Long totalEscalatedClaims;
     private Long totalSettledClaims;
     private Long totalPayments;
     private BigDecimal totalRevenue;

@@ -32,7 +32,6 @@ public class UnderwriterService {
     private final PolicyRepository policyRepository;
     private final PolicyMemberRepository policyMemberRepository;
     private final InsurancePlanService insurancePlanService;
-//    private final AuditService auditService;
 
     // =================== DASHBOARD ===================
 
@@ -130,13 +129,6 @@ public class UnderwriterService {
         underwriterRepository.save(underwriter);
 
         Policy saved = policyRepository.save(policy);
-
-//        auditService.logStatusChange("POLICY", policyId,
-//                PolicyStatus.ASSIGNED.name(), PolicyStatus.QUOTE_SENT.name(),
-//                "Premium quote of ₹" + request.getQuoteAmount() + " sent by Underwriter: "
-//                        + underwriter.getFirstName() + " " + underwriter.getLastName()
-//                        + (request.getRemarks() != null ? " | Remarks: " + request.getRemarks() : ""),
-//                underwriter);
 
         log.info("Underwriter {} sent quote ₹{} for policy {}", underwriter.getLicenseNumber(),
                 request.getQuoteAmount(), policy.getPolicyNumber());
@@ -242,10 +234,37 @@ public class UnderwriterService {
                             + " " + policy.getAssignedUnderwriter().getLastName());
         }
 
+        builder.underwriterRemarks(policy.getUnderwriterRemarks());
+
         if (policy.getOriginalPolicy() != null) {
             builder.originalPolicyId(policy.getOriginalPolicy().getPolicyId());
         }
 
         return builder.build();
+    }
+
+    // =================== RAISE CONCERN ===================
+
+    @Transactional
+    public void raiseConcern(Long underwriterId, Long policyId, String remarks) {
+        Policy policy = policyRepository.findById(policyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Policy not found with id: " + policyId));
+
+        if (policy.getAssignedUnderwriter() == null ||
+                !policy.getAssignedUnderwriter().getUserId().equals(underwriterId)) {
+            throw new UnauthorizedException("This policy is not assigned to you");
+        }
+
+        if (policy.getPolicyStatus() != PolicyStatus.ASSIGNED) {
+            throw new BadRequestException("Policy is not in ASSIGNED state");
+        }
+
+        policy.setPolicyStatus(PolicyStatus.PENDING);
+        policy.setAssignedUnderwriter(null);
+        policy.setAssignedAt(null);
+        policy.setUnderwriterRemarks(remarks);
+        policyRepository.save(policy);
+
+        log.info("Underwriter {} raised concern for policy {}. Remarks: {}", underwriterId, policyId, remarks);
     }
 }

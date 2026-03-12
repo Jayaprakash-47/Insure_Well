@@ -17,11 +17,15 @@ export class ManageClaimsOfficersComponent implements OnInit {
     loading = true;
     showModal = false;
     submitting = false;
+    createSuccess = false;
+    createError = '';
 
     form: CreateClaimsOfficerRequest = {
         firstName: '', lastName: '', email: '', password: '',
         phone: '', employeeId: '', department: '', approvalLimit: 500000
     };
+    errors: any = {};
+    touched: any = {};
 
     constructor(private api: ApiService, private toast: ToastService) { }
 
@@ -37,18 +41,71 @@ export class ManageClaimsOfficersComponent implements OnInit {
 
     openCreate(): void {
         this.form = { firstName: '', lastName: '', email: '', password: '', phone: '', employeeId: '', department: 'Claims Processing', approvalLimit: 500000 };
+        this.errors = {};
+        this.touched = {};
+        this.createSuccess = false;
+        this.createError = '';
         this.showModal = true;
     }
 
+    onBlur(field: string): void {
+        this.touched[field] = true;
+        this.validateField(field);
+    }
+
+    validateField(field: string): void {
+        switch (field) {
+            case 'firstName':
+                if (!this.form.firstName?.trim()) { this.errors.firstName = 'First name cannot be empty'; } else { delete this.errors.firstName; }
+                break;
+            case 'lastName':
+                if (!this.form.lastName?.trim()) { this.errors.lastName = 'Last name cannot be empty'; } else { delete this.errors.lastName; }
+                break;
+            case 'email':
+                if (!this.form.email?.trim()) { this.errors.email = 'Email cannot be empty'; }
+                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) { this.errors.email = 'Invalid email format'; }
+                else { delete this.errors.email; }
+                break;
+            case 'password':
+                if (!this.form.password) { this.errors.password = 'Password cannot be empty'; } else { delete this.errors.password; }
+                break;
+        }
+    }
+
     create(): void {
-        if (!this.form.email || !this.form.password || !this.form.firstName) {
-            this.toast.error('Please fill all required fields');
+        this.errors = {};
+        this.touched = { firstName: true, lastName: true, email: true, password: true };
+
+        this.validateField('firstName');
+        this.validateField('lastName');
+        this.validateField('email');
+        this.validateField('password');
+
+        if (Object.keys(this.errors).length > 0) {
+            this.toast.error('Please fill all required fields correctly');
+            setTimeout(() => {
+                const firstError = document.querySelector('.form-control.error');
+                if (firstError) { (firstError as HTMLElement).focus(); }
+            }, 100);
             return;
         }
+
         this.submitting = true;
+        this.createSuccess = false;
+        this.createError = '';
         this.api.createClaimsOfficer(this.form).subscribe({
-            next: () => { this.toast.success('Claims Officer created'); this.showModal = false; this.loadOfficers(); this.submitting = false; },
-            error: (err) => { this.toast.error(err.error?.message || 'Failed'); this.submitting = false; }
+            next: () => {
+                this.createSuccess = true;
+                this.toast.success('Claims Officer created');
+                this.loadOfficers();
+                this.submitting = false;
+                setTimeout(() => { this.showModal = false; this.createSuccess = false; }, 1500);
+            },
+            error: (err) => {
+                this.createError = err.error?.message || 'Failed to create officer';
+                this.toast.error(this.createError);
+                this.submitting = false;
+            }
         });
     }
 
