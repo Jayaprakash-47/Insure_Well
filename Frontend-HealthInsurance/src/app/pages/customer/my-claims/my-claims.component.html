@@ -1,81 +1,203 @@
 <div class="page-wrapper">
-    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-            <h1>My Claims</h1>
-            <p>Track your insurance claims and remaining coverage</p>
-        </div>
-        <a routerLink="/customer/claims/new" class="btn btn-primary">+ File New Claim</a>
+  <div
+    class="page-header"
+    style="display: flex; justify-content: space-between; align-items: center"
+  >
+    <div>
+      <h1>My Claims</h1>
+      <p>Track your insurance claims and remaining coverage</p>
     </div>
-    @if (loading) {
+    <a routerLink="/customer/claims/new" class="btn btn-primary"> + File New Claim </a>
+  </div>
+
+  @if (loading) {
     <div class="loading-page">
-        <div class="spinner"></div>
-        <p>Loading...</p>
+      <div class="spinner"></div>
+      <p>Loading...</p>
     </div>
-    }
-    @else if (claims.length === 0) {
+  } @else if (claims.length === 0) {
     <div class="empty-state">
-        <h3>No claims filed</h3>
-        <p>File a claim when you need to use your insurance</p>
-        <a routerLink="/customer/claims/new" class="btn btn-primary">File Claim</a>
+      <h3>No claims filed</h3>
+      <p>File a claim when you need to use your insurance</p>
+      <a routerLink="/customer/claims/new" class="btn btn-primary"> File Claim </a>
     </div>
-    }
-    @else {
+  } @else {
     <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Claim #</th>
-                    <th>Policy #</th>
-                    <th>Type</th>
-                    <th>Claimed</th>
-                    <th>Approved</th>
-                    <th>Hospital</th>
-                    <th>Status</th>
-                    <th>Remaining Coverage</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (c of claims; track c.claimId) {
-                <tr>
-                    <td><strong>{{ c.claimNumber }}</strong></td>
-                    <td>{{ c.policyNumber }}</td>
-                    <td>{{ c.claimType }}</td>
-                    <td>{{ formatCurrency(c.claimAmount) }}</td>
-                    <td>
-                        @if (c.approvedAmount) {
-                            <span style="color:#10b981;font-weight:600;">{{ formatCurrency(c.approvedAmount) }}</span>
-                        } @else {
-                            <span style="color:#94a3b8;">—</span>
-                        }
-                    </td>
-                    <td>{{ c.hospitalName }}</td>
-                    <td>
-                        <span class="badge" [ngClass]="getStatusClass(c.claimStatus)">{{ c.claimStatus | titlecase }}</span>
-                    </td>
-                    <td>
-                        @if (getRemainingCoverage(c.policyId) !== null) {
-                        <div class="coverage-cell">
-                            <span class="coverage-amount" [style.color]="getCoveragePercent(c.policyId) < 30 ? '#ef4444' : getCoveragePercent(c.policyId) < 60 ? '#f59e0b' : '#10b981'">
-                                {{ formatCurrency(getRemainingCoverage(c.policyId)!) }}
-                            </span>
-                            <div class="coverage-bar-wrap">
-                                <div class="coverage-bar-fill"
-                                    [style.width]="getCoveragePercent(c.policyId) + '%'"
-                                    [style.background]="getCoveragePercent(c.policyId) < 30 ? '#ef4444' : getCoveragePercent(c.policyId) < 60 ? '#f59e0b' : '#10b981'">
-                                </div>
-                            </div>
-                            <span class="coverage-pct">{{ getCoveragePercent(c.policyId) }}%</span>
-                        </div>
-                        } @else {
-                            <span style="color:#94a3b8;">—</span>
-                        }
-                    </td>
-                    <td>{{ c.createdAt | date:'dd/MM/yyyy' }}</td>
-                </tr>
+      <table>
+        <thead>
+          <tr>
+            <th>Claim #</th>
+            <th>Policy #</th>
+            <th>Type</th>
+            <th>Claimed</th>
+            <th>Approved</th>
+            <th>Hospital</th>
+            <th>Status</th>
+            <th>Remaining Coverage</th>
+            <th>Date</th>
+            <th>Timeline</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of claims; track c.claimId) {
+            <!-- ── Main Row ── -->
+            <tr [class.row-expanded]="expandedClaimId === c.claimId">
+              <td>
+                <strong>{{ c.claimNumber }}</strong>
+              </td>
+              <td>{{ c.policyNumber }}</td>
+              <td>{{ c.claimType }}</td>
+              <td>{{ formatCurrency(c.claimAmount) }}</td>
+              <td>
+                @if (c.approvedAmount) {
+                  <span style="color: #10b981; font-weight: 600">
+                    {{ formatCurrency(c.approvedAmount) }}
+                  </span>
+                } @else {
+                  <span style="color: #94a3b8">—</span>
                 }
-            </tbody>
-        </table>
+              </td>
+              <td>{{ c.hospitalName }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(c.claimStatus)">
+                  {{ c.claimStatus | titlecase }}
+                </span>
+              </td>
+              <td>
+                @if (getRemainingCoverage(c.policyId) !== null) {
+                  <div class="coverage-cell">
+                    <span
+                      class="coverage-amount"
+                      [style.color]="
+                        getCoveragePercent(c.policyId) < 30
+                          ? '#ef4444'
+                          : getCoveragePercent(c.policyId) < 60
+                            ? '#f59e0b'
+                            : '#10b981'
+                      "
+                    >
+                      {{ formatCurrency(getRemainingCoverage(c.policyId)!) }}
+                    </span>
+                    <div class="coverage-bar-wrap">
+                      <div
+                        class="coverage-bar-fill"
+                        [style.width]="getCoveragePercent(c.policyId) + '%'"
+                        [style.background]="
+                          getCoveragePercent(c.policyId) < 30
+                            ? '#ef4444'
+                            : getCoveragePercent(c.policyId) < 60
+                              ? '#f59e0b'
+                              : '#10b981'
+                        "
+                      ></div>
+                    </div>
+                    <span class="coverage-pct"> {{ getCoveragePercent(c.policyId) }}% </span>
+                  </div>
+                } @else {
+                  <span style="color: #94a3b8">—</span>
+                }
+              </td>
+              <td>{{ c.createdAt | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <button class="btn-timeline" (click)="toggleTimeline(c.claimId)">
+                  <span class="material-icons" style="font-size: 16px">
+                    {{ expandedClaimId === c.claimId ? 'expand_less' : 'timeline' }}
+                  </span>
+                  {{ expandedClaimId === c.claimId ? 'Hide' : 'Track' }}
+                </button>
+              </td>
+            </tr>
+
+            <!-- ── Timeline Row ── -->
+            @if (expandedClaimId === c.claimId) {
+              <tr class="timeline-row">
+                <td colspan="10">
+                  <div class="timeline-container">
+                    <!-- Header -->
+                    <div class="timeline-header">
+                      <span
+                        class="material-icons"
+                        style="vertical-align: middle; font-size: 18px; margin-right: 6px"
+                      >
+                        timeline
+                      </span>
+                      Claim Journey — {{ c.claimNumber }}
+                      @if (c.tpaReferenceNumber) {
+                        <span class="tpa-ref"> TPA Ref: {{ c.tpaReferenceNumber }} </span>
+                      }
+                    </div>
+
+                    <!-- Steps -->
+                    <div class="timeline-steps">
+                      @for (step of getTimelineSteps(c); track step.key; let last = $last) {
+                        <div class="timeline-step" [class]="'step-' + step.state">
+                          <!-- Connector line -->
+                          @if (!last) {
+                            <div
+                              class="step-connector"
+                              [class.connector-done]="step.state === 'completed'"
+                            ></div>
+                          }
+
+                          <!-- Icon circle -->
+                          <div class="step-icon">
+                            <span class="material-icons" style="font-size: 20px">
+                              {{ step.icon }}
+                            </span>
+                          </div>
+
+                          <!-- Label -->
+                          <div class="step-content">
+                            <div class="step-label">
+                              {{ step.label }}
+                            </div>
+                            <div class="step-desc">
+                              {{ step.description }}
+                            </div>
+                            @if (step.date) {
+                              <div class="step-date">
+                                {{ step.date | date: 'dd MMM yyyy, h:mm a' }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Rejection reason callout -->
+                    @if (c.claimStatus === 'REJECTED' && c.rejectionReason) {
+                      <div class="rejection-callout">
+                        <span
+                          class="material-icons"
+                          style="font-size: 16px; vertical-align: middle; margin-right: 6px"
+                        >
+                          info
+                        </span>
+                        <strong>Rejection Reason:</strong>
+                        {{ c.rejectionReason }}
+                      </div>
+                    }
+
+                    <!-- Reviewer remarks -->
+                    @if (c.reviewerRemarks) {
+                      <div class="remarks-callout">
+                        <span
+                          class="material-icons"
+                          style="font-size: 16px; vertical-align: middle; margin-right: 6px"
+                        >
+                          comment
+                        </span>
+                        <strong>Officer Remarks:</strong>
+                        {{ c.reviewerRemarks }}
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
     </div>
-    }
+  }
 </div>

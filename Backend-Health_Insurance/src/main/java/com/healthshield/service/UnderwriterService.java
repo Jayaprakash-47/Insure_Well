@@ -6,6 +6,7 @@ import com.healthshield.dto.response.PolicyResponse;
 import com.healthshield.dto.response.PolicyMemberResponse;
 import com.healthshield.dto.response.UnderwriterDashboardResponse;
 import com.healthshield.entity.*;
+import com.healthshield.enums.NotificationType;
 import com.healthshield.enums.PolicyStatus;
 import com.healthshield.exception.BadRequestException;
 import com.healthshield.exception.ResourceNotFoundException;
@@ -32,6 +33,10 @@ public class UnderwriterService {
     private final PolicyRepository policyRepository;
     private final PolicyMemberRepository policyMemberRepository;
     private final InsurancePlanService insurancePlanService;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
+    private final AuditLogService auditLogService;
+
 
     // =================== DASHBOARD ===================
 
@@ -132,7 +137,21 @@ public class UnderwriterService {
 
         log.info("Underwriter {} sent quote ₹{} for policy {}", underwriter.getLicenseNumber(),
                 request.getQuoteAmount(), policy.getPolicyNumber());
-
+        notificationService.sendNotification(
+                policy.getUser().getEmail(),
+                "📨 Your premium quote for policy " + policy.getPolicyNumber()
+                        + " is ₹" + request.getQuoteAmount()
+                        + ". Please log in to review and make payment.",
+                NotificationType.QUOTE_RECEIVED
+        );
+        emailService.sendStatusChangeEmail(
+                policy.getUser().getEmail(),
+                policy.getUser().getFirstName(),
+                policy.getPolicyNumber(), "QUOTE_SENT"
+        );
+        auditLogService.log("QUOTE_SENT", "UNDERWRITER", underwriter.getEmail(),
+                "Quote ₹" + request.getQuoteAmount()
+                        + " sent for policy " + policy.getPolicyNumber());
         return mapToResponse(saved);
     }
 
@@ -140,45 +159,110 @@ public class UnderwriterService {
     @Transactional(readOnly = true)
     public BigDecimal calculateQuoteForPolicy(Long underwriterId, Long policyId) {
         Policy policy = policyRepository.findById(policyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Policy not found with id: " + policyId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Policy not found: " + policyId));
 
-        if (policy.getAssignedUnderwriter() == null || !policy.getAssignedUnderwriter().getUserId().equals(underwriterId)) {
-            throw new UnauthorizedException("This policy application is not assigned to you");
+        if (policy.getAssignedUnderwriter() == null
+                || !policy.getAssignedUnderwriter().getUserId().equals(underwriterId)) {
+            throw new UnauthorizedException("This policy is not assigned to you");
         }
 
         int maxAge = 0;
-        boolean hasPreExisting = false;
-        int membersCount = policy.getMembers() != null ? policy.getMembers().size() : 1;
+        double diseaseFactor = 1.0;
+        int membersCount = policy.getMembers() != null
+                ? policy.getMembers().size() : 1;
 
-        if (policy.getMembers() != null && !policy.getMembers().isEmpty()) {
+        if (policy.getMembers() != null) {
             for (PolicyMember m : policy.getMembers()) {
+
+                // ── Age factor ──
                 if (m.getDateOfBirth() != null) {
-                    int age = java.time.Period.between(m.getDateOfBirth(), java.time.LocalDate.now()).getYears();
+                    int age = java.time.Period.between(
+                            m.getDateOfBirth(),
+                            java.time.LocalDate.now()).getYears();
                     if (age > maxAge) maxAge = age;
                 }
-                if (m.getPreExistingDiseases() != null && !m.getPreExistingDiseases().trim().isEmpty() 
-                    && !m.getPreExistingDiseases().equalsIgnoreCase("none")) {
-                    hasPreExisting = true;
+
+                // ── NEW: Disease-based risk recognition ──
+                if (m.getPreExistingDiseases() != null
+                        && !m.getPreExistingDiseases().trim().isEmpty()
+                        && !m.getPreExistingDiseases().equalsIgnoreCase("none")) {
+
+                    double memberDiseaseFactor =
+                            calculateDiseaseFactor(m.getPreExistingDiseases());
+
+                    // Take the highest disease factor across all members
+                    if (memberDiseaseFactor > diseaseFactor) {
+                        diseaseFactor = memberDiseaseFactor;
+                    }
                 }
             }
         }
-        if (maxAge == 0) maxAge = 30; // default safe age
+
+        if (maxAge == 0) maxAge = 30;
 
         double ageFactor;
-        if (maxAge <= 30) ageFactor = 1.0;
+        if (maxAge <= 30)      ageFactor = 1.0;
         else if (maxAge <= 40) ageFactor = 1.2;
         else if (maxAge <= 50) ageFactor = 1.5;
         else if (maxAge <= 60) ageFactor = 1.8;
-        else ageFactor = 2.2;
+        else                   ageFactor = 2.2;
 
-        double diseaseFactor = hasPreExisting ? 1.3 : 1.0;
         double memberFactor = 1.0 + (membersCount - 1) * 0.7;
 
         return policy.getPlan().getBasePremiumAmount()
                 .multiply(BigDecimal.valueOf(ageFactor))
                 .multiply(BigDecimal.valueOf(diseaseFactor))
                 .multiply(BigDecimal.valueOf(memberFactor))
-                .setScale(2, RoundingMode.HALF_UP);
+                .setScale(2, java.math.RoundingMode.HALF_UP);
+    }
+
+    // ── NEW: Disease risk factor calculator ──
+    private double calculateDiseaseFactor(String diseases) {
+        if (diseases == null || diseases.trim().isEmpty()) return 1.0;
+
+        String d = diseases.toLowerCase();
+
+        // ── Critical / Very High Risk (×1.8) ──
+        if (containsAny(d, "cancer", "tumor", "hiv", "aids",
+                "organ failure", "transplant", "kidney failure",
+                "liver failure", "heart failure")) {
+            return 1.8;
+        }
+
+        // ── High Risk (×1.5) ──
+        if (containsAny(d, "heart", "cardiac", "stroke",
+                "paralysis", "parkinson", "alzheimer",
+                "multiple sclerosis", "ms ", "crohn",
+                "lupus", "cirrhosis", "chronic kidney")) {
+            return 1.5;
+        }
+
+        // ── Medium-High Risk (×1.35) ──
+        if (containsAny(d, "diabetes", "diabetic",
+                "hypertension", "blood pressure", "bp",
+                "copd", "asthma", "epilepsy", "seizure",
+                "thyroid", "obesity", "arthritis")) {
+            return 1.35;
+        }
+
+        // ── Medium Risk (×1.2) ──
+        if (containsAny(d, "cholesterol", "fatty liver",
+                "gastric", "ulcer", "anxiety", "depression",
+                "migraine", "psoriasis", "eczema",
+                "back pain", "spine")) {
+            return 1.2;
+        }
+
+        // ── Low Risk / Unknown condition (×1.1) ──
+        return 1.1; // any other condition mentioned
+    }
+
+    private boolean containsAny(String text, String... keywords) {
+        for (String keyword : keywords) {
+            if (text.contains(keyword)) return true;
+        }
+        return false;
     }
 
     // =================== PLANS ===================
@@ -250,8 +334,8 @@ public class UnderwriterService {
         Policy policy = policyRepository.findById(policyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Policy not found with id: " + policyId));
 
-        if (policy.getAssignedUnderwriter() == null ||
-                !policy.getAssignedUnderwriter().getUserId().equals(underwriterId)) {
+        Underwriter underwriter = policy.getAssignedUnderwriter();
+        if (underwriter == null || !underwriter.getUserId().equals(underwriterId)) {
             throw new UnauthorizedException("This policy is not assigned to you");
         }
 
@@ -259,12 +343,25 @@ public class UnderwriterService {
             throw new BadRequestException("Policy is not in ASSIGNED state");
         }
 
-        policy.setPolicyStatus(PolicyStatus.PENDING);
-        policy.setAssignedUnderwriter(null);
-        policy.setAssignedAt(null);
+        policy.setPolicyStatus(PolicyStatus.CONCERN_RAISED);
         policy.setUnderwriterRemarks(remarks);
         policyRepository.save(policy);
 
+        // ── NEW: Notify customer ──
+        notificationService.sendNotification(
+                policy.getUser().getEmail(),
+                "⚠️ A concern has been raised for your policy " + policy.getPolicyNumber()
+                        + ". Please log in to review and reapply.",
+                NotificationType.GENERAL
+        );
+        emailService.sendStatusChangeEmail(
+                policy.getUser().getEmail(),
+                policy.getUser().getFirstName(),
+                policy.getPolicyNumber(), "CONCERN_RAISED"
+        );
+        auditLogService.log("CONCERN_RAISED", "UNDERWRITER", underwriter.getEmail(),
+                "Concern raised for policy " + policy.getPolicyNumber()
+                        + ". Remarks: " + remarks);
         log.info("Underwriter {} raised concern for policy {}. Remarks: {}", underwriterId, policyId, remarks);
     }
 }

@@ -1,82 +1,120 @@
 <div class="page-wrapper">
-    <div class="page-header">
-        <h1>Manage Claims</h1>
-        <p>Review and process insurance claims</p>
-    </div>
-    @if (loading) {
+  <div class="page-header">
+    <h1>Manage Claims</h1>
+    <p>Review and process insurance claims</p>
+  </div>
+  @if (loading) {
     <div class="loading-page">
-        <div class="spinner"></div>
-        <p>Loading...</p>
+      <div class="spinner"></div>
+      <p>Loading...</p>
     </div>
-    } @else {
+  } @else {
     <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Claim #</th>
-                    <th>Customer</th>
-                    <th>Policy #</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Hospital</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (c of claims; track c.claimId) {
-                <tr>
-                    <td><strong>{{ c.claimNumber }}</strong></td>
-                    <td>{{ c.customerName }}</td>
-                    <td>{{ c.policyNumber }}</td>
-                    <td>{{ c.claimType }}</td>
-                    <td>{{ formatCurrency(c.claimAmount) }}</td>
-                    <td>{{ c.hospitalName }}</td>
-                    <td><span class="badge" [class.badge-submitted]="c.claimStatus==='SUBMITTED'"
-                            [class.badge-approved]="c.claimStatus==='APPROVED'"
-                            [class.badge-rejected]="c.claimStatus==='REJECTED'">{{ c.claimStatus }}</span></td>
-                    <td>
-                        @if (c.claimStatus === 'SUBMITTED') {
-                        <button class="btn btn-sm btn-success" (click)="openAction(c, 'APPROVED')"
-                            style="margin-right:4px;">Approve</button>
-                        <button class="btn btn-sm btn-danger" (click)="openAction(c, 'REJECTED')">Reject</button>
-                        } @else { <span style="color:var(--text-muted)">—</span> }
-                    </td>
-                </tr>
-                } @empty {
-                <tr>
-                    <td colspan="8" style="text-align:center; padding:32px; color:var(--text-secondary);">No claims
-                        found</td>
-                </tr>
+      <table>
+        <thead>
+          <tr>
+            <th>Claim #</th>
+            <th>Customer</th>
+            <th>Policy #</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Hospital</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of claims; track c.claimId) {
+            <tr>
+              <td>
+                <strong>{{ c.claimNumber }}</strong>
+              </td>
+              <td>{{ c.customerName }}</td>
+              <td>{{ c.policyNumber }}</td>
+              <td>{{ c.claimType }}</td>
+              <td>{{ formatCurrency(c.claimAmount) }}</td>
+              <td>{{ c.hospitalName }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.badge-submitted]="c.claimStatus === 'SUBMITTED'"
+                  [class.badge-approved]="c.claimStatus === 'APPROVED'"
+                  [class.badge-rejected]="c.claimStatus === 'REJECTED'"
+                  >{{ c.claimStatus }}</span
+                >
+              </td>
+              <td>
+                @if (c.claimStatus === 'SUBMITTED') {
+                  <button
+                    class="btn btn-sm btn-success"
+                    (click)="openAction(c, 'APPROVED')"
+                    style="margin-right: 4px"
+                  >
+                    Approve
+                  </button>
+                  <button class="btn btn-sm btn-danger" (click)="openAction(c, 'REJECTED')">
+                    Reject
+                  </button>
+                } @else {
+                  <span style="color: var(--text-muted)">—</span>
                 }
-            </tbody>
-        </table>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td
+                colspan="8"
+                style="text-align: center; padding: 32px; color: var(--text-secondary)"
+              >
+                No claims found
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
-    }
+  }
 </div>
 
 @if (showModal && selectedClaim) {
-<div class="modal-overlay" (click)="showModal = false">
+  <div class="modal-overlay" (click)="showModal = false">
     <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h2>{{ action === 'APPROVED' ? 'Approve' : 'Reject' }} Claim</h2><button class="modal-close"
-                (click)="showModal = false">✕</button>
+      <div class="modal-header">
+        <h2>{{ action === 'APPROVED' ? 'Approve' : 'Reject' }} Claim</h2>
+        <button class="modal-close" (click)="showModal = false">✕</button>
+      </div>
+      <p style="margin-bottom: 16px; color: var(--text-secondary)">
+        Claim <strong>{{ selectedClaim.claimNumber }}</strong> by
+        {{ selectedClaim.customerName }} for {{ formatCurrency(selectedClaim.claimAmount) }}
+      </p>
+      @if (action === 'APPROVED') {
+        <div class="form-group">
+          <label>Approved Amount (₹)</label
+          ><input class="form-control" [(ngModel)]="approvedAmount" type="number" />
         </div>
-        <p style="margin-bottom:16px; color:var(--text-secondary);">Claim <strong>{{ selectedClaim.claimNumber
-                }}</strong> by {{ selectedClaim.customerName }} for {{ formatCurrency(selectedClaim.claimAmount) }}</p>
-        @if (action === 'APPROVED') {
-        <div class="form-group"><label>Approved Amount (₹)</label><input class="form-control"
-                [(ngModel)]="approvedAmount" type="number" /></div>
-        } @else {
-        <div class="form-group"><label>Rejection Reason *</label><textarea class="form-control"
-                [(ngModel)]="rejectionReason" rows="3" placeholder="Provide reason for rejection"></textarea></div>
-        }
-        <div class="modal-actions">
-            <button class="btn btn-secondary" (click)="showModal = false">Cancel</button>
-            <button class="btn" [class.btn-success]="action==='APPROVED'" [class.btn-danger]="action==='REJECTED'"
-                (click)="submit()" [disabled]="processing">{{ processing ? 'Processing...' : (action === 'APPROVED' ?
-                'Approve' : 'Reject') }}</button>
+      } @else {
+        <div class="form-group">
+          <label>Rejection Reason *</label
+          ><textarea
+            class="form-control"
+            [(ngModel)]="rejectionReason"
+            rows="3"
+            placeholder="Provide reason for rejection"
+          ></textarea>
         </div>
+      }
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="showModal = false">Cancel</button>
+        <button
+          class="btn"
+          [class.btn-success]="action === 'APPROVED'"
+          [class.btn-danger]="action === 'REJECTED'"
+          (click)="submit()"
+          [disabled]="processing"
+        >
+          {{ processing ? 'Processing...' : action === 'APPROVED' ? 'Approve' : 'Reject' }}
+        </button>
+      </div>
     </div>
-</div>
+  </div>
 }

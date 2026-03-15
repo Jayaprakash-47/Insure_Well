@@ -1,144 +1,238 @@
 <div class="page">
 
-  <!-- STEP 1: Choose Plan -->
+  <!-- ══════════════════════════════════════ -->
+  <!-- STEP 1: Choose Plan                    -->
+  <!-- ══════════════════════════════════════ -->
   @if (step === 1) {
     <div>
       <div class="page-header">
         <div>
           <h1>Choose Your Plan</h1>
-          <p>Select an insurance plan that suits you. Our underwriter will calculate your exact premium after reviewing your details.</p>
+          <p>
+            Select an insurance plan that suits you. Our underwriter will
+            calculate your exact premium after reviewing your details.
+          </p>
         </div>
       </div>
+
       @if (loading) {
         <div class="loader">Loading plans...</div>
       }
+
       @if (!loading) {
         <!-- Search & Filter -->
-        <div class="search-filter-bar" style="flex-direction: column; gap: 1rem;">
-          <div style="display: flex; gap: 1rem; width: 100%;">
-            <div class="search-box" style="flex: 1;">
+        <div class="search-filter-bar" style="flex-direction:column;gap:1rem">
+          <div style="display:flex;gap:1rem;width:100%">
+            <div class="search-box" style="flex:1">
               <span class="material-icons search-icon">search</span>
-              <input type="text" class="form-control" placeholder="Search plans by name..." [(ngModel)]="searchTerm" />
+              <input type="text" class="form-control"
+                     placeholder="Search plans by name..."
+                     [(ngModel)]="searchTerm" />
             </div>
-            <div class="filter-bar" style="margin-top: 0;">
-              <button class="filter-btn" [class.active]="selectedPlanType === 'ALL'" (click)="setFilter('ALL')">All</button>
+            <div class="filter-bar" style="margin-top:0">
+              <button class="filter-btn"
+                      [class.active]="selectedPlanType === 'ALL'"
+                      (click)="setFilter('ALL')">
+                All
+              </button>
               @for (type of planTypes; track type) {
-              <button class="filter-btn" [class.active]="selectedPlanType === type" (click)="setFilter(type)">{{ type.replace('_', ' ') }}</button>
+                <button class="filter-btn"
+                        [class.active]="selectedPlanType === type"
+                        (click)="setFilter(type)">
+                  {{ type.replace('_', ' ') }}
+                </button>
               }
             </div>
           </div>
-          
-          <div style="display: flex; gap: 1rem; align-items: center; background: white; padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border);">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span class="material-icons" style="color: var(--text-muted); font-size: 1.2rem;">sort</span>
-              <select class="form-control" [(ngModel)]="sortBy" style="width: auto; padding-top: 6px; padding-bottom: 6px; border: none; background: #f8fafc;">
+
+          <div style="display:flex;gap:1rem;align-items:center;background:white;
+                      padding:12px 20px;border-radius:12px;border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:0.5rem">
+              <span class="material-icons"
+                    style="color:var(--text-muted);font-size:1.2rem">
+                sort
+              </span>
+              <select class="form-control" [(ngModel)]="sortBy"
+                      style="width:auto;padding-top:6px;padding-bottom:6px;
+                             border:none;background:#f8fafc">
                 <option value="default">Relevance (Default)</option>
                 <option value="premium_asc">Premium: Low to High</option>
                 <option value="premium_desc">Premium: High to Low</option>
                 <option value="coverage_desc">Highest Coverage</option>
               </select>
             </div>
-            <div class="divider" style="width: 1px; height: 24px; background: var(--border); margin: 0 0.5rem;"></div>
-            <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1;">
-              <span class="material-icons" style="color: var(--text-muted); font-size: 1.2rem;">account_balance_wallet</span>
-              <span style="font-size: 14px; font-weight: 500; color: var(--text-primary); white-space: nowrap;">Coverage Range:</span>
-              <input type="number" class="form-control" placeholder="Min (₹)" [(ngModel)]="minCoverage" style="width: 120px; padding: 6px 12px;" />
-              <span style="color: var(--text-muted);">to</span>
-              <input type="number" class="form-control" placeholder="Max (₹)" [(ngModel)]="maxCoverage" style="width: 120px; padding: 6px 12px;" />
+            <div class="divider"
+                 style="width:1px;height:24px;background:var(--border);margin:0 0.5rem">
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;flex:1">
+              <span class="material-icons"
+                    style="color:var(--text-muted);font-size:1.2rem">
+                account_balance_wallet
+              </span>
+              <span style="font-size:14px;font-weight:500;color:var(--text-primary);
+                           white-space:nowrap">
+                Coverage Range:
+              </span>
+              <input type="number" class="form-control"
+                     placeholder="Min (₹)" [(ngModel)]="minCoverage"
+                     style="width:120px;padding:6px 12px" />
+              <span style="color:var(--text-muted)">to</span>
+              <input type="number" class="form-control"
+                     placeholder="Max (₹)" [(ngModel)]="maxCoverage"
+                     style="width:120px;padding:6px 12px" />
             </div>
           </div>
         </div>
 
         @if (filteredPlans.length === 0) {
-        <div class="empty-state" style="background:white; border-radius:16px; padding:3rem; text-align:center;">
-          <h3>No plans found</h3>
-          <p>Try adjusting your search or filter criteria</p>
-        </div>
+          <div class="empty-state"
+               style="background:white;border-radius:16px;
+                      padding:3rem;text-align:center">
+            <h3>No plans found</h3>
+            <p>Try adjusting your search or filter criteria</p>
+          </div>
         } @else {
-        <div class="plans-grid">
-          @for (p of filteredPlans; track p) {
-            <div class="plan-card" (click)="selectPlan(p)">
-              <div class="plan-badge">{{ p.planType | titlecase }}</div>
-              <h3>{{ p.planName }}</h3>
-              <p class="plan-desc">{{ p.description }}</p>
-              <div class="plan-highlights">
-                <div class="highlight-item">
-                  <span class="highlight-icon"></span>
-                  <div>
-                    <div class="highlight-label">Max Coverage</div>
-                    <div class="highlight-val">₹{{ formatCoverage(p.coverageAmount) }}</div>
+          <div class="plans-grid">
+            @for (p of filteredPlans; track p) {
+              <div class="plan-card" (click)="selectPlan(p)">
+                <div class="plan-badge">{{ p.planType | titlecase }}</div>
+                <h3>{{ p.planName }}</h3>
+                <p class="plan-desc">{{ p.description }}</p>
+                <div class="plan-highlights">
+                  <div class="highlight-item">
+                    <span class="highlight-icon"></span>
+                    <div>
+                      <div class="highlight-label">Max Coverage</div>
+                      <div class="highlight-val">
+                        ₹{{ formatCoverage(p.coverageAmount) }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="highlight-item">
+                    <span class="highlight-icon"></span>
+                    <div>
+                      <div class="highlight-label">Base Premium</div>
+                      <div class="highlight-val">
+                        ₹{{ formatCoverage(p.basePremiumAmount) }}/yr
+                      </div>
+                    </div>
+                  </div>
+                  <div class="highlight-item">
+                    <span class="highlight-icon"></span>
+                    <div>
+                      <div class="highlight-label">Age Range</div>
+                      <div class="highlight-val">
+                        {{ p.minAgeLimit }}–{{ p.maxAgeLimit }} yrs
+                      </div>
+                    </div>
+                  </div>
+                  <div class="highlight-item">
+                    <span class="highlight-icon"></span>
+                    <div>
+                      <div class="highlight-label">Waiting Period</div>
+                      <div class="highlight-val">
+                        {{ p.waitingPeriodMonths }} months
+                      </div>
+                    </div>
+                  </div>
+                  <div class="highlight-item">
+                    <span class="highlight-icon"></span>
+                    <div>
+                      <div class="highlight-label">Duration</div>
+                      <div class="highlight-val">
+                        {{ p.planDurationMonths }} months
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="highlight-item">
-                  <span class="highlight-icon"></span>
-                  <div>
-                    <div class="highlight-label">Base Premium</div>
-                    <div class="highlight-val">₹{{ formatCoverage(p.basePremiumAmount) }}/yr</div>
-                  </div>
+                <div class="plan-tags">
+                  <span [class.tag-yes]="p.maternityCover"
+                        [class.tag-no]="!p.maternityCover">
+                    {{ p.maternityCover ? '✓' : '✗' }} Maternity
+                  </span>
+                  <span [class.tag-yes]="p.preExistingDiseaseCover"
+                        [class.tag-no]="!p.preExistingDiseaseCover">
+                    {{ p.preExistingDiseaseCover ? '✓' : '✗' }} Pre-existing
+                  </span>
                 </div>
-                <div class="highlight-item">
-                  <span class="highlight-icon"></span>
-                  <div>
-                    <div class="highlight-label">Age Range</div>
-                    <div class="highlight-val">{{ p.minAgeLimit }}–{{ p.maxAgeLimit }} yrs</div>
-                  </div>
-                </div>
-                <div class="highlight-item">
-                  <span class="highlight-icon"></span>
-                  <div>
-                    <div class="highlight-label">Waiting Period</div>
-                    <div class="highlight-val">{{ p.waitingPeriodMonths }} months</div>
-                  </div>
-                </div>
-                <div class="highlight-item">
-                  <span class="highlight-icon"></span>
-                  <div>
-                    <div class="highlight-label">Duration</div>
-                    <div class="highlight-val">{{ p.planDurationMonths }} months</div>
-                  </div>
-                </div>
+                <button class="btn btn-primary" style="margin-top:auto"
+                        (click)="selectPlan(p)">
+                  Select This Plan →
+                </button>
               </div>
-              <div class="plan-tags">
-                <span [class.tag-yes]="p.maternityCover" [class.tag-no]="!p.maternityCover">
-                  {{ p.maternityCover ? '✓' : '✗' }} Maternity
-                </span>
-                <span [class.tag-yes]="p.preExistingDiseaseCover" [class.tag-no]="!p.preExistingDiseaseCover">
-                  {{ p.preExistingDiseaseCover ? '✓' : '✗' }} Pre-existing
-                </span>
-              </div>
-              <button class="btn btn-primary" style="margin-top:auto;" (click)="selectPlan(p)">Select This Plan →</button>
-            </div>
-          }
-        </div>
+            }
+          </div>
         }
       }
     </div>
   }
 
-  <!-- STEP 2: Request Policy Form -->
+  <!-- ══════════════════════════════════════ -->
+  <!-- STEP 2: Request Policy Form            -->
+  <!-- ══════════════════════════════════════ -->
   @if (step === 2 && selectedPlan) {
     <div class="form-page">
       <button class="btn-back" (click)="step = 1">← Back to Plans</button>
+
       <div class="form-header">
         <div class="selected-plan-tag">{{ selectedPlan.planName }}</div>
         <h1>Request Policy</h1>
-        <p>Fill in your details. Our underwriter will review your application and send you a customized premium quote.</p>
+        <p>
+          Fill in your details. Our underwriter will review your application
+          and send you a customized premium quote.
+        </p>
+
+        <!-- ── NEW: Plan eligibility info banner ── -->
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;
+                      border-radius:8px;padding:10px 16px;font-size:13px;
+                      color:#1e40af;display:flex;align-items:center;gap:6px">
+            <span class="material-icons" style="font-size:16px">person</span>
+            Age Eligibility:
+            <strong>
+              {{ selectedPlan.minAgeLimit }}–{{ selectedPlan.maxAgeLimit }} years
+            </strong>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;
+                      border-radius:8px;padding:10px 16px;font-size:13px;
+                      color:#15803d;display:flex;align-items:center;gap:6px">
+            <span class="material-icons" style="font-size:16px">
+              hourglass_top
+            </span>
+            Waiting Period:
+            <strong>{{ selectedPlan.waitingPeriodMonths }} month(s)</strong>
+          </div>
+          <div style="background:#fefce8;border:1px solid #fde68a;
+                      border-radius:8px;padding:10px 16px;font-size:13px;
+                      color:#854d0e;display:flex;align-items:center;gap:6px">
+            <span class="material-icons" style="font-size:16px">shield</span>
+            Coverage:
+            <strong>₹{{ formatCoverage(selectedPlan.coverageAmount) }}</strong>
+          </div>
+        </div>
       </div>
+
       <div class="form-card">
-        <!-- Nominee -->
+
+        <!-- ── Nominee ── -->
         <div class="section">
           <h3>Nominee Details</h3>
           <div class="form-row">
             <div class="form-group">
               <label>Nominee Full Name <span class="required">*</span></label>
-              <input [(ngModel)]="form.nomineeName" placeholder="e.g. Priya Sharma" [class.error]="errors.nomineeName" (blur)="onBlur('nomineeName')" />
+              <input [(ngModel)]="form.nomineeName"
+                     placeholder="e.g. Priya Sharma"
+                     [class.error]="errors.nomineeName"
+                     (blur)="onBlur('nomineeName')" />
               @if (errors.nomineeName) {
                 <span class="error-message">{{ errors.nomineeName }}</span>
               }
             </div>
             <div class="form-group">
               <label>Relationship <span class="required">*</span></label>
-              <select [(ngModel)]="form.nomineeRelationship" [class.error]="errors.nomineeRelationship" (blur)="onBlur('nomineeRelationship')">
+              <select [(ngModel)]="form.nomineeRelationship"
+                      [class.error]="errors.nomineeRelationship"
+                      (blur)="onBlur('nomineeRelationship')">
                 <option value="">— Select —</option>
                 <option>Spouse</option>
                 <option>Father</option>
@@ -154,44 +248,74 @@
             </div>
           </div>
         </div>
-        <!-- Health Check Report -->
+
+        <!-- ── Health Check Report ── -->
         <div class="section">
           <h3>Health Check Report</h3>
           <div class="form-group">
-            <label>Upload Health Check Report <span class="required">*</span></label>
-            <input type="file" (change)="onHealthCheckReportSelect($event)" accept=".pdf,.jpg,.jpeg,.png" style="padding-bottom: 35px;" class="form-control" [class.error]="errors.healthCheckReport" />
-            <small style="color: #666; margin-top: 5px; display: block;">Mandatory: Upload your recent health check report (PDF, JPG, PNG)</small>
+            <label>
+              Upload Health Check Report <span class="required">*</span>
+            </label>
+            <input type="file"
+                   (change)="onHealthCheckReportSelect($event)"
+                   accept=".pdf,.jpg,.jpeg,.png"
+                   style="padding-bottom:35px"
+                   class="form-control"
+                   [class.error]="errors.healthCheckReport" />
+            <small style="color:#666;margin-top:5px;display:block">
+              Mandatory: Upload your recent health check report (PDF, JPG, PNG)
+            </small>
             @if (errors.healthCheckReport) {
-              <span class="error-message file-upload-error">{{ errors.healthCheckReport }}</span>
+              <span class="error-message file-upload-error">
+                {{ errors.healthCheckReport }}
+              </span>
             }
           </div>
         </div>
-        <!-- Members -->
+
+        <!-- ── Members ── -->
         <div class="section">
           <div class="section-header">
             <h3>Members to Insure</h3>
             <button class="btn-add" (click)="addMember()">+ Add Member</button>
           </div>
-          <p class="section-note">Add all members (including yourself) who need to be covered under this policy.</p>
+          <p class="section-note">
+            Add all members (including yourself) who need to be covered.
+          </p>
+
           @for (m of form.members; track m; let i = $index) {
             <div class="member-card">
               <div class="member-header">
                 <strong>Member {{ i + 1 }}</strong>
                 @if (form.members.length > 1) {
-                  <button class="btn-remove" (click)="removeMember(i)">✕ Remove</button>
+                  <button class="btn-remove" (click)="removeMember(i)">
+                    ✕ Remove
+                  </button>
                 }
               </div>
+
               <div class="form-row">
+
+                <!-- Full Name -->
                 <div class="form-group">
                   <label>Full Name <span class="required">*</span></label>
-                  <input [(ngModel)]="m.memberName" placeholder="Full name" [class.error]="errors['member' + i + '_name']" (blur)="onBlur('member' + i + '_name')" />
+                  <input [(ngModel)]="m.memberName"
+                         placeholder="Full name"
+                         [class.error]="errors['member' + i + '_name']"
+                         (blur)="onBlur('member' + i + '_name')" />
                   @if (errors['member' + i + '_name']) {
-                    <span class="error-message">{{ errors['member' + i + '_name'] }}</span>
+                    <span class="error-message">
+                      {{ errors['member' + i + '_name'] }}
+                    </span>
                   }
                 </div>
+
+                <!-- Relationship -->
                 <div class="form-group">
                   <label>Relationship <span class="required">*</span></label>
-                  <select [(ngModel)]="m.relationship" [class.error]="errors['member' + i + '_relationship']" (blur)="onBlur('member' + i + '_relationship')">
+                  <select [(ngModel)]="m.relationship"
+                          [class.error]="errors['member' + i + '_relationship']"
+                          (blur)="onBlur('member' + i + '_relationship')">
                     <option value="">— Select —</option>
                     <option value="SELF">Self</option>
                     <option value="SPOUSE">Spouse</option>
@@ -201,54 +325,123 @@
                     <option value="OTHER">Other</option>
                   </select>
                   @if (errors['member' + i + '_relationship']) {
-                    <span class="error-message">{{ errors['member' + i + '_relationship'] }}</span>
+                    <span class="error-message">
+                      {{ errors['member' + i + '_relationship'] }}
+                    </span>
                   }
                 </div>
+
+                <!-- ── NEW: Date of Birth with full validations ── -->
                 <div class="form-group">
                   <label>Date of Birth <span class="required">*</span></label>
-                  <input type="date" [(ngModel)]="m.dateOfBirth" [class.error]="errors['member' + i + '_dob']" (blur)="onBlur('member' + i + '_dob')" />
+
+                  <input type="date"
+                         [(ngModel)]="m.dateOfBirth"
+                         [max]="today"
+                         [min]="getMinDob()"
+                         [class.error]="errors['member' + i + '_dob']"
+                         (blur)="onBlur('member' + i + '_dob')"
+                         (change)="onBlur('member' + i + '_dob')" />
+
+                  <!-- Plan age limit hint -->
+                  @if (!m.dateOfBirth) {
+                    <small style="color:#64748b;font-size:11px">
+                      Age {{ selectedPlan.minAgeLimit }}–{{ selectedPlan.maxAgeLimit }}
+                      years allowed for this plan
+                    </small>
+                  }
+
+                  <!-- Error message -->
                   @if (errors['member' + i + '_dob']) {
-                    <span class="error-message">{{ errors['member' + i + '_dob'] }}</span>
+                    <span class="error-message">
+                      {{ errors['member' + i + '_dob'] }}
+                    </span>
+                  }
+
+                  <!-- Live age display when valid -->
+                  @if (m.dateOfBirth && !errors['member' + i + '_dob']) {
+                    <small style="color:#16a34a;font-size:11px;font-weight:600">
+                      ✓ Age: {{ calcAge(m.dateOfBirth) }} years — eligible
+                    </small>
                   }
                 </div>
+
+                <!-- Gender -->
                 <div class="form-group">
                   <label>Gender <span class="required">*</span></label>
-                  <select [(ngModel)]="m.gender" [class.error]="errors['member' + i + '_gender']" (blur)="onBlur('member' + i + '_gender')">
+                  <select [(ngModel)]="m.gender"
+                          [class.error]="errors['member' + i + '_gender']"
+                          (blur)="onBlur('member' + i + '_gender')">
                     <option value="">— Select —</option>
                     <option value="MALE">Male</option>
                     <option value="FEMALE">Female</option>
                     <option value="OTHER">Other</option>
                   </select>
                   @if (errors['member' + i + '_gender']) {
-                    <span class="error-message">{{ errors['member' + i + '_gender'] }}</span>
+                    <span class="error-message">
+                      {{ errors['member' + i + '_gender'] }}
+                    </span>
                   }
                 </div>
+
+                <!-- Pre-existing Diseases -->
                 <div class="form-group wide">
                   <label>Pre-existing Diseases / Conditions</label>
-                  <input [(ngModel)]="m.preExistingDiseases" placeholder="e.g. Diabetes, Hypertension, None" />
+                  <input [(ngModel)]="m.preExistingDiseases"
+                         placeholder="e.g. Diabetes, Hypertension, None" />
                 </div>
+
               </div>
             </div>
           }
         </div>
 
-        <button class="btn btn-primary btn-block" style="padding: 1rem; font-size: 1.05rem;" (click)="submitRequest()" [disabled]="submitting">
+        <!-- Submit Button -->
+        <button class="btn btn-primary btn-block"
+                style="padding:1rem;font-size:1.05rem"
+                (click)="submitRequest()"
+                [disabled]="submitting">
           @if (!submitting) {
-            <span style="display:flex; align-items:center; justify-content:center; gap:0.5rem;"><span class="material-icons">send</span> Submit Policy Request</span>
+            <span style="display:flex;align-items:center;
+                         justify-content:center;gap:0.5rem">
+              <span class="material-icons">send</span>
+              Submit Policy Request
+            </span>
           }
           @if (submitting) {
-            <span style="display:flex; align-items:center; justify-content:center; gap:0.5rem;"><span class="material-icons" style="animation: spin 1s linear infinite;">hourglass_empty</span> Submitting...</span>
+            <span style="display:flex;align-items:center;
+                         justify-content:center;gap:0.5rem">
+              <span class="material-icons"
+                    style="animation:spin 1s linear infinite">
+                hourglass_empty
+              </span>
+              Submitting...
+            </span>
           }
         </button>
+
+        <!-- Success Card -->
         @if (submitted) {
           <div class="success-card">
-            <div class="success-icon"><span class="material-icons" style="font-size: 3rem; color: #059669;">check_circle</span></div>
+            <div class="success-icon">
+              <span class="material-icons"
+                    style="font-size:3rem;color:#059669">
+                check_circle
+              </span>
+            </div>
             <h3>Policy Request Submitted!</h3>
-            <p>Your application is under review. You'll see the premium quote in <strong>My Policies</strong> once the underwriter evaluates it.</p>
-            <button class="btn btn-primary" (click)="goToPolicies()">Go to My Policies →</button>
+            <p>
+              Your application is under review. You'll see the premium quote
+              in <strong>My Policies</strong> once the underwriter evaluates it.
+            </p>
+            <button class="btn btn-primary" (click)="goToPolicies()">
+              Go to My Policies →
+            </button>
           </div>
         }
+
       </div>
     </div>
   }
+
 </div>

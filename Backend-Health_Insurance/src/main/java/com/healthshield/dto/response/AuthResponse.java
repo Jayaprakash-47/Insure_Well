@@ -15,6 +15,7 @@ public class AuthResponse {
     private Long userId;
     private String firstName;
     private String email;
-    private String role;     // ADMIN, UNDERWRITER, CUSTOMER, CLAIMS_OFFICER
+    private String role;
     private String message;
+    private String refreshToken;  // ← NEW field added
 }

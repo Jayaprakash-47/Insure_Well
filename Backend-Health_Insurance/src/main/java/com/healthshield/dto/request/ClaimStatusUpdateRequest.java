@@ -11,4 +11,5 @@ public class ClaimStatusUpdateRequest {
     private ClaimStatus status;
     private BigDecimal approvedAmount;
     private String rejectionReason;
+    private String reviewerRemarks;
 }

@@ -2,20 +2,20 @@
 
 /* File Claim - enhanced */
 small {
-    color: var(--text-muted);
-    font-size: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
 }
 
-input[type="file"].form-control {
-    padding: 12px;
-    background: var(--bg-primary);
-    border-style: dashed;
-    border-width: 2px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+input[type='file'].form-control {
+  padding: 12px;
+  background: var(--bg-primary);
+  border-style: dashed;
+  border-width: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-input[type="file"].form-control:hover {
-    border-color: var(--primary);
-    background: var(--primary-light);
+input[type='file'].form-control:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
 }

@@ -1,0 +1,16 @@
+<!-- FILE: src/app/shared/dark-mode-toggle/dark-mode-toggle.component.html -->
+
+<button
+  class="dark-mode-fab"
+  [attr.data-tooltip]="(isDark$ | async) ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+  [attr.aria-label]="(isDark$ | async) ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+  (click)="toggle()"
+>
+  <span class="fab-icon">
+    @if (isDark$ | async) {
+      ☀️
+    } @else {
+      🌙
+    }
+  </span>
+</button>

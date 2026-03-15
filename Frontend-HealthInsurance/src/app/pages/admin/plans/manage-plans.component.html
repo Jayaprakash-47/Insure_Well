@@ -1,101 +1,177 @@
 <div class="page-wrapper">
-    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-            <h1>Manage Plans</h1>
-            <p>Create, edit, and manage insurance plans</p>
-        </div>
-        <button class="btn btn-primary" (click)="openCreate()">+ New Plan</button>
+  <div
+    class="page-header"
+    style="display: flex; justify-content: space-between; align-items: center"
+  >
+    <div>
+      <h1>Manage Plans</h1>
+      <p>Create, edit, and manage insurance plans</p>
     </div>
+    <button class="btn btn-primary" (click)="openCreate()">+ New Plan</button>
+  </div>
 
-    @if (loading) {
+  @if (loading) {
     <div class="loading-page">
-        <div class="spinner"></div>
-        <p>Loading...</p>
+      <div class="spinner"></div>
+      <p>Loading...</p>
     </div>
-    } @else {
+  } @else {
     <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Plan Name</th>
-                    <th>Type</th>
-                    <th>Premium</th>
-                    <th>Coverage</th>
-                    <th>Duration</th>
-                    <th>Age</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (p of plans; track p.planId) {
-                <tr>
-                    <td><strong>{{ p.planName }}</strong></td>
-                    <td><span class="badge badge-info">{{ p.planType }}</span></td>
-                    <td>{{ formatCurrency(p.basePremiumAmount) }}</td>
-                    <td>{{ formatCurrency(p.coverageAmount) }}</td>
-                    <td>{{ p.planDurationMonths }}m</td>
-                    <td>{{ p.minAgeLimit }}-{{ p.maxAgeLimit }}</td>
-                    <td><span class="badge" [class.badge-active]="p.isActive" [class.badge-inactive]="!p.isActive">{{
-                            p.isActive ? 'Active' : 'Inactive' }}</span></td>
-                    <td><button class="btn btn-sm btn-secondary" (click)="openEdit(p)">Edit</button></td>
-                </tr>
-                }
-            </tbody>
-        </table>
+      <table>
+        <thead>
+          <tr>
+            <th>Plan Name</th>
+            <th>Type</th>
+            <th>Premium</th>
+            <th>Coverage</th>
+            <th>Duration</th>
+            <th>Age</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of plans; track p.planId) {
+            <tr>
+              <td>
+                <strong>{{ p.planName }}</strong>
+              </td>
+              <td>
+                <span class="badge badge-info">{{ p.planType }}</span>
+              </td>
+              <td>{{ formatCurrency(p.basePremiumAmount) }}</td>
+              <td>{{ formatCurrency(p.coverageAmount) }}</td>
+              <td>{{ p.planDurationMonths }}m</td>
+              <td>{{ p.minAgeLimit }}-{{ p.maxAgeLimit }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.badge-active]="p.isActive"
+                  [class.badge-inactive]="!p.isActive"
+                  >{{ p.isActive ? 'Active' : 'Inactive' }}</span
+                >
+              </td>
+              <td><button class="btn btn-sm btn-secondary" (click)="openEdit(p)">Edit</button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
-    }
+  }
 </div>
 
 @if (showModal) {
-<div class="modal-overlay" (click)="showModal = false">
-    <div class="modal" (click)="$event.stopPropagation()" style="max-width:560px;">
-        <div class="modal-header">
-            <h2>{{ editing ? 'Edit Plan' : 'Create Plan' }}</h2><button class="modal-close"
-                (click)="showModal = false">✕</button>
+  <div class="modal-overlay" (click)="showModal = false">
+    <div class="modal" (click)="$event.stopPropagation()" style="max-width: 560px">
+      <div class="modal-header">
+        <h2>{{ editing ? 'Edit Plan' : 'Create Plan' }}</h2>
+        <button class="modal-close" (click)="showModal = false">✕</button>
+      </div>
+      <form (ngSubmit)="save()">
+        <div class="form-group">
+          <label>Plan Name *</label
+          ><input class="form-control" [(ngModel)]="form.planName" name="pn" />
         </div>
-        <form (ngSubmit)="save()">
-            <div class="form-group"><label>Plan Name *</label><input class="form-control" [(ngModel)]="form.planName"
-                    name="pn" /></div>
-            <div class="form-row">
-                <div class="form-group"><label>Plan Type</label>
-                    <select class="form-control" [(ngModel)]="form.planType" name="pt">
-                        <option value="INDIVIDUAL">Individual</option>
-                        <option value="FAMILY">Family</option>
-                        <option value="SENIOR_CITIZEN">Senior Citizen</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>Duration (months)</label><input class="form-control"
-                        [(ngModel)]="form.planDurationMonths" name="dur" type="number" /></div>
-            </div>
-            <div class="form-group"><label>Description</label><textarea class="form-control"
-                    [(ngModel)]="form.description" name="desc" rows="2"></textarea></div>
-            <div class="form-row">
-                <div class="form-group"><label>Base Premium (₹)</label><input class="form-control"
-                        [(ngModel)]="form.basePremiumAmount" name="prem" type="number" /></div>
-                <div class="form-group"><label>Coverage (₹)</label><input class="form-control"
-                        [(ngModel)]="form.coverageAmount" name="cov" type="number" /></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>Min Age</label><input class="form-control" [(ngModel)]="form.minAgeLimit"
-                        name="minage" type="number" /></div>
-                <div class="form-group"><label>Max Age</label><input class="form-control" [(ngModel)]="form.maxAgeLimit"
-                        name="maxage" type="number" /></div>
-            </div>
-            <div class="form-group"><label>Waiting Period (months)</label><input class="form-control"
-                    [(ngModel)]="form.waitingPeriodMonths" name="wait" type="number" /></div>
-            <div class="form-row">
-                <div class="form-group"><label><input type="checkbox" [(ngModel)]="form.maternityCover" name="mat" />
-                        Maternity Cover</label></div>
-                <div class="form-group"><label><input type="checkbox" [(ngModel)]="form.preExistingDiseaseCover"
-                            name="pre" /> Pre-existing Cover</label></div>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" (click)="showModal = false">Cancel</button>
-                <button type="submit" class="btn btn-primary" [disabled]="saving">{{ saving ? 'Saving...' : (editing ?
-                    'Update Plan' : 'Create Plan') }}</button>
-            </div>
-        </form>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Plan Type</label>
+            <select class="form-control" [(ngModel)]="form.planType" name="pt">
+              <option value="INDIVIDUAL">Individual</option>
+              <option value="FAMILY">Family</option>
+              <option value="SENIOR_CITIZEN">Senior Citizen</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Duration (months)</label
+            ><input
+              class="form-control"
+              [(ngModel)]="form.planDurationMonths"
+              name="dur"
+              type="number"
+            />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label
+          ><textarea
+            class="form-control"
+            [(ngModel)]="form.description"
+            name="desc"
+            rows="2"
+          ></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Base Premium (₹)</label
+            ><input
+              class="form-control"
+              [(ngModel)]="form.basePremiumAmount"
+              name="prem"
+              type="number"
+            />
+          </div>
+          <div class="form-group">
+            <label>Coverage (₹)</label
+            ><input
+              class="form-control"
+              [(ngModel)]="form.coverageAmount"
+              name="cov"
+              type="number"
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Min Age</label
+            ><input
+              class="form-control"
+              [(ngModel)]="form.minAgeLimit"
+              name="minage"
+              type="number"
+            />
+          </div>
+          <div class="form-group">
+            <label>Max Age</label
+            ><input
+              class="form-control"
+              [(ngModel)]="form.maxAgeLimit"
+              name="maxage"
+              type="number"
+            />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Waiting Period (months)</label
+          ><input
+            class="form-control"
+            [(ngModel)]="form.waitingPeriodMonths"
+            name="wait"
+            type="number"
+          />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label
+              ><input type="checkbox" [(ngModel)]="form.maternityCover" name="mat" /> Maternity
+              Cover</label
+            >
+          </div>
+          <div class="form-group">
+            <label
+              ><input type="checkbox" [(ngModel)]="form.preExistingDiseaseCover" name="pre" />
+              Pre-existing Cover</label
+            >
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="showModal = false">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="saving">
+            {{ saving ? 'Saving...' : editing ? 'Update Plan' : 'Create Plan' }}
+          </button>
+        </div>
+      </form>
     </div>
-</div>
+  </div>
 }

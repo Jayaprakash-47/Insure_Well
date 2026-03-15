@@ -55,13 +55,21 @@ public class PaymentService {
                     ") does not match policy premium (\u20B9" + policy.getPremiumAmount() + ")");
         }
 
+        PaymentMethod paymentMethod;
+        try {
+            paymentMethod = PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid payment method: " + request.getPaymentMethod()
+                    + ". Allowed values: CREDIT_CARD, DEBIT_CARD, NET_BANKING, UPI, RAZORPAY");
+        }
+
         String transactionId = UUID.randomUUID().toString();
 
         Payment payment = Payment.builder()
                 .policy(policy)
                 .user(user)
                 .amount(request.getAmount())
-                .paymentMethod(PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase()))
+                .paymentMethod(paymentMethod)
                 .transactionId(transactionId)
                 .paymentStatus(PaymentStatus.SUCCESS)
                 .build();

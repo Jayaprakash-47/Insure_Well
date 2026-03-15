@@ -1,7 +1,7 @@
 <div class="page">
   <div class="page-header">
     <div>
-      <h1><span class="material-icons" style="vertical-align: middle;">folder</span> My Policies</h1>
+      <h1><span class="material-icons" style="vertical-align: middle">folder</span> My Policies</h1>
       <p>All policy applications assigned and managed by you.</p>
     </div>
     <a routerLink="/underwriter/dashboard" class="btn-back">← Dashboard</a>
@@ -13,7 +13,9 @@
 
   @if (!loading && policies.length === 0) {
     <div class="empty-state">
-      <div class="empty-icon"><span class="material-icons" style="font-size: 48px; color: #a0aec0;">folder_open</span></div>
+      <div class="empty-icon">
+        <span class="material-icons" style="font-size: 48px; color: #a0aec0">folder_open</span>
+      </div>
       <h3>No policies yet</h3>
       <p>Policies assigned to you will appear here.</p>
     </div>
@@ -36,13 +38,19 @@
         <tbody>
           @for (p of policies; track p) {
             <tr>
-              <td><strong>{{ p.policyNumber }}</strong></td>
+              <td>
+                <strong>{{ p.policyNumber }}</strong>
+              </td>
               <td>{{ p.customerName }}</td>
               <td>{{ p.planName }}</td>
               <td>₹{{ (p.coverageAmount || 0).toLocaleString() }}</td>
               <td>{{ p.quoteAmount ? '₹' + (p.quoteAmount || 0).toLocaleString() : '—' }}</td>
-              <td><span class="status-badge" [class]="getStatusClass(p.policyStatus)">{{ p.policyStatus }}</span></td>
-              <td>{{ p.createdAt | date:'dd MMM yyyy' }}</td>
+              <td>
+                <span class="status-badge" [class]="getStatusClass(p.policyStatus)">{{
+                  p.policyStatus
+                }}</span>
+              </td>
+              <td>{{ p.createdAt | date: 'dd MMM yyyy' }}</td>
             </tr>
           }
         </tbody>
@@ -50,4 +58,3 @@
     </div>
   }
 </div>
-

@@ -1,85 +1,85 @@
 .calc-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
 }
 
 .calc-form h3,
 .calc-history h3 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
 }
 
 .result-box {
-    margin-top: 24px;
-    padding: 28px;
-    background: linear-gradient(135deg, #d1fae5, #ecfdf5);
-    border-radius: var(--radius-lg);
-    text-align: center;
-    border: 1px solid #a7f3d0;
+  margin-top: 24px;
+  padding: 28px;
+  background: linear-gradient(135deg, #d1fae5, #ecfdf5);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  border: 1px solid #a7f3d0;
 }
 
 .result-box p {
-    font-size: 13px;
-    color: var(--text-secondary);
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
 .result-box h2 {
-    font-family: var(--font-heading);
-    font-size: 36px;
-    color: #166534;
-    margin: 8px 0;
-    font-weight: 800;
+  font-family: var(--font-heading);
+  font-size: 36px;
+  color: #166534;
+  margin: 8px 0;
+  font-weight: 800;
 }
 
 .result-box h2 span {
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-secondary);
 }
 
 .result-id {
-    font-size: 12px !important;
-    color: var(--accent) !important;
-    margin-top: 8px;
-    background: white;
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
+  font-size: 12px !important;
+  color: var(--accent) !important;
+  margin-top: 8px;
+  background: white;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
 }
 
 .history-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border-light);
-    transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-light);
+  transition: all 0.2s ease;
 }
 
 .history-item:hover {
-    padding-left: 8px;
+  padding-left: 8px;
 }
 
 .history-item:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .history-price {
-    font-family: var(--font-heading);
-    font-weight: 800;
-    font-size: 16px;
-    color: var(--primary);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--primary);
 }
 
 .text-sm {
-    font-size: 12px;
-    color: var(--text-secondary);
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {
-    .calc-layout {
-        grid-template-columns: 1fr;
-    }
+  .calc-layout {
+    grid-template-columns: 1fr;
+  }
 }

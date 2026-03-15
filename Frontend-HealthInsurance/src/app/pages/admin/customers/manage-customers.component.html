@@ -1,48 +1,66 @@
 <div class="page-wrapper">
-    <div class="page-header">
-        <h1>Manage Customers</h1>
-        <p>View and manage all registered customers</p>
-    </div>
-    @if (loading) {
+  <div class="page-header">
+    <h1>Manage Customers</h1>
+    <p>View and manage all registered customers</p>
+  </div>
+  @if (loading) {
     <div class="loading-page">
-        <div class="spinner"></div>
-        <p>Loading...</p>
+      <div class="spinner"></div>
+      <p>Loading...</p>
     </div>
-    } @else {
+  } @else {
     <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>City</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (c of customers; track c.userId) {
-                <tr>
-                    <td>{{ c.userId }}</td>
-                    <td>{{ c.firstName }} {{ c.lastName }}</td>
-                    <td>{{ c.email }}</td>
-                    <td>{{ c.phone }}</td>
-                    <td>{{ c.city || '-' }}</td>
-                    <td><span class="badge" [class.badge-active]="c.isActive" [class.badge-inactive]="!c.isActive">{{
-                            c.isActive ? 'Active' : 'Inactive' }}</span></td>
-                    <td><button class="btn btn-sm" [class.btn-danger]="c.isActive" [class.btn-success]="!c.isActive"
-                            (click)="toggleStatus(c)">{{ c.isActive ? 'Deactivate' : 'Activate' }}</button></td>
-                </tr>
-                } @empty {
-                <tr>
-                    <td colspan="7" style="text-align:center; padding:32px; color:var(--text-secondary);">No customers
-                        found</td>
-                </tr>
-                }
-            </tbody>
-        </table>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>City</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of customers; track c.userId) {
+            <tr>
+              <td>{{ c.userId }}</td>
+              <td>{{ c.firstName }} {{ c.lastName }}</td>
+              <td>{{ c.email }}</td>
+              <td>{{ c.phone }}</td>
+              <td>{{ c.city || '-' }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [class.badge-active]="c.isActive"
+                  [class.badge-inactive]="!c.isActive"
+                  >{{ c.isActive ? 'Active' : 'Inactive' }}</span
+                >
+              </td>
+              <td>
+                <button
+                  class="btn btn-sm"
+                  [class.btn-danger]="c.isActive"
+                  [class.btn-success]="!c.isActive"
+                  (click)="toggleStatus(c)"
+                >
+                  {{ c.isActive ? 'Deactivate' : 'Activate' }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td
+                colspan="7"
+                style="text-align: center; padding: 32px; color: var(--text-secondary)"
+              >
+                No customers found
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
-    }
+  }
 </div>

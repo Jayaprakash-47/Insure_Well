@@ -625,3 +625,230 @@ button .spinner, .btn .spinner {
     transition-duration: 0.01ms !important;
   }
 }
+/* =====================================================
+   DARK MODE — append this block to the END of styles.css
+   ===================================================== */
+
+/* ── Dark Mode Variables ───────────────────────────── */
+body.dark-mode {
+  /* Primary stays burgundy — looks great on dark */
+  --primary: #e05577;
+  --primary-dark: #c73d60;
+  --primary-darker: #a8294d;
+  --primary-light: #2d1520;
+  --accent: #e05577;
+  --accent-light: #2d1520;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #c73d60 0%, #a8294d 100%);
+  --gradient-hero: linear-gradient(135deg, #1a0a10 0%, #2d1520 40%, #3d1a28 100%);
+
+  /* Backgrounds */
+  --bg-primary: #0f1117;
+  --bg-secondary: #1a1d27;
+  --bg-warm: #1e1520;
+
+  /* Text */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Status Colors — slightly brightened for dark bg */
+  --success: #34d399;
+  --success-light: #064e3b;
+  --warning: #fbbf24;
+  --warning-light: #451a03;
+  --danger: #f87171;
+  --danger-light: #450a0a;
+  --info: #60a5fa;
+  --info-light: #1e3a5f;
+
+  /* Borders */
+  --border: #2e3347;
+  --border-light: #232738;
+
+  /* Shadows — darker, more diffuse */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+}
+
+/* ── Body transition for smooth switch ─────────────── */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ── Scrollbar in dark mode ─────────────────────────── */
+body.dark-mode ::-webkit-scrollbar-track { background: #0f1117; }
+body.dark-mode ::-webkit-scrollbar-thumb { background: #2e3347; }
+body.dark-mode ::-webkit-scrollbar-thumb:hover { background: #3e4560; }
+
+/* ── Selection in dark mode ─────────────────────────── */
+body.dark-mode ::selection {
+  background: rgba(224, 85, 119, 0.25);
+  color: #f9a8c0;
+}
+
+/* ── Tables ─────────────────────────────────────────── */
+body.dark-mode tbody tr:hover { background-color: #1e2133; }
+
+/* ── Empty state ────────────────────────────────────── */
+body.dark-mode .empty-state {
+  background: linear-gradient(135deg, #1a1d27 0%, #1e2133 100%);
+  border-color: #2e3347;
+}
+body.dark-mode .empty-state:hover {
+  border-color: #3d1a28;
+  background: linear-gradient(135deg, #1a1d27 0%, #2d1520 100%);
+}
+
+/* ── Modal ──────────────────────────────────────────── */
+body.dark-mode .modal {
+  background: #1a1d27;
+  border: 1px solid #2e3347;
+}
+body.dark-mode .modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* ── Toast ──────────────────────────────────────────── */
+body.dark-mode .toast {
+  background: #1a1d27;
+  color: #f1f5f9;
+  box-shadow: 0 20px 40px -8px rgba(0,0,0,0.5);
+}
+
+/* ── Filter buttons ─────────────────────────────────── */
+body.dark-mode .filter-btn {
+  background: #1a1d27;
+  border-color: #2e3347;
+  color: #94a3b8;
+}
+body.dark-mode .filter-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+body.dark-mode .filter-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* ── Stat icon backgrounds in dark mode ─────────────── */
+body.dark-mode .stat-icon.blue   { background: #1e3a5f; color: #60a5fa; }
+body.dark-mode .stat-icon.green  { background: #064e3b; color: #34d399; }
+body.dark-mode .stat-icon.yellow { background: #451a03; color: #fbbf24; }
+body.dark-mode .stat-icon.red    { background: #450a0a; color: #f87171; }
+body.dark-mode .stat-icon.purple { background: #2e1065; color: #a78bfa; }
+body.dark-mode .stat-icon.teal   { background: #042f2e; color: #2dd4bf; }
+
+/* ── Badges in dark mode ────────────────────────────── */
+body.dark-mode .badge-pending    { background: #451a03; color: #fbbf24; }
+body.dark-mode .badge-approved,
+body.dark-mode .badge-submitted,
+body.dark-mode .badge-active,
+body.dark-mode .badge-success    { background: #064e3b; color: #34d399; }
+body.dark-mode .badge-rejected,
+body.dark-mode .badge-cancelled  { background: #450a0a; color: #f87171; }
+body.dark-mode .badge-inactive   { background: #1e2133; color: #64748b; }
+body.dark-mode .badge-info       { background: #1e3a5f; color: #60a5fa; }
+
+/* ── Welcome banners (gradient already looks good,
+      but ensure text stays readable) ───────────────── */
+body.dark-mode .welcome-banner {
+  background: var(--gradient-hero) !important;
+}
+
+/* ── Form controls ──────────────────────────────────── */
+body.dark-mode .form-control {
+  background-color: #232738;
+  border-color: #2e3347;
+  color: #f1f5f9;
+}
+body.dark-mode .form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(224, 85, 119, 0.2);
+}
+body.dark-mode .form-control::placeholder { color: #4a5568; }
+
+/* ── btn-secondary in dark mode ─────────────────────── */
+body.dark-mode .btn-secondary {
+  background-color: #232738;
+  color: #f1f5f9;
+  border-color: #2e3347;
+}
+body.dark-mode .btn-secondary:hover {
+  background-color: #2e3347;
+}
+
+/* ── Dark Mode Toggle Floating Button ───────────────── */
+.dark-mode-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9998;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+}
+
+body.dark-mode .dark-mode-fab {
+  background: #1a1d27;
+  border-color: #2e3347;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode-fab:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
+
+body.dark-mode .dark-mode-fab:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+}
+
+.dark-mode-fab .fab-icon {
+  font-size: 22px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  line-height: 1;
+}
+
+.dark-mode-fab:hover .fab-icon {
+  transform: rotate(20deg);
+}
+
+/* Tooltip on hover */
+.dark-mode-fab::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #0f1117;
+  color: #f1f5f9;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.dark-mode-fab:hover::before {
+  opacity: 1;
+}

@@ -9,6 +9,8 @@ import com.healthshield.exception.GlobalExceptionHandler;
 import com.healthshield.exception.UnauthorizedException;
 import com.healthshield.repository.UserRepository;
 import com.healthshield.service.AuthService;
+import com.healthshield.service.ForgotPasswordService;
+import com.healthshield.service.RefreshTokenService;
 import com.healthshield.util.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,12 @@ class AuthControllerTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private ForgotPasswordService forgotPasswordService;
+
+    @MockitoBean
+    private RefreshTokenService refreshTokenService;
 
     @MockitoBean
     private JwtUtil jwtUtil;

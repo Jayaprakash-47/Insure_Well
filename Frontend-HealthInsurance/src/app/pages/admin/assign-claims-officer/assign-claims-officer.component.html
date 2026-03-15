@@ -12,32 +12,38 @@
     <div class="panel">
       <h2>Submitted & Under Review Claims</h2>
       @if (loadingClaims) {
-      <div class="loader">Loading...</div>
+        <div class="loader">Loading...</div>
       }
       @if (!loadingClaims && claims.length === 0) {
-      <div class="empty">No submitted claims to assign</div>
+        <div class="empty">No submitted claims to assign</div>
       }
       @for (c of claims; track c) {
-      <div class="claim-card" [class.selected]="selectedClaim?.claimId === c.claimId" (click)="selectClaim(c)">
-        <div class="claim-header">
-          <strong>{{ c.claimNumber }}</strong>
-          @if (c.claimStatus === 'UNDER_REVIEW') {
-            <span class="badge" style="background: #e0f2fe; color: #0284c7;">UNDER REVIEW</span>
-          } @else {
-            <span class="badge submitted">SUBMITTED</span>
+        <div
+          class="claim-card"
+          [class.selected]="selectedClaim?.claimId === c.claimId"
+          (click)="selectClaim(c)"
+        >
+          <div class="claim-header">
+            <strong>{{ c.claimNumber }}</strong>
+            @if (c.claimStatus === 'UNDER_REVIEW') {
+              <span class="badge" style="background: #e0f2fe; color: #0284c7">UNDER REVIEW</span>
+            } @else {
+              <span class="badge submitted">SUBMITTED</span>
+            }
+          </div>
+          <div class="claim-meta">{{ c.customerName }} &bull; {{ c.claimType }}</div>
+          @if (c.assignedOfficerName) {
+            <div class="claim-meta" style="color: #0284c7; font-weight: 500">
+              Current: {{ c.assignedOfficerName }}
+            </div>
           }
+          <div class="claim-meta">Hospital: {{ c.hospitalName }}</div>
+          <div class="claim-meta">Amount: ₹{{ (c.claimAmount || 0).toLocaleString() }}</div>
+          @if (c.diagnosis) {
+            <div class="claim-meta">Diagnosis: {{ c.diagnosis }}</div>
+          }
+          <div class="claim-date">Filed: {{ c.createdAt | date: 'dd MMM yyyy, h:mm a' }}</div>
         </div>
-        <div class="claim-meta">{{ c.customerName }} &bull; {{ c.claimType }}</div>
-        @if (c.assignedOfficerName) {
-          <div class="claim-meta" style="color: #0284c7; font-weight: 500;">Current: {{ c.assignedOfficerName }}</div>
-        }
-        <div class="claim-meta">Hospital: {{ c.hospitalName }}</div>
-        <div class="claim-meta">Amount: ₹{{ (c.claimAmount || 0).toLocaleString() }}</div>
-        @if (c.diagnosis) {
-        <div class="claim-meta">Diagnosis: {{ c.diagnosis }}</div>
-        }
-        <div class="claim-date">Filed: {{ c.createdAt | date:'dd MMM yyyy, h:mm a' }}</div>
-      </div>
       }
     </div>
 
@@ -45,46 +51,66 @@
     <div class="panel">
       <h2>Select Claims Officer</h2>
       @if (!selectedClaim) {
-      <div class="empty-select">← Select a claim first</div>
+        <div class="empty-select">← Select a claim first</div>
       }
 
       @if (selectedClaim) {
-      <div class="assign-form">
-        <div class="selected-info">
-          <strong>Assigning:</strong> {{ selectedClaim.claimNumber }} — {{ selectedClaim.customerName }}
-          <div>Amount: ₹{{ (selectedClaim.claimAmount || 0).toLocaleString() }}</div>
-        </div>
-        @if (loadingOfficers) {
-        <div class="loader">Loading officers...</div>
-        }
-        @if (!loadingOfficers) {
-        <div class="officer-list">
-          @for (o of officers; track o) {
-          <div class="officer-card" [class.selected]="selectedOfficerId === o.userId"
-            (click)="selectedOfficerId = o.userId">
-            <div class="officer-info">
-              <strong>{{ o.firstName }} {{ o.lastName }}</strong>
-              <span class="dept">{{ o.department }}</span>
-            </div>
-            <div class="officer-stats">
-              <span>{{ o.totalClaimsProcessed || 0 }} processed</span>
-              <span class="approval-rate">{{ o.approvalRate || 0 }}% approval</span>
-              <span class="status-dot" [class.active]="o.isActive"></span>
-            </div>
+        <div class="assign-form">
+          <div class="selected-info">
+            <strong>Assigning:</strong> {{ selectedClaim.claimNumber }} —
+            {{ selectedClaim.customerName }}
+            <div>Amount: ₹{{ (selectedClaim.claimAmount || 0).toLocaleString() }}</div>
           </div>
+          @if (loadingOfficers) {
+            <div class="loader">Loading officers...</div>
+          }
+          @if (!loadingOfficers) {
+            <div class="officer-list">
+              @for (o of officers; track o) {
+                <div
+                  class="officer-card"
+                  [class.selected]="selectedOfficerId === o.userId"
+                  (click)="selectedOfficerId = o.userId"
+                >
+                  <div class="officer-info">
+                    <strong>{{ o.firstName }} {{ o.lastName }}</strong>
+                    <span class="dept">{{ o.department }}</span>
+                  </div>
+                  <div class="officer-stats">
+                    <span>{{ o.totalClaimsProcessed || 0 }} processed</span>
+                    <span class="approval-rate">{{ o.approvalRate || 0 }}% approval</span>
+                    <span class="status-dot" [class.active]="o.isActive"></span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+          <button
+            class="btn-assign"
+            (click)="assignOfficer()"
+            [disabled]="
+              assigning ||
+              !selectedOfficerId ||
+              selectedClaim.assignedOfficerId === selectedOfficerId
+            "
+          >
+            {{
+              assigning
+                ? 'Assigning...'
+                : selectedClaim.assignedOfficerId
+                  ? 'Reassign Officer'
+                  : 'Assign Officer'
+            }}
+          </button>
+          @if (success) {
+            <div class="success-msg">
+              Claims Officer assigned/reassigned! Claim is now UNDER REVIEW.
+            </div>
+          }
+          @if (error) {
+            <div class="error-msg">{{ error }}</div>
           }
         </div>
-        }
-        <button class="btn-assign" (click)="assignOfficer()" [disabled]="assigning || !selectedOfficerId || selectedClaim.assignedOfficerId === selectedOfficerId">
-          {{ assigning ? 'Assigning...' : (selectedClaim.assignedOfficerId ? 'Reassign Officer' : 'Assign Officer') }}
-        </button>
-        @if (success) {
-        <div class="success-msg">Claims Officer assigned/reassigned! Claim is now UNDER REVIEW.</div>
-        }
-        @if (error) {
-        <div class="error-msg">{{ error }}</div>
-        }
-      </div>
       }
     </div>
   </div>

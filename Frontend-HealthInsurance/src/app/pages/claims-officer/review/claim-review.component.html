@@ -1,170 +1,307 @@
 <div class="page-wrapper">
-    <div class="page-header">
-        <a routerLink="/claims-officer/my-claims" class="back-link">← Back to My Claims</a>
-        <h1>Claim Review</h1>
-    </div>
+  <div class="page-header">
+    <a routerLink="/claims-officer/my-claims" class="back-link">← Back to My Claims</a>
+    <h1>Claim Review</h1>
+  </div>
 
-    @if (claim) {
-    <!-- Claim Summary Card -->
+  @if (claim) {
     <div class="review-layout">
-        <div class="claim-detail-card card">
-            <div class="detail-header">
-                <div>
-                    <h2>{{ claim.claimNumber }}</h2>
-                    <span class="badge" [ngClass]="getStatusClass(claim.claimStatus)">{{ claim.claimStatus }}</span>
-                </div>
-                <div class="claim-total">{{ formatCurrency(claim.claimAmount) }}</div>
-            </div>
 
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <span class="item-label">Customer</span>
-                    <span class="item-value">{{ claim.customerName }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="item-label">Policy</span>
-                    <span class="item-value">{{ claim.policyNumber }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="item-label">Claim Type</span>
-                    <span class="item-value">{{ claim.claimType }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="item-label">Hospital</span>
-                    <span class="item-value">{{ claim.hospitalName }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="item-label">Admission Date</span>
-                    <span class="item-value">{{ claim.admissionDate | date:'mediumDate' }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="item-label">Discharge Date</span>
-                    <span class="item-value">{{ claim.dischargeDate | date:'mediumDate' }}</span>
-                </div>
-                <div class="detail-item full-width">
-                    <span class="item-label">Diagnosis</span>
-                    <span class="item-value">{{ claim.diagnosis }}</span>
-                </div>
-                <div class="detail-item full-width">
-                    <span class="item-label">Filed On</span>
-                    <span class="item-value">{{ claim.createdAt | date:'medium' }}</span>
-                </div>
-            </div>
-
-            @if (claim.tpaReferenceNumber) {
-            <div class="settlement-info">
-                <h4><span class="material-icons" style="vertical-align: middle;">account_balance</span> Settlement Info</h4>
-                <p><strong>TPA Reference:</strong> {{ claim.tpaReferenceNumber }}</p>
-                <p><strong>Settlement Amount:</strong> {{ formatCurrency(claim.settlementAmount) }}</p>
-                <p><strong>Settlement Date:</strong> {{ claim.settlementDate | date:'medium' }}</p>
-            </div>
-            }
-
-            <!-- Documents Section -->
-            <div class="documents-section">
-                <h4><span class="material-icons" style="vertical-align: middle; margin-right: 4px;">folder_open</span> Submitted Documents</h4>
-                @if (claim.documents && claim.documents.length > 0) {
-                <div class="documents-list">
-                    @for (doc of claim.documents; track doc) {
-                    <div class="document-item">
-                        <span class="material-icons doc-icon">description</span>
-                        <div class="doc-info">
-                            <span class="doc-name">{{ doc.fileName || doc.originalFileName || 'Document' }}</span>
-                            <span class="doc-meta">{{ doc.fileType || 'PDF' }}</span>
-                        </div>
-                        <div style="display: flex; gap: 4px;">
-                            <button class="btn btn-sm btn-secondary" (click)="viewDocument(doc)">
-                                <span class="material-icons" style="font-size: 16px;">visibility</span> View
-                            </button>
-                            <button class="btn btn-sm btn-secondary" (click)="downloadDocument(doc)">
-                                <span class="material-icons" style="font-size: 16px;">download</span> Download
-                            </button>
-                        </div>
-                    </div>
-                    }
-                </div>
-                } @else {
-                <p class="no-docs">No documents uploaded by the customer.</p>
-                }
-            </div>
+      <!-- ── Left: Claim Detail Card ── -->
+      <div class="claim-detail-card card">
+        <div class="detail-header">
+          <div>
+            <h2>{{ claim.claimNumber }}</h2>
+            <span class="badge" [ngClass]="getStatusClass(claim.claimStatus)">
+              {{ claim.claimStatus }}
+            </span>
+          </div>
+          <div class="claim-total">{{ formatCurrency(claim.claimAmount) }}</div>
         </div>
 
-        <!-- Decision Panel -->
-        @if (canReview) {
-        <div class="decision-panel card">
-            <h3 style="display: flex; align-items: center; gap: 8px;"><span class="material-icons" style="font-size: 1.25rem;">edit_document</span> Submit Decision</h3>
-
-            <div class="decision-buttons">
-                <button class="decision-btn approve" [class.selected]="decision === 'APPROVED'" (click)="setDecision('APPROVED')">
-                    <span class="material-icons" style="font-size: 1rem; vertical-align: middle;">check_circle</span> Approve
-                </button>
-                <button class="decision-btn partial" [class.selected]="decision === 'PARTIALLY_APPROVED'" (click)="setDecision('PARTIALLY_APPROVED')">
-                    <span class="material-icons" style="font-size: 1rem; vertical-align: middle;">balance</span> Partial
-                </button>
-                <button class="decision-btn reject" [class.selected]="decision === 'REJECTED'" (click)="setDecision('REJECTED')">
-                    <span class="material-icons" style="font-size: 1rem; vertical-align: middle;">cancel</span> Reject
-                </button>
-                <button class="decision-btn pending" [class.selected]="decision === 'DOCUMENT_PENDING'" (click)="setDecision('DOCUMENT_PENDING')">
-                    <span class="material-icons" style="font-size: 1rem; vertical-align: middle;">description</span> Need Docs
-                </button>
-            </div>
-
-            @if (decision) {
-            <div class="decision-form">
-                @if (decision === 'APPROVED' || decision === 'PARTIALLY_APPROVED') {
-                <div class="form-group">
-                    <label>Approved Amount (₹)</label>
-                    <input class="form-control" type="number" [(ngModel)]="approvedAmount" [max]="claim.claimAmount" placeholder="Enter approved amount">
-                    <span class="hint">Claimed: {{ formatCurrency(claim.claimAmount) }}</span>
-                </div>
-                }
-
-                @if (decision === 'REJECTED') {
-                <div class="form-group">
-                    <label>Rejection Reason *</label>
-                    <textarea class="form-control" [(ngModel)]="rejectionReason" rows="3" placeholder="Explain the reason for rejection"></textarea>
-                </div>
-                }
-
-                @if (decision === 'DOCUMENT_PENDING') {
-                <div class="form-group">
-                    <label>Documents Required</label>
-                    <textarea class="form-control" [(ngModel)]="additionalDocumentsRequired" rows="2" placeholder="List the required documents"></textarea>
-                </div>
-                }
-
-                <div class="form-group">
-                    <label>Reviewer Remarks</label>
-                    <textarea class="form-control" [(ngModel)]="reviewerRemarks" rows="2" placeholder="Your observations (optional)"></textarea>
-                </div>
-
-                <button class="btn btn-primary btn-lg full-width" (click)="submitReview()" [disabled]="submitting">
-                    @if (submitting) {
-                    <div class="spinner"></div> Submitting...
-                    } @else {
-                    Submit Decision
-                    }
-                </button>
-            </div>
-            }
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="item-label">Customer</span>
+            <span class="item-value">{{ claim.customerName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="item-label">Policy</span>
+            <span class="item-value">{{ claim.policyNumber }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="item-label">Claim Type</span>
+            <span class="item-value">{{ claim.claimType }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="item-label">Hospital</span>
+            <span class="item-value">{{ claim.hospitalName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="item-label">Admission Date</span>
+            <span class="item-value">{{ claim.admissionDate | date: 'mediumDate' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="item-label">Discharge Date</span>
+            <span class="item-value">{{ claim.dischargeDate | date: 'mediumDate' }}</span>
+          </div>
+          <div class="detail-item full-width">
+            <span class="item-label">Diagnosis</span>
+            <span class="item-value">{{ claim.diagnosis }}</span>
+          </div>
+          <div class="detail-item full-width">
+            <span class="item-label">Filed On</span>
+            <span class="item-value">{{ claim.createdAt | date: 'medium' }}</span>
+          </div>
         </div>
-        } @else {
-        <div class="decision-panel card read-only">
-            <h3>Decision Summary</h3>
-            @if (claim.reviewerRemarks) {
-            <p><strong>Remarks:</strong> {{ claim.reviewerRemarks }}</p>
-            }
-            @if (claim.approvedAmount) {
-            <p><strong>Approved Amount:</strong> {{ formatCurrency(claim.approvedAmount) }}</p>
-            }
-            @if (claim.rejectionReason) {
-            <p><strong>Rejection Reason:</strong> {{ claim.rejectionReason }}</p>
-            }
-            @if (claim.adminRemarks) {
-            <p><strong>Admin Decision:</strong> {{ claim.adminRemarks }}</p>
-            }
-        </div>
+
+        <!-- Settlement Info -->
+        @if (claim.tpaReferenceNumber) {
+          <div class="settlement-info">
+            <h4>
+              <span class="material-icons" style="vertical-align:middle">
+                account_balance
+              </span>
+              Settlement Info
+            </h4>
+            <p><strong>TPA Reference:</strong> {{ claim.tpaReferenceNumber }}</p>
+            <p>
+              <strong>Settlement Amount:</strong>
+              {{ formatCurrency(claim.settlementAmount) }}
+            </p>
+            <p>
+              <strong>Settlement Date:</strong>
+              {{ claim.settlementDate | date: 'medium' }}
+            </p>
+          </div>
         }
+
+        <!-- Documents Section -->
+        <div class="documents-section">
+          <h4>
+            <span class="material-icons"
+                  style="vertical-align:middle;margin-right:4px">
+              folder_open
+            </span>
+            Submitted Documents
+          </h4>
+
+          @if (claim.documents && claim.documents.length > 0) {
+            <div class="documents-list">
+              @for (doc of claim.documents; track doc) {
+                <div class="document-item">
+                  <span class="material-icons doc-icon">description</span>
+                  <div class="doc-info">
+                    <span class="doc-name">
+                      {{ doc.fileName || doc.originalFileName || 'Document' }}
+                    </span>
+                    <span class="doc-meta">{{ doc.fileType || 'PDF' }}</span>
+                  </div>
+                  <div style="display:flex;gap:4px">
+                    <button class="btn btn-sm" (click)="viewDocument(doc)">
+                      <span class="material-icons" style="font-size:14px">
+                        visibility
+                      </span>
+                      View
+                    </button>
+                    <button class="btn btn-sm" (click)="downloadDocument(doc)">
+                      <span class="material-icons" style="font-size:14px">
+                        download
+                      </span>
+                      Download
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="no-docs">No documents uploaded by the customer.</p>
+          }
+        </div>
+      </div>
+
+      <!-- ── Right: Decision Panel ── -->
+      @if (canReview) {
+        <div class="decision-panel card">
+          <h3 style="display:flex;align-items:center;gap:8px">
+            <span class="material-icons" style="font-size:1.25rem">
+              edit_document
+            </span>
+            Submit Decision
+          </h3>
+
+          <div class="decision-buttons">
+            <button class="decision-btn approve"
+                    [class.selected]="decision === 'APPROVED'"
+                    (click)="setDecision('APPROVED')">
+              <span class="material-icons"
+                    style="font-size:1rem;vertical-align:middle">
+                check_circle
+              </span>
+              Approve
+            </button>
+            <button class="decision-btn partial"
+                    [class.selected]="decision === 'PARTIALLY_APPROVED'"
+                    (click)="setDecision('PARTIALLY_APPROVED')">
+              <span class="material-icons"
+                    style="font-size:1rem;vertical-align:middle">
+                balance
+              </span>
+              Partial
+            </button>
+            <button class="decision-btn reject"
+                    [class.selected]="decision === 'REJECTED'"
+                    (click)="setDecision('REJECTED')">
+              <span class="material-icons"
+                    style="font-size:1rem;vertical-align:middle">
+                cancel
+              </span>
+              Reject
+            </button>
+            <button class="decision-btn pending"
+                    [class.selected]="decision === 'DOCUMENT_PENDING'"
+                    (click)="setDecision('DOCUMENT_PENDING')">
+              <span class="material-icons"
+                    style="font-size:1rem;vertical-align:middle">
+                description
+              </span>
+              Need Docs
+            </button>
+          </div>
+
+          @if (decision) {
+            <div class="decision-form">
+
+              @if (decision === 'APPROVED' || decision === 'PARTIALLY_APPROVED') {
+                <div class="form-group">
+                  <label>Approved Amount (₹)</label>
+                  <input class="form-control"
+                         type="number"
+                         [(ngModel)]="approvedAmount"
+                         [max]="claim.claimAmount"
+                         placeholder="Enter approved amount" />
+                  <span class="hint">
+                    Claimed: {{ formatCurrency(claim.claimAmount) }}
+                  </span>
+                </div>
+              }
+
+              @if (decision === 'REJECTED') {
+                <div class="form-group">
+                  <label>Rejection Reason *</label>
+                  <textarea class="form-control"
+                            [(ngModel)]="rejectionReason"
+                            rows="3"
+                            placeholder="Explain the reason for rejection">
+                  </textarea>
+                </div>
+              }
+
+              @if (decision === 'DOCUMENT_PENDING') {
+                <div class="form-group">
+                  <label>Documents Required</label>
+                  <textarea class="form-control"
+                            [(ngModel)]="additionalDocumentsRequired"
+                            rows="2"
+                            placeholder="List the required documents">
+                  </textarea>
+                </div>
+              }
+
+              <div class="form-group">
+                <label>Reviewer Remarks</label>
+                <textarea class="form-control"
+                          [(ngModel)]="reviewerRemarks"
+                          rows="2"
+                          placeholder="Your observations (optional)">
+                </textarea>
+              </div>
+
+              <button class="btn btn-primary btn-lg full-width"
+                      (click)="submitReview()"
+                      [disabled]="submitting">
+                @if (submitting) {
+                  <div class="spinner"></div>
+                  Submitting...
+                } @else {
+                  Submit Decision
+                }
+              </button>
+            </div>
+          }
+        </div>
+
+      } @else {
+
+        <!-- ── Read-only panel with Settle button ── -->
+        <div class="decision-panel card read-only">
+          <h3>Decision Summary</h3>
+
+          @if (claim.reviewerRemarks) {
+            <p><strong>Remarks:</strong> {{ claim.reviewerRemarks }}</p>
+          }
+          @if (claim.approvedAmount) {
+            <p>
+              <strong>Approved Amount:</strong>
+              {{ formatCurrency(claim.approvedAmount) }}
+            </p>
+          }
+          @if (claim.rejectionReason) {
+            <p>
+              <strong>Rejection Reason:</strong>
+              {{ claim.rejectionReason }}
+            </p>
+          }
+          @if (claim.adminRemarks) {
+            <p><strong>Admin Decision:</strong> {{ claim.adminRemarks }}</p>
+          }
+
+          <!-- ── Settle Button ── -->
+          @if (claim.claimStatus === 'APPROVED'
+          || claim.claimStatus === 'PARTIALLY_APPROVED') {
+            <div style="margin-top:20px;padding-top:16px;
+                        border-top:1px solid #f1f5f9">
+              <p style="font-size:13px;color:#64748b;margin-bottom:12px">
+                <span class="material-icons"
+                      style="font-size:14px;vertical-align:middle;margin-right:4px">
+                  info
+                </span>
+                Approved amount:
+                <strong>{{ formatCurrency(claim.approvedAmount) }}</strong>.
+                Click below to process the final settlement payout.
+              </p>
+              <button class="btn btn-success full-width"
+                      (click)="settleClaim()"
+                      [disabled]="settling">
+                @if (settling) {
+                  <div class="spinner"></div>
+                  Processing...
+                } @else {
+                  <span class="material-icons"
+                        style="font-size:1rem;vertical-align:middle;margin-right:4px">
+                    payments
+                  </span>
+                  Process Settlement —
+                  {{ formatCurrency(claim.approvedAmount) }}
+                }
+              </button>
+            </div>
+          }
+
+          <!-- ── Already Settled Badge ── -->
+          @if (claim.claimStatus === 'SETTLED') {
+            <div class="settled-badge">
+              <span class="material-icons" style="color:#16a34a">
+                check_circle
+              </span>
+              Settlement of
+              {{ formatCurrency(claim.settlementAmount) }}
+              processed on
+              {{ claim.settlementDate | date: 'mediumDate' }}
+            </div>
+          }
+        </div>
+      }
+
     </div>
-    }
+  }
 </div>

@@ -1,51 +1,137 @@
 <div class="page-wrapper">
-    <div class="page-header center-text">
-        <h1>Payment Details</h1>
-        <p>Review and complete your payment safely.</p>
-    </div>
-    @if (loading) {
+  <div class="page-header center-text">
+    <h1>Payment Details</h1>
+    <p>Review and complete your payment safely.</p>
+  </div>
+
+  @if (loading) {
     <div class="loading-page">
-        <div class="spinner"></div>
-        <p>Loading...</p>
+      <div class="spinner"></div>
+      <p>Loading...</p>
     </div>
-    } @else if (policy) {
-    <div class="payment-card card" style="max-width:450px; margin: 0 auto;">
-        <h3 style="margin-bottom: 20px; font-weight: 600; font-size: 1.1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 15px;">Summary</h3>
-        <div class="summary-list">
-            <div class="summary-item">
-                <span class="label">Policy Number</span>
-                <span class="value">{{ policy.policyNumber }}</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Plan Name</span>
-                <span class="value">{{ policy.planName }}</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">Coverage</span>
-                <span class="value">{{ formatCurrency(policy.coverageAmount) }}</span>
-            </div>
-            <div class="summary-item total-item" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border);">
-                <span class="label" style="font-weight: 600; color: var(--text-primary);">Total Amount</span>
-                <span class="value" style="font-weight: 700; font-size: 1.25rem; color: var(--primary);">{{ formatCurrency(policy.premiumAmount) }}</span>
-            </div>
+  } @else if (policy) {
+    <div class="payment-card card">
+      <!-- ── Order Summary ── -->
+      <h3 class="section-title">Order Summary</h3>
+
+      <div class="summary-list">
+        <div class="summary-item">
+          <span class="label">Policy Number</span>
+          <span class="value">{{ policy.policyNumber }}</span>
         </div>
-        
-        <div class="form-group" style="margin-top:25px;">
-            <label style="font-size: 0.9rem; margin-bottom: 8px;">Select Payment Method</label>
-            <select class="form-control" [(ngModel)]="paymentMethod">
-                <option value="UPI">UPI Interface</option>
-                <option value="CREDIT_CARD">Credit Card</option>
-                <option value="DEBIT_CARD">Debit Card</option>
-                <option value="NET_BANKING">Net Banking</option>
-            </select>
+        <div class="summary-item">
+          <span class="label">Plan Name</span>
+          <span class="value">{{ policy.planName }}</span>
         </div>
-        
-        <button class="btn btn-primary" style="width:100%; margin-top:25px; padding: 12px 0;" (click)="pay()"
-            [disabled]="paying || policy.policyStatus !== 'QUOTE_SENT'">
-            @if (paying) { <span class="spinner" style="width:16px;height:16px;margin-right:8px;border-width:2px;border-top-color:#fff;"></span> Processing... } 
-            @else if (policy.policyStatus !== 'QUOTE_SENT') { Status: {{ policy.policyStatus }} } 
-            @else { Pay {{ formatCurrency(policy.premiumAmount) }} }
+        <div class="summary-item">
+          <span class="label">Coverage Amount</span>
+          <span class="value">{{ formatCurrency(policy.coverageAmount) }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Underwriter</span>
+          <span class="value">{{ policy.underwriterName || 'Assigned' }}</span>
+        </div>
+      </div>
+
+      <!-- ── Total ── -->
+      <div class="total-row">
+        <span>Total Amount Payable</span>
+        <strong class="total-amount">
+          {{ formatCurrency(policy.premiumAmount) }}
+        </strong>
+      </div>
+
+      <!-- ── What you get ── -->
+      <div class="benefits-row">
+        <div class="benefit-item">
+          <span class="material-icons" style="font-size: 16px; color: #16a34a"> check_circle </span>
+          Instant activation
+        </div>
+        <div class="benefit-item">
+          <span class="material-icons" style="font-size: 16px; color: #16a34a"> check_circle </span>
+          Policy certificate via email
+        </div>
+        <div class="benefit-item">
+          <span class="material-icons" style="font-size: 16px; color: #16a34a"> check_circle </span>
+          Coverage starts immediately
+        </div>
+      </div>
+
+      <!-- ── Razorpay Pay Button ── -->
+      @if (policy.policyStatus === 'QUOTE_SENT') {
+        <button class="btn-razorpay" (click)="pay()" [disabled]="paying || !razorpayLoaded">
+          @if (paying) {
+            <span
+              class="spinner"
+              style="
+                width: 16px;
+                height: 16px;
+                margin-right: 8px;
+                border-width: 2px;
+                border-top-color: #fff;
+              "
+            >
+            </span>
+            Processing...
+          } @else {
+            <span class="razorpay-icon">
+              <!-- Razorpay SVG logo -->
+              <svg width="20" height="20" viewBox="0 0 512 512" fill="white">
+                <path
+                  d="M348.57 197.62L277.8 0 32 362.68h178.1L
+                                         160.53 512l319.47-314.38H348.57zm-108.3
+                                         210.43l34.57-116.18H176.5L263.03
+                                         130.9l55.17 154.17h82.54l-160.47
+                                         122.98z"
+                />
+              </svg>
+            </span>
+            Pay {{ formatCurrency(policy.premiumAmount) }} with Razorpay
+          }
         </button>
+
+        <p class="secure-text">
+          <span class="material-icons" style="font-size: 14px; vertical-align: middle"> lock </span>
+          Secured by Razorpay — 256-bit SSL encryption
+        </p>
+
+        <!-- ── Accepted payment methods ── -->
+        <div class="payment-methods">
+          <span class="method-badge">UPI</span>
+          <span class="method-badge">Credit Card</span>
+          <span class="method-badge">Debit Card</span>
+          <span class="method-badge">Net Banking</span>
+          <span class="method-badge">Wallets</span>
+        </div>
+
+        <!-- ── Test mode notice ── -->
+        <div class="test-notice">
+          <span
+            class="material-icons"
+            style="font-size: 14px; vertical-align: middle; margin-right: 4px"
+          >
+            info
+          </span>
+          Test Mode — Use card
+          <strong>4111 1111 1111 1111</strong>, any expiry, CVV <strong>any 3 digits</strong>, OTP
+          <strong>1234</strong>
+        </div>
+      } @else {
+        <div class="status-note">
+          <span class="material-icons">info</span>
+          Current Status: <strong>{{ policy.policyStatus }}</strong>
+          <span *ngIf="policy.policyStatus === 'ACTIVE'"> — Your policy is already active! </span>
+        </div>
+        @if (policy.policyStatus === 'ACTIVE') {
+          <button
+            class="btn btn-primary"
+            style="width: 100%; margin-top: 16px"
+            (click)="router.navigate(['/customer/policies'])"
+          >
+            View My Policies
+          </button>
+        }
+      }
     </div>
-    }
+  }
 </div>

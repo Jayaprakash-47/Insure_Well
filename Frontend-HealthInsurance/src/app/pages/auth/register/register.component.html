@@ -1,116 +1,241 @@
 <div class="auth-page">
-    <div class="auth-card register-card">
-        <div class="auth-header">
-            <a routerLink="/" class="auth-brand">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#800020" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-                InsureWell
-            </a>
-            <h1>Create Account</h1>
-            <p>Register to start exploring health insurance plans</p>
-        </div>
-
-        <form (ngSubmit)="onSubmit()">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="firstName">First Name <span class="required">*</span></label>
-                    <input id="firstName" type="text" class="form-control" [(ngModel)]="form.firstName" name="firstName"
-                        placeholder="First name" [class.error]="errors.firstName && touched.firstName" (blur)="onBlur('firstName')" />
-                    @if (errors.firstName && touched.firstName) {
-                        <span class="error-message">{{ errors.firstName }}</span>
-                    }
-                </div>
-                <div class="form-group">
-                    <label for="lastName">Last Name <span class="required">*</span></label>
-                    <input id="lastName" type="text" class="form-control" [(ngModel)]="form.lastName" name="lastName"
-                        placeholder="Last name" [class.error]="errors.lastName && touched.lastName" (blur)="onBlur('lastName')" />
-                    @if (errors.lastName && touched.lastName) {
-                        <span class="error-message">{{ errors.lastName }}</span>
-                    }
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="regEmail">Email Address <span class="required">*</span></label>
-                <input id="regEmail" type="email" class="form-control" [(ngModel)]="form.email" name="email"
-                    placeholder="you@example.com" [class.error]="errors.email && touched.email" (blur)="onBlur('email')" />
-                @if (errors.email && touched.email) {
-                    <span class="error-message">{{ errors.email }}</span>
-                }
-            </div>
-
-            <div class="form-group">
-                <label for="regPassword">Password <span class="required">*</span></label>
-                <input id="regPassword" type="password" class="form-control" [(ngModel)]="form.password" name="password"
-                    placeholder="Min 6 characters" [class.error]="errors.password && touched.password" (blur)="onBlur('password')" />
-                @if (errors.password && touched.password) {
-                    <span class="error-message">{{ errors.password }}</span>
-                }
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="phone">Phone Number <span class="required">*</span></label>
-                    <input id="phone" type="tel" class="form-control" [(ngModel)]="form.phone" name="phone"
-                        placeholder="9876543210" [class.error]="errors.phone && touched.phone" (blur)="onBlur('phone')" />
-                    @if (errors.phone && touched.phone) {
-                        <span class="error-message">{{ errors.phone }}</span>
-                    }
-                </div>
-                <div class="form-group">
-                    <label for="dob">Date of Birth <span class="required">*</span></label>
-                    <input id="dob" type="date" class="form-control" [(ngModel)]="form.dateOfBirth"
-                        name="dateOfBirth" [class.error]="errors.dateOfBirth && touched.dateOfBirth" (blur)="onBlur('dateOfBirth')" />
-                    @if (errors.dateOfBirth && touched.dateOfBirth) {
-                        <span class="error-message">{{ errors.dateOfBirth }}</span>
-                    }
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="gender">Gender</label>
-                <select id="gender" class="form-control" [(ngModel)]="form.gender" name="gender">
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="OTHER">Other</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="address">Address</label>
-                <input id="address" type="text" class="form-control" [(ngModel)]="form.address" name="address"
-                    placeholder="Street address" />
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="city">City</label>
-                    <input id="city" type="text" class="form-control" [(ngModel)]="form.city" name="city"
-                        placeholder="City" />
-                </div>
-                <div class="form-group">
-                    <label for="state">State</label>
-                    <input id="state" type="text" class="form-control" [(ngModel)]="form.state" name="state"
-                        placeholder="State" />
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="pincode">Pincode</label>
-                <input id="pincode" type="text" class="form-control" [(ngModel)]="form.pincode" name="pincode"
-                    placeholder="600001" />
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="loading">
-                @if (loading) {
-                <span class="spinner"></span> Creating Account...
-                } @else {
-                Create Account
-                }
-            </button>
-        </form>
-
-        <div class="auth-footer">
-            <p>Already have an account? <a routerLink="/login">Sign in</a></p>
-        </div>
+  <div class="auth-card register-card">
+    <div class="auth-header">
+      <a routerLink="/" class="auth-brand">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#800020"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="M9 12l2 2 4-4" />
+        </svg>
+        InsureWell
+      </a>
+      <h1>Create Account</h1>
+      <p>Register to start exploring health insurance plans</p>
     </div>
+
+    <form (ngSubmit)="onSubmit()">
+      <!-- ── First Name + Last Name (unchanged) ── -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name <span class="required">*</span></label>
+          <input
+            id="firstName"
+            type="text"
+            class="form-control"
+            [(ngModel)]="form.firstName"
+            name="firstName"
+            placeholder="First name"
+            [class.error]="errors.firstName && touched.firstName"
+            (blur)="onBlur('firstName')"
+          />
+          @if (errors.firstName && touched.firstName) {
+            <span class="error-message">{{ errors.firstName }}</span>
+          }
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name <span class="required">*</span></label>
+          <input
+            id="lastName"
+            type="text"
+            class="form-control"
+            [(ngModel)]="form.lastName"
+            name="lastName"
+            placeholder="Last name"
+            [class.error]="errors.lastName && touched.lastName"
+            (blur)="onBlur('lastName')"
+          />
+          @if (errors.lastName && touched.lastName) {
+            <span class="error-message">{{ errors.lastName }}</span>
+          }
+        </div>
+      </div>
+
+      <!-- ── Email (unchanged) ── -->
+      <div class="form-group">
+        <label for="regEmail">Email Address <span class="required">*</span></label>
+        <input
+          id="regEmail"
+          type="email"
+          class="form-control"
+          [(ngModel)]="form.email"
+          name="email"
+          placeholder="you@example.com"
+          [class.error]="errors.email && touched.email"
+          (blur)="onBlur('email')"
+        />
+        @if (errors.email && touched.email) {
+          <span class="error-message">{{ errors.email }}</span>
+        }
+      </div>
+
+      <!-- ── PASSWORD — show/hide toggle + strength meter (modified) ── -->
+      <div class="form-group">
+        <label for="regPassword">Password <span class="required">*</span></label>
+
+        <div style="position: relative; display: flex">
+          <input
+            id="regPassword"
+            [type]="showPassword ? 'text' : 'password'"
+            class="form-control"
+            [(ngModel)]="form.password"
+            name="password"
+            placeholder="Min 8 characters"
+            [class.error]="errors.password && touched.password"
+            (blur)="onBlur('password')"
+            style="padding-right: 44px"
+          />
+          <button
+            type="button"
+            (click)="showPassword = !showPassword"
+            style="
+              position: absolute;
+              right: 0;
+              top: 0;
+              height: 100%;
+              width: 42px;
+              background: none;
+              border: none;
+              cursor: pointer;
+              color: #6b7280;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 16px;
+            "
+          >
+            {{ showPassword ? '🙈' : '👁️' }}
+          </button>
+        </div>
+
+        <!-- Password strength meter -->
+        <app-password-strength [password]="form.password"></app-password-strength>
+
+        @if (errors.password && touched.password) {
+          <span class="error-message">{{ errors.password }}</span>
+        }
+      </div>
+
+      <!-- ── Phone + DOB row ── -->
+      <div class="form-row">
+        <!-- Phone (unchanged) -->
+        <div class="form-group">
+          <label for="phone">Phone Number <span class="required">*</span></label>
+          <input
+            id="phone"
+            type="tel"
+            class="form-control"
+            [(ngModel)]="form.phone"
+            name="phone"
+            placeholder="9876543210"
+            [class.error]="errors.phone && touched.phone"
+            (blur)="onBlur('phone')"
+          />
+          @if (errors.phone && touched.phone) {
+            <span class="error-message">{{ errors.phone }}</span>
+          }
+        </div>
+
+        <!-- DOB — [max]="today" added (modified) -->
+        <div class="form-group">
+          <label for="dob">Date of Birth <span class="required">*</span></label>
+          <input
+            id="dob"
+            type="date"
+            class="form-control"
+            [(ngModel)]="form.dateOfBirth"
+            name="dateOfBirth"
+            [max]="today"
+            [class.error]="errors.dateOfBirth && touched.dateOfBirth"
+            (blur)="onBlur('dateOfBirth')"
+          />
+          @if (errors.dateOfBirth && touched.dateOfBirth) {
+            <span class="error-message">{{ errors.dateOfBirth }}</span>
+          }
+        </div>
+      </div>
+
+      <!-- ── Gender (unchanged) ── -->
+      <div class="form-group">
+        <label for="gender">Gender</label>
+        <select id="gender" class="form-control" [(ngModel)]="form.gender" name="gender">
+          <option value="MALE">Male</option>
+          <option value="FEMALE">Female</option>
+          <option value="OTHER">Other</option>
+        </select>
+      </div>
+
+      <!-- ── Address (unchanged) ── -->
+      <div class="form-group">
+        <label for="address">Address</label>
+        <input
+          id="address"
+          type="text"
+          class="form-control"
+          [(ngModel)]="form.address"
+          name="address"
+          placeholder="Street address"
+        />
+      </div>
+
+      <!-- ── City + State (unchanged) ── -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="city">City</label>
+          <input
+            id="city"
+            type="text"
+            class="form-control"
+            [(ngModel)]="form.city"
+            name="city"
+            placeholder="City"
+          />
+        </div>
+        <div class="form-group">
+          <label for="state">State</label>
+          <input
+            id="state"
+            type="text"
+            class="form-control"
+            [(ngModel)]="form.state"
+            name="state"
+            placeholder="State"
+          />
+        </div>
+      </div>
+
+      <!-- ── Pincode (unchanged) ── -->
+      <div class="form-group">
+        <label for="pincode">Pincode</label>
+        <input
+          id="pincode"
+          type="text"
+          class="form-control"
+          [(ngModel)]="form.pincode"
+          name="pincode"
+          placeholder="600001"
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="loading">
+        @if (loading) {
+          <span class="spinner"></span> Creating Account...
+        } @else {
+          Create Account
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a routerLink="/login">Sign in</a></p>
+    </div>
+  </div>
 </div>

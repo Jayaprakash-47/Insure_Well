@@ -41,7 +41,6 @@ public class JwtUtil {
                 .signWith(getSigningKey())
                 .compact();
     }
-
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }

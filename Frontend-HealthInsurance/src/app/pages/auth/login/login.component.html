@@ -1,43 +1,118 @@
 <div class="auth-page">
-    <div class="auth-card">
-        <div class="auth-header">
-            <a routerLink="/" class="auth-brand">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#800020" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-                InsureWell
-            </a>
-            <h1>Welcome Back</h1>
-            <p>Sign in to manage your policies and claims</p>
-        </div>
-
-        <form (ngSubmit)="onSubmit()">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input id="email" type="email" class="form-control" [(ngModel)]="email" name="email"
-                    placeholder="Enter your email" autocomplete="email" (blur)="onBlur('email')" [class.error]="errors.email && touched.email" />
-                @if (errors.email && touched.email) {
-                    <span class="error-message">{{ errors.email }}</span>
-                }
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input id="password" type="password" class="form-control" [(ngModel)]="password" name="password"
-                    placeholder="Enter your password" autocomplete="current-password" (blur)="onBlur('password')" [class.error]="errors.password && touched.password" />
-                @if (errors.password && touched.password) {
-                    <span class="error-message">{{ errors.password }}</span>
-                }
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="loading">
-                @if (loading) {
-                <span class="spinner"></span> Signing in...
-                } @else {
-                Sign In
-                }
-            </button>
-        </form>
-        <div class="auth-footer">
-            <p>Don't have an account? <a routerLink="/register">Register here</a></p>
-        </div>
+  <div class="auth-card">
+    <div class="auth-header">
+      <a routerLink="/" class="auth-brand">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#800020"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="M9 12l2 2 4-4" />
+        </svg>
+        InsureWell
+      </a>
+      <h1>Welcome Back</h1>
+      <p>Sign in to manage your policies and claims</p>
     </div>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          type="email"
+          class="form-control"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="Enter your email"
+          autocomplete="email"
+          (blur)="onBlur('email')"
+          [class.error]="errors.email && touched.email"
+        />
+        @if (errors.email && touched.email) {
+          <span class="error-message">{{ errors.email }}</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <!-- ── Label row with Forgot Password link ── -->
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+          "
+        >
+          <label for="password" style="margin: 0">Password</label>
+          <a
+            routerLink="/forgot-password"
+            style="font-size: 12px; color: #800020; text-decoration: none; font-weight: 500"
+          >
+            Forgot password?
+          </a>
+        </div>
+
+        <!-- ── Password input with show/hide toggle ── -->
+        <div style="position: relative; display: flex">
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            class="form-control"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            (blur)="onBlur('password')"
+            [class.error]="errors.password && touched.password"
+            style="padding-right: 44px"
+          />
+          <button
+            type="button"
+            (click)="showPassword = !showPassword"
+            style="
+              position: absolute;
+              right: 0;
+              top: 0;
+              height: 100%;
+              width: 42px;
+              background: none;
+              border: none;
+              cursor: pointer;
+              color: #6b7280;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 16px;
+            "
+          >
+            {{ showPassword ? '🙈' : '👁️' }}
+          </button>
+        </div>
+
+        @if (errors.password && touched.password) {
+          <span class="error-message">{{ errors.password }}</span>
+        }
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="loading">
+        @if (loading) {
+          <span class="spinner"></span> Signing in...
+        } @else {
+          Sign In
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Don't have an account? <a routerLink="/register">Register here</a></p>
+    </div>
+  </div>
 </div>

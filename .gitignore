@@ -20,3 +20,12 @@ Thumbs.db
 # Implementation notes
 IMPLEMENTATION_SUMMARY.md
 
+# Node dependencies
+node_modules/
+
+# npm files
+package.json
+package-lock.json
+
+
+

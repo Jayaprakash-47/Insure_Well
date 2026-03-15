@@ -1,84 +1,126 @@
 <div class="page-wrapper">
-    <div class="page-header" style="text-align:center; margin-bottom:32px;">
-        <h1>Our Insurance Plans</h1>
-        <p>Choose the plan that best fits your needs and budget</p>
-    </div>
+  <div class="page-header" style="text-align: center; margin-bottom: 32px">
+    <h1>Our Insurance Plans</h1>
+    <p>Choose the plan that best fits your needs and budget</p>
+  </div>
 
-    @if (loading) {
+  @if (loading) {
     <div class="loading-page">
-        <div class="spinner"></div>
-        <p>Loading plans...</p>
+      <div class="spinner"></div>
+      <p>Loading plans...</p>
     </div>
-    } @else {
+  } @else {
     <!-- Search & Filter -->
     <div class="search-filter-bar">
-        <div class="search-box">
-            <span class="material-icons search-icon">search</span>
-            <input type="text" class="form-control" placeholder="Search plans by name..." [(ngModel)]="searchTerm" />
-        </div>
-        <div class="filter-bar">
-            <button class="filter-btn" [class.active]="selectedPlanType === 'ALL'" (click)="setFilter('ALL')">All</button>
-            @for (type of planTypes; track type) {
-            <button class="filter-btn" [class.active]="selectedPlanType === type" (click)="setFilter(type)">{{ type.replace('_', ' ') }}</button>
-            }
-        </div>
+      <div class="search-box">
+        <span class="material-icons search-icon">search</span>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search plans by name..."
+          [(ngModel)]="searchTerm"
+        />
+      </div>
+      <div class="filter-bar">
+        <button
+          class="filter-btn"
+          [class.active]="selectedPlanType === 'ALL'"
+          (click)="setFilter('ALL')"
+        >
+          All
+        </button>
+        @for (type of planTypes; track type) {
+          <button
+            class="filter-btn"
+            [class.active]="selectedPlanType === type"
+            (click)="setFilter(type)"
+          >
+            {{ type.replace('_', ' ') }}
+          </button>
+        }
+      </div>
     </div>
 
     @if (filteredPlans.length === 0) {
-    <div class="empty-state">
+      <div class="empty-state">
         <span class="empty-icon">🔍</span>
         <h3>No plans found</h3>
         <p>Try adjusting your search or filter criteria</p>
-    </div>
+      </div>
     } @else {
-    <div class="plans-grid">
+      <div class="plans-grid">
         @for (plan of filteredPlans; track plan.planId) {
-        <div class="plan-card">
+          <div class="plan-card">
             <div class="plan-type-badge">{{ plan.planType }}</div>
             <h3>{{ plan.planName }}</h3>
             <p class="plan-desc">{{ plan.description }}</p>
 
             <div class="plan-price">
-                <span class="price">{{ formatCurrency(plan.basePremiumAmount) }}</span>
-                <span class="price-label">/ year (base premium)</span>
+              <span class="price">{{ formatCurrency(plan.basePremiumAmount) }}</span>
+              <span class="price-label">/ year (base premium)</span>
             </div>
 
             <div class="plan-details">
-                <div class="detail-row">
-                    <span>Coverage</span>
-                    <strong>{{ formatCurrency(plan.coverageAmount) }}</strong>
-                </div>
-                <div class="detail-row">
-                    <span>Duration</span>
-                    <strong>{{ plan.planDurationMonths }} months</strong>
-                </div>
-                <div class="detail-row">
-                    <span>Age Limit</span>
-                    <strong>{{ plan.minAgeLimit }} - {{ plan.maxAgeLimit }} years</strong>
-                </div>
-                <div class="detail-row">
-                    <span>Waiting Period</span>
-                    <strong>{{ plan.waitingPeriodMonths }} months</strong>
-                </div>
-                <div class="detail-row">
-                    <span>Maternity Cover</span>
-                    <strong><span class="material-icons" [style.color]="plan.maternityCover ? '#10b981' : '#dc2626'" style="font-size: 1rem; vertical-align: middle;">{{ plan.maternityCover ? 'check_circle' : 'cancel' }}</span> {{ plan.maternityCover ? 'Yes' : 'No' }}</strong>
-                </div>
-                <div class="detail-row">
-                    <span>Pre-existing Cover</span>
-                    <strong><span class="material-icons" [style.color]="plan.preExistingDiseaseCover ? '#10b981' : '#dc2626'" style="font-size: 1rem; vertical-align: middle;">{{ plan.preExistingDiseaseCover ? 'check_circle' : 'cancel' }}</span> {{ plan.preExistingDiseaseCover ? 'Yes' : 'No' }}</strong>
-                </div>
+              <div class="detail-row">
+                <span>Coverage</span>
+                <strong>{{ formatCurrency(plan.coverageAmount) }}</strong>
+              </div>
+              <div class="detail-row">
+                <span>Duration</span>
+                <strong>{{ plan.planDurationMonths }} months</strong>
+              </div>
+              <div class="detail-row">
+                <span>Age Limit</span>
+                <strong>{{ plan.minAgeLimit }} - {{ plan.maxAgeLimit }} years</strong>
+              </div>
+              <div class="detail-row">
+                <span>Waiting Period</span>
+                <strong>{{ plan.waitingPeriodMonths }} months</strong>
+              </div>
+              <div class="detail-row">
+                <span>Maternity Cover</span>
+                <strong
+                  ><span
+                    class="material-icons"
+                    [style.color]="plan.maternityCover ? '#10b981' : '#dc2626'"
+                    style="font-size: 1rem; vertical-align: middle"
+                    >{{ plan.maternityCover ? 'check_circle' : 'cancel' }}</span
+                  >
+                  {{ plan.maternityCover ? 'Yes' : 'No' }}</strong
+                >
+              </div>
+              <div class="detail-row">
+                <span>Pre-existing Cover</span>
+                <strong
+                  ><span
+                    class="material-icons"
+                    [style.color]="plan.preExistingDiseaseCover ? '#10b981' : '#dc2626'"
+                    style="font-size: 1rem; vertical-align: middle"
+                    >{{ plan.preExistingDiseaseCover ? 'check_circle' : 'cancel' }}</span
+                  >
+                  {{ plan.preExistingDiseaseCover ? 'Yes' : 'No' }}</strong
+                >
+              </div>
             </div>
 
             @if (auth.isCustomer()) {
-            <a routerLink="/customer/calculator" class="btn btn-primary" style="width:100%; margin-top:16px;">Get
-                Quote</a>
+              <a
+                routerLink="/customer/calculator"
+                class="btn btn-primary"
+                style="width: 100%; margin-top: 16px"
+                >Get Quote</a
+              >
             } @else if (!auth.isLoggedIn()) {
-            <a routerLink="/register" class="btn btn-primary" style="width:100%; margin-top:16px;">Register to Buy</a>
+              <a
+                routerLink="/register"
+                class="btn btn-primary"
+                style="width: 100%; margin-top: 16px"
+                >Register to Buy</a
+              >
             }
-        </div>
+          </div>
         }
-    </div>
+      </div>
     }
-    }
+  }
 </div>

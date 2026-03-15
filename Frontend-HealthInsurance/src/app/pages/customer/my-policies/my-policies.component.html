@@ -1,139 +1,556 @@
 <div class="page-wrapper">
-    <div class="page-header">
-        <h1>My Policies</h1>
-        <p>View and manage your insurance policies</p>
-    </div>
-    @if (loading) {
-    <div class="loading-page">
-        <div class="spinner"></div>
-        <p>Loading...</p>
-    </div>
-    } @else if (policies.length === 0) {
-    <div class="empty-state">
-        <h3>No policies yet</h3>
-        <p>Browse our plans and apply for your first policy!</p>
-        <a routerLink="/customer/plans" class="btn btn-primary">Browse Plans</a>
-    </div>
-    } @else {
+  <div class="page-header">
+    <h1>My Policies</h1>
+    <p>View and manage your insurance policies</p>
+  </div>
 
-    <!-- Quote Ready Banner -->
-    @if (quotedPolicies.length > 0) {
-    <div class="quote-banner">
-        <div class="quote-banner-icon"><span class="material-icons" style="font-size: 2.5rem;">campaign</span></div>
-        <div>
-            <strong>You have {{ quotedPolicies.length }} quote(s) ready!</strong>
-            <p>Your underwriter has reviewed your application and sent a premium quote. Pay now to activate your policy.
-            </p>
-        </div>
+  @if (loading) {
+    <div class="loading-page">
+      <div class="spinner"></div>
+      <p>Loading...</p>
     </div>
+  } @else if (policies.length === 0) {
+    <div class="empty-state">
+      <h3>No policies yet</h3>
+      <p>Browse our plans and apply for your first policy!</p>
+      <a routerLink="/customer/plans" class="btn btn-primary">Browse Plans</a>
+    </div>
+  } @else {
+    <!-- ── Concern Banner (unchanged) ── -->
+    @if (concernPolicies.length > 0) {
+      <div class="concern-banner">
+        <div class="concern-banner-icon">
+          <span class="material-icons" style="font-size: 2.5rem">warning</span>
+        </div>
+        <div>
+          <strong>{{ concernPolicies.length }} policy(ies) need your attention!</strong>
+          <p>An underwriter has raised a concern. Please review and reapply.</p>
+        </div>
+      </div>
+    }
+
+    <!-- ── Quote Banner (unchanged) ── -->
+    @if (quotedPolicies.length > 0) {
+      <div class="quote-banner">
+        <div class="quote-banner-icon">
+          <span class="material-icons" style="font-size: 2.5rem">campaign</span>
+        </div>
+        <div>
+          <strong>You have {{ quotedPolicies.length }} quote(s) ready!</strong>
+          <p>Your underwriter has sent a premium quote. Pay now to activate.</p>
+        </div>
+      </div>
+    }
+
+    <!-- ── NEW: Expired Renewal Banner ── -->
+    @if (expiredPolicies.length > 0) {
+      <div class="renewal-banner">
+        <div class="renewal-banner-icon">
+          <span class="material-icons" style="font-size: 2.5rem">autorenew</span>
+        </div>
+        <div>
+          <strong>{{ expiredPolicies.length }} policy(ies) expired — Renew Now!</strong>
+          <p>Keep your coverage active by renewing your expired policies.</p>
+        </div>
+      </div>
     }
 
     <div class="cards-list">
-        @for (p of policies; track p.policyId) {
-        <div class="policy-card" [class.quote-ready]="p.policyStatus === 'QUOTE_SENT'"
-            [class.active]="p.policyStatus === 'ACTIVE'">
+      @for (p of policies; track p.policyId) {
+        <div
+          class="policy-card"
+          [class.quote-ready]="p.policyStatus === 'QUOTE_SENT'"
+          [class.active]="p.policyStatus === 'ACTIVE'"
+          [class.concern]="p.policyStatus === 'CONCERN_RAISED'"
+          [class.expired]="p.policyStatus === 'EXPIRED'"
+          [class.expiring-soon]="isExpiringSoon(p)"
+        >
+          <div class="card-header">
+            <div class="card-title">
+              <span class="policy-num">{{ p.policyNumber }}</span>
+              <span
+                class="badge"
+                [class.badge-active]="p.policyStatus === 'ACTIVE'"
+                [class.badge-pending]="p.policyStatus === 'PENDING'"
+                [class.badge-assigned]="p.policyStatus === 'ASSIGNED'"
+                [class.badge-quote]="p.policyStatus === 'QUOTE_SENT'"
+                [class.badge-concern]="p.policyStatus === 'CONCERN_RAISED'"
+                [class.badge-cancelled]="p.policyStatus === 'CANCELLED'"
+                [class.badge-expired]="p.policyStatus === 'EXPIRED'"
+              >
+                {{ getStatusLabel(p.policyStatus) }}
+              </span>
 
-            <div class="card-header">
-                <div class="card-title">
-                    <span class="policy-num">{{ p.policyNumber }}</span>
-                    <span class="badge" [class.badge-active]="p.policyStatus==='ACTIVE'"
-                        [class.badge-pending]="p.policyStatus==='PENDING'"
-                        [class.badge-assigned]="p.policyStatus==='ASSIGNED'"
-                        [class.badge-quote]="p.policyStatus==='QUOTE_SENT'"
-                        [class.badge-cancelled]="p.policyStatus==='CANCELLED'"
-                        [class.badge-expired]="p.policyStatus==='EXPIRED'">
-                        {{ getStatusLabel(p.policyStatus) }}
-                    </span>
-                </div>
-                <span class="plan-name">{{ p.planName }}</span>
+              <!-- NEW: Expiring soon warning -->
+              @if (isExpiringSoon(p)) {
+                <span class="badge badge-expiring">
+                  ⚠ Expires in {{ getDaysUntilExpiry(p) }} days
+                </span>
+              }
+
+              <!-- NEW: NCB badge for active policies -->
+              @if (p.policyStatus === 'ACTIVE' && (p.noClaimBonus || 0) > 0) {
+                <span class="badge badge-ncb"> 🎁 NCB {{ p.noClaimBonus }}% </span>
+              }
             </div>
+            <span class="plan-name">{{ p.planName }}</span>
+          </div>
 
-            <!-- Quote Highlight Box -->
-            @if (p.policyStatus === 'QUOTE_SENT') {
+          <!-- Concern Raised Box (unchanged) -->
+          @if (p.policyStatus === 'CONCERN_RAISED') {
+            <div class="concern-box">
+              <div class="concern-header">
+                <span class="material-icons" style="color: #dc2626"> report_problem </span>
+                <strong>Underwriter Concern</strong>
+              </div>
+              @if (p.underwriterName) {
+                <div class="concern-by">Raised by: {{ p.underwriterName }}</div>
+              }
+              <div class="concern-remarks">{{ p.underwriterRemarks }}</div>
+              <p class="concern-help">
+                Please update your details and click
+                <strong>Reapply</strong> below.
+              </p>
+            </div>
+          }
+
+          <!-- Quote Box (unchanged) -->
+          @if (p.policyStatus === 'QUOTE_SENT') {
             <div class="quote-box">
-                <div class="quote-left">
-                    <div class="quote-label">Premium Quote from your Underwriter</div>
-                    <div class="quote-amount">₹{{ formatCurrency(p.quoteAmount) }}<span>/year</span></div>
-                    @if (p.underwriterName) {
-                    <div class="quote-by">Quoted by: {{ p.underwriterName }}</div>
-                    }
+              <div class="quote-left">
+                <div class="quote-label">Premium Quote from your Underwriter</div>
+                <div class="quote-amount">
+                  ₹{{ formatCurrency(p.quoteAmount) }}
+                  <span>/year</span>
                 </div>
-                <a [routerLink]="['/customer/payment', p.policyId]" class="btn-pay-now">
-                    Pay Now & Activate →
-                </a>
+                @if (p.underwriterName) {
+                  <div class="quote-by">Quoted by: {{ p.underwriterName }}</div>
+                }
+              </div>
+              <a [routerLink]="['/customer/payment', p.policyId]" class="btn-pay-now">
+                Pay Now & Activate →
+              </a>
             </div>
+          }
+
+          <!-- NEW: Expired Renewal Box -->
+          @if (p.policyStatus === 'EXPIRED') {
+            <div class="renewal-box">
+              <div class="renewal-left">
+                <div class="renewal-label">
+                  <span
+                    class="material-icons"
+                    style="font-size: 16px; vertical-align: middle; margin-right: 4px"
+                  >
+                    autorenew
+                  </span>
+                  Renew Your Policy
+                </div>
+                <div class="renewal-sub">
+                  This policy expired on
+                  <strong>{{ p.endDate | date: 'dd MMM yyyy' }}</strong
+                  >. Renew to restore coverage.
+                </div>
+                @if ((p.totalClaimedAmount || 0) === 0) {
+                  <div class="ncb-hint">
+                    🎁 You qualify for a
+                    <strong>No-Claim Bonus</strong>
+                    discount on renewal!
+                  </div>
+                }
+              </div>
+              <button class="btn-renew-now" (click)="openRenewalModal(p)">Renew Now →</button>
+            </div>
+          }
+
+          <div class="card-body">
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Total Coverage</label>
+                <strong>₹{{ formatCurrency(p.coverageAmount) }}</strong>
+              </div>
+              <div class="info-item">
+                @if (p.policyStatus === 'QUOTE_SENT') {
+                  <label>Quoted Premium</label>
+                  <strong class="highlight"> ₹{{ formatCurrency(p.quoteAmount) }}/yr </strong>
+                } @else {
+                  <label>Premium</label>
+                  <strong>₹{{ formatCurrency(p.premiumAmount) }}/yr</strong>
+                }
+              </div>
+              <div class="info-item">
+                <label>Start Date</label>
+                <strong>
+                  {{ p.startDate ? (p.startDate | date: 'dd MMM yyyy') : 'Not Active Yet' }}
+                </strong>
+              </div>
+              <div class="info-item">
+                <label>End Date</label>
+                <strong>
+                  {{ p.endDate ? (p.endDate | date: 'dd MMM yyyy') : 'Not Active Yet' }}
+                </strong>
+              </div>
+
+              <!-- NEW: Remaining coverage for active policies -->
+              @if (p.policyStatus === 'ACTIVE' && p.remainingCoverage != null) {
+                <div class="info-item">
+                  <label>Remaining Coverage</label>
+                  <strong style="color: #10b981">
+                    ₹{{ formatCurrency(p.remainingCoverage) }}
+                  </strong>
+                </div>
+              }
+
+              <!-- NEW: Renewal count -->
+              @if ((p.renewalCount || 0) > 0) {
+                <div class="info-item">
+                  <label>Renewal Count</label>
+                  <strong>{{ p.renewalCount }}× renewed</strong>
+                </div>
+              }
+            </div>
+
+            <!-- Status help texts (unchanged) -->
+            @if (p.policyStatus === 'PENDING') {
+              <div class="status-info pending">
+                Your application is under review. Admin will assign an underwriter to evaluate your
+                policy.
+              </div>
+            }
+            @if (p.policyStatus === 'ASSIGNED') {
+              <div class="status-info assigned">
+                An underwriter has been assigned and is calculating your premium. Please wait.
+              </div>
             }
 
-            <div class="card-body">
-                <div class="info-grid">
-                    <div class="info-item">
-                        <label>Total Coverage</label>
-                        <strong>{{ formatCurrency(p.coverageAmount) }}</strong>
-                    </div>
+            <!-- Actions -->
+            <div class="card-actions">
+              @if (p.policyStatus === 'CONCERN_RAISED') {
+                <button class="btn btn-sm btn-reapply" (click)="openReapplyModal(p)">
+                  <span class="material-icons" style="font-size: 1rem; vertical-align: middle">
+                    refresh
+                  </span>
+                  Reapply with Updated Details
+                </button>
+                <button class="btn btn-sm btn-danger" (click)="cancel(p.policyId)">Cancel</button>
+              }
 
-                    <div class="info-item">
-                        @if (p.policyStatus === 'QUOTE_SENT') {
-                        <label>Quoted Premium</label>
-                        <strong class="highlight">{{ formatCurrency(p.quoteAmount) }}/yr</strong>
-                        } @else {
-                        <label>Premium</label>
-                        <strong>{{ formatCurrency(p.premiumAmount) }}/yr</strong>
-                        }
-                    </div>
-                    <div class="info-item">
-                        <label>Start Date</label>
-                        <strong>{{ p.startDate || 'Not Active Yet' }}</strong>
-                    </div>
-                    <div class="info-item">
-                        <label>End Date</label>
-                        <strong>{{ p.endDate || 'Not Active Yet' }}</strong>
-                    </div>
-                </div>
+              @if (p.policyStatus === 'PENDING' || p.policyStatus === 'ASSIGNED') {
+                <button
+                  class="btn btn-sm btn-primary"
+                  disabled
+                  style="opacity: 0.5; cursor: not-allowed"
+                >
+                  Awaiting Quote
+                </button>
+              }
 
-                <!-- Status Help Text -->
-                @if (p.policyStatus === 'PENDING') {
-                <div class="status-info pending">
-                    Your application is under review. The admin will assign an underwriter to evaluate your policy.
-                </div>
-                }
-                @if (p.policyStatus === 'ASSIGNED') {
-                <div class="status-info assigned">
-                    An underwriter has been assigned and is calculating your premium quote. Please wait.
-                </div>
-                }
-                
-                @if (p.underwriterRemarks && p.policyStatus === 'PENDING') {
-                <div class="status-info assigned" style="background: #fef2f2; color: #b91c1c; border-left-color: #ef4444;">
-                    <strong style="display: block; margin-bottom: 4px;">Attention Required: Underwriter Feedback</strong>
-                    {{ p.underwriterRemarks }}
-                </div>
+              @if (p.policyStatus === 'ACTIVE') {
+                @if (isEligibleForClaim(p)) {
+                  <a routerLink="/customer/claims/new" class="btn btn-sm btn-outline">
+                    File Claim
+                  </a>
+                } @else {
+                  <button
+                    class="btn btn-sm btn-outline"
+                    disabled
+                    style="opacity: 0.5; cursor: not-allowed"
+                    [title]="'Eligible from ' + getClaimEligibilityDate(p)"
+                  >
+                    <span class="material-icons" style="font-size: 0.9rem; vertical-align: middle">
+                      lock_clock
+                    </span>
+                    Waiting Period
+                  </button>
                 }
 
-                <!-- Actions -->
-                <div class="card-actions">
-                    @if (p.policyStatus === 'PENDING' || p.policyStatus === 'ASSIGNED') {
-                    <button class="btn btn-sm btn-primary" disabled style="opacity: 0.5; cursor: not-allowed;"
-                        title="Wait for Underwriter to send quote">Pay via Dashboard Tracker</button>
-                    }
-                    @if (p.policyStatus === 'ACTIVE') {
-                    @if (isEligibleForClaim(p)) {
-                    <a [routerLink]="['/customer/claims/new']" class="btn btn-sm btn-outline">File Claim</a>
-                    } @else {
-                    <button class="btn btn-sm btn-outline" disabled style="opacity: 0.5; cursor: not-allowed;"
-                        title="Eligible to claim after {{ getClaimEligibilityDate(p) }}">
-                        <span class="material-icons"
-                            style="font-size: 0.9rem; vertical-align: middle;">lock_clock</span> Waiting Period
-                    </button>
-                    }
-                    <button class="btn btn-sm btn-danger" (click)="cancel(p.policyId)">Cancel</button>
-                    }
-                    @if (p.policyStatus === 'EXPIRED') {
-                    <a [routerLink]="['/customer/payment', p.policyId]" class="btn btn-sm btn-outline">Renew</a>
-                    }
-                </div>
+                <!-- NEW: PDF Certificate button -->
+                <button
+                  class="btn btn-sm btn-pdf"
+                  (click)="downloadCertificate(p)"
+                  [disabled]="downloadingPdf === p.policyId"
+                >
+                  <span class="material-icons" style="font-size: 0.9rem; vertical-align: middle">
+                    {{ downloadingPdf === p.policyId ? 'hourglass_empty' : 'picture_as_pdf' }}
+                  </span>
+                  {{ downloadingPdf === p.policyId ? 'Downloading...' : 'Certificate' }}
+                </button>
+
+                <!-- NEW: Early renewal button -->
+                @if (isExpiringSoon(p)) {
+                  <button class="btn btn-sm btn-renew" (click)="openRenewalModal(p)">
+                    <span class="material-icons" style="font-size: 0.9rem; vertical-align: middle">
+                      autorenew
+                    </span>
+                    Renew Early
+                  </button>
+                }
+
+                <button class="btn btn-sm btn-danger" (click)="cancel(p.policyId)">Cancel</button>
+              }
+
+              <!-- NEW: Expired — renew button -->
+              @if (p.policyStatus === 'EXPIRED') {
+                <button class="btn btn-sm btn-renew" (click)="openRenewalModal(p)">
+                  <span class="material-icons" style="font-size: 0.9rem; vertical-align: middle">
+                    autorenew
+                  </span>
+                  Renew Policy
+                </button>
+              }
             </div>
+          </div>
         </div>
-        }
+      }
     </div>
-    }
+  }
 </div>
+
+<!-- =================== RENEWAL MODAL (NEW) =================== -->
+@if (showRenewalModal && renewalPolicy) {
+  <div class="modal-overlay" (click)="closeRenewalModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2>Renew Policy</h2>
+          <p class="modal-subtitle">
+            {{ renewalPolicy.policyNumber }} — {{ renewalPolicy.planName }}
+          </p>
+        </div>
+        <button class="modal-close" (click)="closeRenewalModal()">✕</button>
+      </div>
+
+      <!-- Premium preview -->
+      <div class="renewal-premium-preview">
+        <div class="renewal-preview-row">
+          <span>Previous Premium</span>
+          <strong>₹{{ formatCurrency(renewalPolicy.premiumAmount) }}/yr</strong>
+        </div>
+        <div class="renewal-preview-row">
+          <span>Age Loading (+3%)</span>
+          <strong style="color: #f59e0b">
+            +₹{{ formatCurrency(getRenewalAgeLoadingAmount(renewalPolicy)) }}
+          </strong>
+        </div>
+        @if (estimatedNcb > 0) {
+          <div class="renewal-preview-row ncb-row">
+            <span>🎁 No-Claim Bonus (-{{ estimatedNcb }}%)</span>
+            <strong style="color: #10b981">
+              -₹{{ formatCurrency(getRenewalNcbAmount(renewalPolicy)) }}
+            </strong>
+          </div>
+        }
+        <div class="renewal-preview-total">
+          <span>Estimated Renewal Premium</span>
+          <strong>₹{{ formatCurrency(estimatedRenewalPremium) }}/yr</strong>
+        </div>
+        <p style="font-size: 11px; color: #94a3b8; margin: 8px 0 0; text-align: center">
+          * Final premium will be confirmed after underwriter review
+        </p>
+      </div>
+
+      <div class="modal-body">
+        <!-- Nominee Details -->
+        <div class="modal-section">
+          <h3>Confirm Nominee Details</h3>
+          <div class="modal-form-row">
+            <div class="modal-form-group">
+              <label>Nominee Full Name <span class="required">*</span></label>
+              <input [(ngModel)]="renewalForm.nomineeName" placeholder="e.g. Priya Sharma" />
+            </div>
+            <div class="modal-form-group">
+              <label>Relationship <span class="required">*</span></label>
+              <select [(ngModel)]="renewalForm.nomineeRelationship">
+                <option value="">— Select —</option>
+                <option>Spouse</option>
+                <option>Father</option>
+                <option>Mother</option>
+                <option>Son</option>
+                <option>Daughter</option>
+                <option>Sibling</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Members summary (read-only) -->
+        @if (renewalPolicy.members.length) {
+          <div class="modal-section">
+            <h3>Insured Members (carried forward)</h3>
+            @for (m of renewalPolicy.members; track m.memberId) {
+              <div class="renewal-member-row">
+                <span class="material-icons" style="font-size: 16px; color: #64748b"> person </span>
+                <span>{{ m.memberName }}</span>
+                <span class="rel-badge-sm">{{ m.relationship }}</span>
+                @if (m.preExistingDiseases && m.preExistingDiseases !== 'none') {
+                  <span class="disease-badge-sm">
+                    {{ m.preExistingDiseases }}
+                  </span>
+                }
+              </div>
+            }
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 8px">
+              Member details are carried forward from the original policy.
+            </p>
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeRenewalModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitRenewal()" [disabled]="renewalSubmitting">
+          @if (!renewalSubmitting) {
+            <span style="display: flex; align-items: center; gap: 0.5rem">
+              <span class="material-icons" style="font-size: 1.1rem"> autorenew </span>
+              Confirm Renewal
+            </span>
+          } @else {
+            <span style="display: flex; align-items: center; gap: 0.5rem">
+              <span class="material-icons" style="animation: spin 1s linear infinite">
+                hourglass_empty
+              </span>
+              Submitting...
+            </span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- =================== REAPPLY MODAL (unchanged) =================== -->
+@if (showReapplyModal && reapplyPolicy) {
+  <div class="modal-overlay" (click)="closeReapplyModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2>Reapply for Policy</h2>
+          <p class="modal-subtitle">
+            {{ reapplyPolicy.policyNumber }} — {{ reapplyPolicy.planName }}
+          </p>
+        </div>
+        <button class="modal-close" (click)="closeReapplyModal()">✕</button>
+      </div>
+      @if (reapplyPolicy.underwriterRemarks) {
+        <div class="modal-concern-box">
+          <span class="material-icons" style="color: #dc2626; font-size: 1.2rem">
+            report_problem
+          </span>
+          <div>
+            <strong>Underwriter Feedback:</strong>
+            <p>{{ reapplyPolicy.underwriterRemarks }}</p>
+          </div>
+        </div>
+      }
+      <div class="modal-body">
+        <div class="modal-section">
+          <h3>Nominee Details</h3>
+          <div class="modal-form-row">
+            <div class="modal-form-group">
+              <label>Nominee Full Name <span class="required">*</span></label>
+              <input [(ngModel)]="reapplyForm.nomineeName" placeholder="e.g. Priya Sharma" />
+            </div>
+            <div class="modal-form-group">
+              <label>Relationship <span class="required">*</span></label>
+              <select [(ngModel)]="reapplyForm.nomineeRelationship">
+                <option value="">— Select —</option>
+                <option>Spouse</option>
+                <option>Father</option>
+                <option>Mother</option>
+                <option>Son</option>
+                <option>Daughter</option>
+                <option>Sibling</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-section">
+          <h3>Health Check Report</h3>
+          <div class="modal-form-group">
+            <label>Upload Updated Health Check Report</label>
+            <input
+              type="file"
+              (change)="onReapplyFileSelect($event)"
+              accept=".pdf,.jpg,.jpeg,.png"
+              class="file-input"
+            />
+            <small>Upload corrected report if needed (PDF, JPG, PNG)</small>
+          </div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-header">
+            <h3>Members to Insure</h3>
+            <button class="btn-add-member" (click)="addReapplyMember()">+ Add Member</button>
+          </div>
+          @for (m of reapplyForm.members; track m; let i = $index) {
+            <div class="modal-member-card">
+              <div class="modal-member-header">
+                <strong>Member {{ i + 1 }}</strong>
+                @if (reapplyForm.members.length > 1) {
+                  <button class="btn-remove-member" (click)="removeReapplyMember(i)">
+                    ✕ Remove
+                  </button>
+                }
+              </div>
+              <div class="modal-form-row">
+                <div class="modal-form-group">
+                  <label>Full Name <span class="required">*</span></label>
+                  <input [(ngModel)]="m.memberName" placeholder="Full name" />
+                </div>
+                <div class="modal-form-group">
+                  <label>Relationship <span class="required">*</span></label>
+                  <select [(ngModel)]="m.relationship">
+                    <option value="">— Select —</option>
+                    <option value="SELF">Self</option>
+                    <option value="SPOUSE">Spouse</option>
+                    <option value="PARENT">Parent</option>
+                    <option value="CHILD">Child</option>
+                    <option value="SIBLING">Sibling</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div class="modal-form-group">
+                  <label>Date of Birth <span class="required">*</span></label>
+                  <input type="date" [(ngModel)]="m.dateOfBirth" />
+                </div>
+                <div class="modal-form-group">
+                  <label>Gender <span class="required">*</span></label>
+                  <select [(ngModel)]="m.gender">
+                    <option value="">— Select —</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div class="modal-form-group wide">
+                  <label>Pre-existing Diseases</label>
+                  <input [(ngModel)]="m.preExistingDiseases" placeholder="e.g. Diabetes, None" />
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeReapplyModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitReapply()" [disabled]="reapplySubmitting">
+          @if (!reapplySubmitting) {
+            <span style="display: flex; align-items: center; gap: 0.5rem">
+              <span class="material-icons" style="font-size: 1.1rem">send</span>
+              Submit Reapplication
+            </span>
+          } @else {
+            <span style="display: flex; align-items: center; gap: 0.5rem">
+              <span class="material-icons" style="animation: spin 1s linear infinite">
+                hourglass_empty
+              </span>
+              Submitting...
+            </span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

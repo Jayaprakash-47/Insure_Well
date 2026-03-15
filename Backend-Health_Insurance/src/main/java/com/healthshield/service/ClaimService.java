@@ -7,6 +7,7 @@ import com.healthshield.dto.response.ClaimResponse;
 import com.healthshield.entity.*;
 import com.healthshield.enums.ClaimStatus;
 import com.healthshield.enums.ClaimType;
+import com.healthshield.enums.NotificationType;
 import com.healthshield.exception.BadRequestException;
 import com.healthshield.exception.ResourceNotFoundException;
 import com.healthshield.exception.UnauthorizedException;
@@ -28,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,9 @@ public class ClaimService {
     private final ClaimDocumentRepository claimDocumentRepository;
     private final PolicyRepository policyRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
+    private final AuditLogService auditLogService;
 
     @Value("${file.upload.dir:uploads/claims}")
     private String uploadDir;
@@ -136,6 +141,16 @@ public class ClaimService {
             }
         }
 
+        notificationService.sendNotification(
+                user.getEmail(),
+                "Your claim " + claimNumber + " for ₹" + request.getClaimAmount()
+                        + " has been submitted successfully.",
+                NotificationType.CLAIM_SUBMITTED
+        );
+        auditLogService.log("CLAIM_SUBMITTED", "CUSTOMER", user.getEmail(),
+                "Claim " + claimNumber + " filed for policy "
+                        + policy.getPolicyNumber());
+
         return mapToResponse(saved);
     }
 
@@ -178,52 +193,146 @@ public class ClaimService {
     @Transactional
     public ClaimResponse updateClaimStatus(Long claimId, ClaimStatusUpdateRequest request) {
         Claim claim = claimRepository.findById(claimId)
-                .orElseThrow(() -> new ResourceNotFoundException("Claim not found with id: " + claimId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Claim not found with id: " + claimId));
 
-        if (request.getStatus() != null) {
-            claim.setClaimStatus(request.getStatus());
+        if (request.getStatus() != null) claim.setClaimStatus(request.getStatus());
+        if (request.getApprovedAmount() != null) claim.setApprovedAmount(request.getApprovedAmount());
+        if (request.getRejectionReason() != null) claim.setRejectionReason(request.getRejectionReason());
+
+        // ── NEW: Set review timestamps ──
+        if (request.getStatus() == ClaimStatus.UNDER_REVIEW
+                && claim.getReviewStartedAt() == null) {
+            claim.setReviewStartedAt(LocalDateTime.now());
         }
-        if (request.getApprovedAmount() != null) {
-            claim.setApprovedAmount(request.getApprovedAmount());
+        if (request.getStatus() == ClaimStatus.APPROVED
+                || request.getStatus() == ClaimStatus.PARTIALLY_APPROVED
+                || request.getStatus() == ClaimStatus.REJECTED) {
+            claim.setReviewedAt(LocalDateTime.now());
         }
-        if (request.getRejectionReason() != null) {
-            claim.setRejectionReason(request.getRejectionReason());
+        if (request.getReviewerRemarks() != null) {
+            claim.setReviewerRemarks(request.getReviewerRemarks());
         }
 
         Claim saved = claimRepository.save(claim);
+
+        // ── NEW: Update remaining coverage on APPROVED / PARTIALLY_APPROVED ──
+        if (saved.getClaimStatus() == ClaimStatus.APPROVED
+                || saved.getClaimStatus() == ClaimStatus.PARTIALLY_APPROVED) {
+
+            Policy policy = saved.getPolicy();
+            BigDecimal approvedAmount = saved.getApprovedAmount() != null
+                    ? saved.getApprovedAmount() : BigDecimal.ZERO;
+
+            // Recalculate remaining = coverage - all approved/settled claims on this policy
+            BigDecimal totalApproved = claimRepository
+                    .findByPolicyPolicyId(policy.getPolicyId())
+                    .stream()
+                    .filter(c -> c.getClaimStatus() == ClaimStatus.APPROVED
+                            || c.getClaimStatus() == ClaimStatus.PARTIALLY_APPROVED
+                            || c.getClaimStatus() == ClaimStatus.SETTLED)
+                    .map(c -> c.getApprovedAmount() != null
+                            ? c.getApprovedAmount() : BigDecimal.ZERO)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal newRemaining = policy.getCoverageAmount()
+                    .subtract(totalApproved)
+                    .max(BigDecimal.ZERO);
+
+            policy.setRemainingCoverage(newRemaining);
+            policy.setTotalClaimedAmount(totalApproved);
+            policyRepository.save(policy);
+
+            log.info("Coverage updated for policy {}: remaining = ₹{}",
+                    policy.getPolicyNumber(), newRemaining);
+        }
+
+        // ── existing: Notify customer on status change (unchanged) ──
+        String customerEmail = claim.getUser().getEmail();
+        String customerName  = claim.getUser().getFirstName();
+        String claimNo       = claim.getClaimNumber();
+
+        switch (saved.getClaimStatus()) {
+            case APPROVED, PARTIALLY_APPROVED -> {
+                notificationService.sendNotification(customerEmail,
+                        "Your claim " + claimNo + " has been "
+                                + saved.getClaimStatus().name().replace("_", " ")
+                                + ". Approved amount: ₹" + saved.getApprovedAmount(),
+                        NotificationType.CLAIM_APPROVED);
+                emailService.sendStatusChangeEmail(customerEmail, customerName,
+                        claimNo, saved.getClaimStatus().name());
+                auditLogService.log("CLAIM_APPROVED", "CLAIMS_OFFICER",
+                        customerEmail, "Claim " + claimNo + " approved. "
+                                + "Amount: ₹" + saved.getApprovedAmount());
+            }
+            case REJECTED -> {
+                notificationService.sendNotification(customerEmail,
+                        "Your claim " + claimNo + " has been rejected. Reason: "
+                                + saved.getRejectionReason(),
+                        NotificationType.CLAIM_REJECTED);
+                emailService.sendStatusChangeEmail(customerEmail, customerName,
+                        claimNo, "REJECTED");
+                auditLogService.log("CLAIM_REJECTED", "CLAIMS_OFFICER",
+                        customerEmail, "Claim " + claimNo + " rejected. Reason: "
+                                + saved.getRejectionReason());
+            }
+            case UNDER_REVIEW -> {
+                notificationService.sendNotification(customerEmail,
+                        "Your claim " + claimNo + " is now under review by our team.",
+                        NotificationType.GENERAL);
+                auditLogService.log("CLAIM_UNDER_REVIEW", "CLAIMS_OFFICER",
+                        customerEmail, "Claim " + claimNo + " moved to review");
+            }
+            default -> {}
+        }
+
         return mapToResponse(saved);
     }
 
-    /**
-     * Settle a claim — process the actual money disbursement.
-     * Called after a claim is approved/partially approved.
-     */
     @Transactional
     public ClaimResponse settleClaim(Long claimId, User performedBy) {
         Claim claim = claimRepository.findById(claimId)
-                .orElseThrow(() -> new ResourceNotFoundException("Claim not found with id: " + claimId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Claim not found with id: " + claimId));
 
         if (claim.getClaimStatus() != ClaimStatus.APPROVED
                 && claim.getClaimStatus() != ClaimStatus.PARTIALLY_APPROVED) {
-            throw new BadRequestException("Only APPROVED or PARTIALLY_APPROVED claims can be settled. Current: " + claim.getClaimStatus());
+            throw new BadRequestException("Only APPROVED or PARTIALLY_APPROVED claims can be settled.");
         }
 
         BigDecimal settlementAmount = claim.getApprovedAmount();
         claim.setClaimStatus(ClaimStatus.SETTLED);
         claim.setSettlementAmount(settlementAmount);
         claim.setSettlementDate(java.time.LocalDate.now());
-        claim.setTpaReferenceNumber("TPA-" + Year.now().getValue() + "-" + String.format("%08d", new Random().nextInt(99999999)));
+        claim.setTpaReferenceNumber("TPA-" + Year.now().getValue() + "-"
+                + String.format("%08d", new Random().nextInt(99999999)));
 
-        // Update policy's remaining coverage
         Policy policy = claim.getPolicy();
         BigDecimal totalClaimed = policy.getTotalClaimedAmount() != null
                 ? policy.getTotalClaimedAmount() : BigDecimal.ZERO;
         policy.setTotalClaimedAmount(totalClaimed.add(settlementAmount));
-        policy.setRemainingCoverage(policy.getCoverageAmount().subtract(policy.getTotalClaimedAmount()));
+        policy.setRemainingCoverage(
+                policy.getCoverageAmount().subtract(policy.getTotalClaimedAmount()));
         policyRepository.save(policy);
 
         Claim saved = claimRepository.save(claim);
 
+        // ── NEW: Notify customer on settlement ──
+        notificationService.sendNotification(
+                claim.getUser().getEmail(),
+                "💰 Your claim " + claim.getClaimNumber() + " has been settled. "
+                        + "Amount ₹" + settlementAmount + " will be credited within 3-5 business days.",
+                NotificationType.CLAIM_APPROVED
+        );
+        emailService.sendStatusChangeEmail(
+                claim.getUser().getEmail(),
+                claim.getUser().getFirstName(),
+                claim.getClaimNumber(), "SETTLED"
+        );
+        auditLogService.log("CLAIM_SETTLED", "CLAIMS_OFFICER",
+                claim.getUser().getEmail(),
+                "Claim " + claim.getClaimNumber()
+                        + " settled. Amount: ₹" + settlementAmount);
 
         return mapToResponse(saved);
     }

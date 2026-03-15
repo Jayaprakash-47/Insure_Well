@@ -8,6 +8,7 @@ import com.healthshield.dto.response.AuthResponse;
 import com.healthshield.dto.response.DashboardResponse;
 import com.healthshield.entity.*;
 import com.healthshield.enums.ClaimStatus;
+import com.healthshield.enums.NotificationType;
 import com.healthshield.enums.PaymentStatus;
 import com.healthshield.enums.PolicyStatus;
 import com.healthshield.exception.BadRequestException;
@@ -44,6 +45,7 @@ public class AdminService {
     private final InsurancePlanRepository insurancePlanRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final NotificationService notificationService;
 
     // =================== USER MANAGEMENT ===================
 
@@ -230,13 +232,20 @@ public class AdminService {
         if (!isReassignment) {
             policy.setPolicyStatus(PolicyStatus.ASSIGNED);
         }
-        
+        notificationService.sendNotification(
+                underwriter.getEmail(),
+                "New policy " + policy.getPolicyNumber()
+                        + " assigned to you for review.",
+                NotificationType.GENERAL
+        );
+
         policyRepository.save(policy);
         log.info("Policy {} assigned to underwriter {}", policy.getPolicyNumber(), underwriter.getUserId());
         return Map.of("message", "Underwriter assigned successfully", "policyId", policyId,
                 "policyNumber", policy.getPolicyNumber(), "underwriterId", underwriter.getUserId(),
                 "underwriterName", underwriter.getFirstName() + " " + underwriter.getLastName(),
                 "policyStatus", PolicyStatus.ASSIGNED.name());
+
     }
 
     // =================== ASSIGN CLAIMS OFFICER TO CLAIM ===================
@@ -275,7 +284,7 @@ public class AdminService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getPendingPolicyApplications() {
         return policyRepository.findAll().stream()
-                .filter(p -> p.getPolicyStatus() == PolicyStatus.PENDING || p.getPolicyStatus() == PolicyStatus.ASSIGNED)
+                .filter(p -> p.getPolicyStatus() == PolicyStatus.PENDING || p.getPolicyStatus() == PolicyStatus.ASSIGNED || p.getPolicyStatus() == PolicyStatus.CONCERN_RAISED)
                 .map(p -> {
             Map<String, Object> map = new HashMap<>();
             map.put("policyId", p.getPolicyId()); map.put("policyNumber", p.getPolicyNumber());

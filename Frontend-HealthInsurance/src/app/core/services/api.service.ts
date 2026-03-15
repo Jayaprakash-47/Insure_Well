@@ -3,253 +3,399 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-    DashboardResponse, CreateUnderwriterRequest, AuthResponse,
-    InsurancePlan, InsurancePlanRequest,
-    PolicyResponse, ClaimRequest, ClaimResponse, ClaimStatusUpdateRequest,
-    PremiumCalculateRequest, PremiumQuoteResponse,
-    PolicyPurchaseRequest, PaymentRequest, PaymentResponse,
-    CreateClaimsOfficerRequest, ClaimsOfficerDashboardResponse,
-    ClaimReviewRequest, UnderwriterDashboardResponse,
-    PolicyRenewalRequest
+  DashboardResponse,
+  CreateUnderwriterRequest,
+  AuthResponse,
+  InsurancePlan,
+  InsurancePlanRequest,
+  PolicyResponse,
+  ClaimRequest,
+  ClaimResponse,
+  ClaimStatusUpdateRequest,
+  PremiumCalculateRequest,
+  PremiumQuoteResponse,
+  PolicyPurchaseRequest,
+  PaymentRequest,
+  PaymentResponse,
+  CreateClaimsOfficerRequest,
+  ClaimsOfficerDashboardResponse,
+  ClaimReviewRequest,
+  UnderwriterDashboardResponse,
+  PolicyRenewalRequest,
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-    private api = environment.apiUrl;
+  private api = environment.apiUrl;
 
-    constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
+  // ====== ADMIN ======
+  getAdminDashboard(): Observable<DashboardResponse> {
+    return this.http.get<DashboardResponse>(`${this.api}/admin/dashboard`);
+  }
 
-    getAdminDashboard(): Observable<DashboardResponse> {
-        return this.http.get<DashboardResponse>(`${this.api}/admin/dashboard`);
-    }
+  getAllCustomers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/admin/customers`);
+  }
 
-    getAllCustomers(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.api}/admin/customers`);
-    }
+  getAllUnderwriters(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/admin/underwriters`);
+  }
 
-    getAllUnderwriters(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.api}/admin/underwriters`);
-    }
+  getAllClaimsOfficers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/admin/claims-officers`);
+  }
 
-    getAllClaimsOfficers(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.api}/admin/claims-officers`);
-    }
+  createUnderwriter(req: CreateUnderwriterRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      `${this.api}/admin/create-underwriter`, req);
+  }
 
-    createUnderwriter(req: CreateUnderwriterRequest): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>(`${this.api}/admin/create-underwriter`, req);
-    }
+  createClaimsOfficer(req: CreateClaimsOfficerRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      `${this.api}/admin/create-claims-officer`, req);
+  }
 
-    createClaimsOfficer(req: CreateClaimsOfficerRequest): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>(`${this.api}/admin/create-claims-officer`, req);
-    }
+  deactivateUser(id: number): Observable<any> {
+    return this.http.patch(`${this.api}/admin/users/${id}/deactivate`, {});
+  }
 
-    deactivateUser(id: number): Observable<any> {
-        return this.http.patch(`${this.api}/admin/users/${id}/deactivate`, {});
-    }
+  activateUser(id: number): Observable<any> {
+    return this.http.patch(`${this.api}/admin/users/${id}/activate`, {});
+  }
 
-    activateUser(id: number): Observable<any> {
-        return this.http.patch(`${this.api}/admin/users/${id}/activate`, {});
-    }
+  settleClaim(id: number): Observable<ClaimResponse> {
+    return this.http.post<ClaimResponse>(
+      `${this.api}/admin/claims/${id}/settle`, {});
+  }
 
+  getUnderwriterPerformance(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/admin/underwriter-performance`);
+  }
 
-    settleClaim(id: number): Observable<ClaimResponse> {
-        return this.http.post<ClaimResponse>(`${this.api}/admin/claims/${id}/settle`, {});
-    }
+  // ====== ADMIN ASSIGNMENT ======
+  getPendingPolicyApplications(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/admin/pending-applications`);
+  }
 
-    getUnderwriterPerformance(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.api}/admin/underwriter-performance`);
-    }
+  assignUnderwriter(policyId: number,
+                    req: { underwriterId: number }): Observable<any> {
+    return this.http.post(
+      `${this.api}/admin/policies/${policyId}/assign-underwriter`, req);
+  }
 
+  getSubmittedClaims(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/admin/submitted-claims`);
+  }
 
-    // ====== ADMIN ASSIGNMENT ======
-    getPendingPolicyApplications(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.api}/admin/pending-applications`);
-    }
+  assignClaimsOfficer(claimId: number,
+                      req: { claimsOfficerId: number }): Observable<any> {
+    return this.http.post(
+      `${this.api}/admin/claims/${claimId}/assign-officer`, req);
+  }
 
-    assignUnderwriter(policyId: number, req: { underwriterId: number }): Observable<any> {
-        return this.http.post(`${this.api}/admin/policies/${policyId}/assign-underwriter`, req);
-    }
+  // ====== ADMIN PLAN MANAGEMENT ======
+  createPlan(req: InsurancePlanRequest): Observable<InsurancePlan> {
+    return this.http.post<InsurancePlan>(`${this.api}/admin/plans`, req);
+  }
 
-    getSubmittedClaims(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.api}/admin/submitted-claims`);
-    }
+  updatePlan(id: number, req: InsurancePlanRequest): Observable<InsurancePlan> {
+    return this.http.put<InsurancePlan>(`${this.api}/admin/plans/${id}`, req);
+  }
 
-    assignClaimsOfficer(claimId: number, req: { claimsOfficerId: number }): Observable<any> {
-        return this.http.post(`${this.api}/admin/claims/${claimId}/assign-officer`, req);
-    }
+  deactivatePlan(id: number): Observable<any> {
+    return this.http.patch(`${this.api}/admin/plans/${id}/deactivate`, {});
+  }
 
-    // ====== ADMIN PLAN MANAGEMENT ======
-    createPlan(req: InsurancePlanRequest): Observable<InsurancePlan> {
-        return this.http.post<InsurancePlan>(`${this.api}/admin/plans`, req);
-    }
+  activatePlan(id: number): Observable<any> {
+    return this.http.patch(`${this.api}/admin/plans/${id}/activate`, {});
+  }
 
-    updatePlan(id: number, req: InsurancePlanRequest): Observable<InsurancePlan> {
-        return this.http.put<InsurancePlan>(`${this.api}/admin/plans/${id}`, req);
-    }
+  // ====== PLANS (PUBLIC) ======
+  getAllPlans(): Observable<InsurancePlan[]> {
+    return this.http.get<InsurancePlan[]>(`${this.api}/plans`);
+  }
 
-    deactivatePlan(id: number): Observable<any> {
-        return this.http.patch(`${this.api}/admin/plans/${id}/deactivate`, {});
-    }
+  getPlanById(id: number): Observable<InsurancePlan> {
+    return this.http.get<InsurancePlan>(`${this.api}/plans/${id}`);
+  }
 
-    activatePlan(id: number): Observable<any> {
-        return this.http.patch(`${this.api}/admin/plans/${id}/activate`, {});
-    }
+  // ====== PREMIUM QUOTES ======
+  calculatePremium(req: PremiumCalculateRequest): Observable<PremiumQuoteResponse> {
+    return this.http.post<PremiumQuoteResponse>(
+      `${this.api}/premium/calculate/me`, req);
+  }
 
-    // ====== PLANS (PUBLIC) ======
-    getAllPlans(): Observable<InsurancePlan[]> {
-        return this.http.get<InsurancePlan[]>(`${this.api}/plans`);
-    }
+  calculatePremiumGuest(req: PremiumCalculateRequest): Observable<PremiumQuoteResponse> {
+    return this.http.post<PremiumQuoteResponse>(
+      `${this.api}/premium/calculate`, req);
+  }
 
-    getPlanById(id: number): Observable<InsurancePlan> {
-        return this.http.get<InsurancePlan>(`${this.api}/plans/${id}`);
-    }
+  getMyQuotes(): Observable<PremiumQuoteResponse[]> {
+    return this.http.get<PremiumQuoteResponse[]>(`${this.api}/premium/my-quotes`);
+  }
 
-    // ====== PREMIUM QUOTES ======
-    calculatePremium(req: PremiumCalculateRequest): Observable<PremiumQuoteResponse> {
-        return this.http.post<PremiumQuoteResponse>(`${this.api}/premium/calculate/me`, req);
-    }
+  // ====== POLICIES ======
+  purchasePolicy(req: PolicyPurchaseRequest): Observable<PolicyResponse> {
+    return this.http.post<PolicyResponse>(`${this.api}/policies`, req);
+  }
 
-    calculatePremiumGuest(req: PremiumCalculateRequest): Observable<PremiumQuoteResponse> {
-        return this.http.post<PremiumQuoteResponse>(`${this.api}/premium/calculate`, req);
-    }
+  purchasePolicyWithDocument(formData: FormData): Observable<PolicyResponse> {
+    return this.http.post<PolicyResponse>(
+      `${this.api}/policies/with-document`, formData);
+  }
 
-    getMyQuotes(): Observable<PremiumQuoteResponse[]> {
-        return this.http.get<PremiumQuoteResponse[]>(`${this.api}/premium/my-quotes`);
-    }
+  getMyPolicies(): Observable<PolicyResponse[]> {
+    return this.http.get<PolicyResponse[]>(`${this.api}/policies/my-policies`);
+  }
 
-    // ====== POLICIES ======
-    purchasePolicy(req: PolicyPurchaseRequest): Observable<PolicyResponse> {
-        return this.http.post<PolicyResponse>(`${this.api}/policies`, req);
-    }
+  getAllPolicies(): Observable<PolicyResponse[]> {
+    return this.http.get<PolicyResponse[]>(`${this.api}/policies`);
+  }
 
-    purchasePolicyWithDocument(formData: FormData): Observable<PolicyResponse> {
-        return this.http.post<PolicyResponse>(`${this.api}/policies/with-document`, formData);
-    }
+  getPolicyById(id: number): Observable<PolicyResponse> {
+    return this.http.get<PolicyResponse>(`${this.api}/policies/${id}`);
+  }
 
-    getMyPolicies(): Observable<PolicyResponse[]> {
-        return this.http.get<PolicyResponse[]>(`${this.api}/policies/my-policies`);
-    }
+  cancelPolicy(id: number): Observable<PolicyResponse> {
+    return this.http.patch<PolicyResponse>(
+      `${this.api}/policies/${id}/cancel`, {});
+  }
 
-    getAllPolicies(): Observable<PolicyResponse[]> {
-        return this.http.get<PolicyResponse[]>(`${this.api}/policies`);
-    }
+  renewPolicy(policyId: number, request: any): Observable<any> {
+    return this.http.put(
+      `${this.api}/customer/policies/${policyId}/renew`, request);
+  }
 
-    getPolicyById(id: number): Observable<PolicyResponse> {
-        return this.http.get<PolicyResponse>(`${this.api}/policies/${id}`);
-    }
+  reapplyPolicy(policyId: number, formData: FormData): Observable<PolicyResponse> {
+    return this.http.put<PolicyResponse>(
+      `${this.api}/policies/${policyId}/reapply`, formData);
+  }
 
-    cancelPolicy(id: number): Observable<PolicyResponse> {
-        return this.http.patch<PolicyResponse>(`${this.api}/policies/${id}/cancel`, {});
-    }
+  getPolicyDocument(policyId: number): Observable<Blob> {
+    return this.http.get(
+      `${this.api}/policies/${policyId}/document/download`,
+      { responseType: 'blob' });
+  }
 
-    renewPolicy(id: number, req: PolicyRenewalRequest): Observable<PolicyResponse> {
-        return this.http.post<PolicyResponse>(`${this.api}/policies/${id}/renew`, req);
-    }
+  // ====== CLAIMS ======
+  fileClaim(req: FormData): Observable<ClaimResponse> {
+    return this.http.post<ClaimResponse>(`${this.api}/claims`, req);
+  }
 
-    // ====== CLAIMS ======
-    fileClaim(req: FormData): Observable<ClaimResponse> {
-        return this.http.post<ClaimResponse>(`${this.api}/claims`, req);
-    }
+  getMyClaims(): Observable<ClaimResponse[]> {
+    return this.http.get<ClaimResponse[]>(`${this.api}/claims/my-claims`);
+  }
 
-    getMyClaims(): Observable<ClaimResponse[]> {
-        return this.http.get<ClaimResponse[]>(`${this.api}/claims/my-claims`);
-    }
+  getAllClaims(): Observable<ClaimResponse[]> {
+    return this.http.get<ClaimResponse[]>(`${this.api}/claims`);
+  }
 
-    getAllClaims(): Observable<ClaimResponse[]> {
-        return this.http.get<ClaimResponse[]>(`${this.api}/claims`);
-    }
+  getPendingClaims(): Observable<ClaimResponse[]> {
+    return this.http.get<ClaimResponse[]>(`${this.api}/claims/pending`);
+  }
 
-    getPendingClaims(): Observable<ClaimResponse[]> {
-        return this.http.get<ClaimResponse[]>(`${this.api}/claims/pending`);
-    }
+  getClaimsByStatus(status: string): Observable<ClaimResponse[]> {
+    return this.http.get<ClaimResponse[]>(
+      `${this.api}/claims/status/${status}`);
+  }
 
-    getClaimsByStatus(status: string): Observable<ClaimResponse[]> {
-        return this.http.get<ClaimResponse[]>(`${this.api}/claims/status/${status}`);
-    }
+  updateClaimStatus(id: number,
+                    req: ClaimStatusUpdateRequest): Observable<ClaimResponse> {
+    return this.http.patch<ClaimResponse>(
+      `${this.api}/claims/${id}/status`, req);
+  }
 
-    updateClaimStatus(id: number, req: ClaimStatusUpdateRequest): Observable<ClaimResponse> {
-        return this.http.patch<ClaimResponse>(`${this.api}/claims/${id}/status`, req);
-    }
+  // ====== PAYMENTS ======
+  makePayment(req: PaymentRequest): Observable<PaymentResponse> {
+    return this.http.post<PaymentResponse>(`${this.api}/payments`, req);
+  }
 
-    // ====== PAYMENTS ======
-    makePayment(req: PaymentRequest): Observable<PaymentResponse> {
-        return this.http.post<PaymentResponse>(`${this.api}/payments`, req);
-    }
+  getMyPayments(): Observable<PaymentResponse[]> {
+    return this.http.get<PaymentResponse[]>(`${this.api}/payments/my-payments`);
+  }
 
-    getMyPayments(): Observable<PaymentResponse[]> {
-        return this.http.get<PaymentResponse[]>(`${this.api}/payments/my-payments`);
-    }
+  // ====== RAZORPAY ======
+  createPaymentOrder(policyId: number): Observable<any> {
+    return this.http.post(`${this.api}/razorpay/create-order`, { policyId });
+  }
 
-    // ====== UNDERWRITER ======
-    getUnderwriterDashboard(): Observable<UnderwriterDashboardResponse> {
-        return this.http.get<UnderwriterDashboardResponse>(`${this.api}/underwriter/dashboard`);
-    }
+  verifyPayment(body: {
+    policyId: string;
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+  }): Observable<any> {
+    return this.http.post(`${this.api}/razorpay/verify`, body);
+  }
 
-    getUnderwriterProfile(): Observable<UnderwriterDashboardResponse> {
-        return this.http.get<UnderwriterDashboardResponse>(`${this.api}/underwriter/profile`);
-    }
+  recordPaymentFailure(body: {
+    policyId: string;
+    errorCode: string;
+    errorDescription: string;
+  }): Observable<any> {
+    return this.http.post(`${this.api}/razorpay/failure`, body);
+  }
 
-    getUnderwriterPlans(): Observable<InsurancePlan[]> {
-        return this.http.get<InsurancePlan[]>(`${this.api}/underwriter/plans`);
-    }
+  // ====== UNDERWRITER ======
+  getUnderwriterDashboard(): Observable<UnderwriterDashboardResponse> {
+    return this.http.get<UnderwriterDashboardResponse>(
+      `${this.api}/underwriter/dashboard`);
+  }
 
-    getUnderwriterPendingAssignments(): Observable<PolicyResponse[]> {
-        return this.http.get<PolicyResponse[]>(`${this.api}/underwriter/pending-assignments`);
-    }
+  getUnderwriterProfile(): Observable<UnderwriterDashboardResponse> {
+    return this.http.get<UnderwriterDashboardResponse>(
+      `${this.api}/underwriter/profile`);
+  }
 
-    getUnderwriterMyPolicies(): Observable<PolicyResponse[]> {
-        return this.http.get<PolicyResponse[]>(`${this.api}/underwriter/my-policies`);
-    }
+  getUnderwriterPlans(): Observable<InsurancePlan[]> {
+    return this.http.get<InsurancePlan[]>(`${this.api}/underwriter/plans`);
+  }
 
-    sendQuote(policyId: number, req: { quoteAmount: number; remarks?: string }): Observable<PolicyResponse> {
-        return this.http.post<PolicyResponse>(`${this.api}/underwriter/policy/${policyId}/send-quote`, req);
-    }
+  getUnderwriterPendingAssignments(): Observable<PolicyResponse[]> {
+    return this.http.get<PolicyResponse[]>(
+      `${this.api}/underwriter/pending-assignments`);
+  }
 
-    calculateUnderwriterQuote(policyId: number): Observable<{ quoteAmount: number }> {
-        return this.http.get<{ quoteAmount: number }>(`${this.api}/underwriter/policy/${policyId}/calculate-quote`);
-    }
+  getUnderwriterMyPolicies(): Observable<PolicyResponse[]> {
+    return this.http.get<PolicyResponse[]>(
+      `${this.api}/underwriter/my-policies`);
+  }
 
-    // ====== CLAIMS OFFICER ======
-    getOfficerDashboard(): Observable<ClaimsOfficerDashboardResponse> {
-        return this.http.get<ClaimsOfficerDashboardResponse>(`${this.api}/claims-officer/dashboard`);
-    }
+  getUnderwriterPolicies(): Observable<PolicyResponse[]> {
+    return this.http.get<PolicyResponse[]>(`${this.api}/underwriter/policies`);
+  }
 
-    getOfficerAssignedClaims(): Observable<ClaimResponse[]> {
-        return this.http.get<ClaimResponse[]>(`${this.api}/claims-officer/my-claims`);
-    }
+  sendQuote(policyId: number,
+            req: { quoteAmount: number; remarks?: string }): Observable<PolicyResponse> {
+    return this.http.post<PolicyResponse>(
+      `${this.api}/underwriter/policy/${policyId}/send-quote`, req);
+  }
 
-    getOfficerClaimsByStatus(status: string): Observable<ClaimResponse[]> {
-        return this.http.get<ClaimResponse[]>(`${this.api}/claims-officer/my-claims/status/${status}`);
-    }
+  calculateUnderwriterQuote(policyId: number): Observable<{ quoteAmount: number }> {
+    return this.http.get<{ quoteAmount: number }>(
+      `${this.api}/underwriter/policy/${policyId}/calculate-quote`);
+  }
 
-    getOfficerDecisionHistory(): Observable<ClaimResponse[]> {
-        return this.http.get<ClaimResponse[]>(`${this.api}/claims-officer/my-decisions`);
-    }
+  calculateQuote(policyId: number): Observable<any> {
+    return this.http.get(
+      `${this.api}/underwriter/calculate-quote/${policyId}`);
+  }
 
-    getOfficerClaimDetail(claimId: number): Observable<ClaimResponse> {
-        return this.http.get<ClaimResponse>(`${this.api}/claims-officer/claim/${claimId}`);
-    }
+  raiseConcern(policyId: number, remarks: string): Observable<any> {
+    return this.http.post(
+      `${this.api}/underwriter/policy/${policyId}/raise-concern`,
+      { remarks });
+  }
 
-    reviewClaim(claimId: number, req: ClaimReviewRequest): Observable<ClaimResponse> {
-        return this.http.post<ClaimResponse>(`${this.api}/claims-officer/claim/${claimId}/review`, req);
-    }
+  // ====== CLAIMS OFFICER ======
+  getOfficerDashboard(): Observable<ClaimsOfficerDashboardResponse> {
+    return this.http.get<ClaimsOfficerDashboardResponse>(
+      `${this.api}/claims-officer/dashboard`);
+  }
 
-    // ====== DOCUMENT REVIEW ======
-    getClaimDocuments(claimId: number): Observable<any[]> {
-        return this.http.get<any[]>(`${this.api}/claims/${claimId}/documents`);
-    }
+  getOfficerAssignedClaims(): Observable<ClaimResponse[]> {
+    return this.http.get<ClaimResponse[]>(
+      `${this.api}/claims-officer/my-claims`);
+  }
 
-    downloadDocument(claimId: number, docId: number): Observable<Blob> {
-        return this.http.get(`${this.api}/claims/${claimId}/documents/${docId}/download`, { responseType: 'blob' });
-    }
+  getOfficerClaimsByStatus(status: string): Observable<ClaimResponse[]> {
+    return this.http.get<ClaimResponse[]>(
+      `${this.api}/claims-officer/my-claims/status/${status}`);
+  }
 
-    getPolicyDocument(policyId: number): Observable<Blob> {
-        return this.http.get(`${this.api}/policies/${policyId}/document/download`, { responseType: 'blob' });
-    }
+  getOfficerDecisionHistory(): Observable<ClaimResponse[]> {
+    return this.http.get<ClaimResponse[]>(
+      `${this.api}/claims-officer/my-decisions`);
+  }
 
-    // ====== UNDERWRITER RAISE CONCERN ======
-    raiseConcern(policyId: number, remarks: string): Observable<any> {
-        return this.http.post(`${this.api}/underwriter/policy/${policyId}/raise-concern`, { remarks });
-    }
+  getOfficerClaimDetail(claimId: number): Observable<ClaimResponse> {
+    return this.http.get<ClaimResponse>(
+      `${this.api}/claims-officer/claim/${claimId}`);
+  }
+
+  reviewClaim(claimId: number,
+              req: ClaimReviewRequest): Observable<ClaimResponse> {
+    return this.http.post<ClaimResponse>(
+      `${this.api}/claims-officer/claim/${claimId}/review`, req);
+  }
+
+  // ====== DOCUMENTS ======
+  getClaimDocuments(claimId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/claims/${claimId}/documents`);
+  }
+
+  // ── Download by docId (used by claims officer / admin) ──
+  downloadDocumentById(claimId: number, docId: number): Observable<Blob> {
+    return this.http.get(
+      `${this.api}/claims/${claimId}/documents/${docId}/download`,
+      { responseType: 'blob' });
+  }
+
+  // ── View by fileName — opens in new tab ──
+  viewDocument(claimId: number, fileName: string): void {
+    const token = localStorage.getItem('hs_token');
+    const url = `${this.api}/claims/${claimId}/documents/view/${encodeURIComponent(fileName)}`;
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.blob();
+      })
+      .then(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+      })
+      .catch(err => {
+        console.error('View failed:', err);
+        alert('Failed to view document. Please try again.');
+      });
+  }
+
+  // ── Download by fileName — saves file ──
+  downloadDocument(claimId: number, fileName: string): void {
+    const token = localStorage.getItem('hs_token');
+    const url = `${this.api}/claims/${claimId}/documents/download/${encodeURIComponent(fileName)}`;
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.blob();
+      })
+      .then(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      })
+      .catch(err => {
+        console.error('Download failed:', err);
+        alert('Failed to download. Please try again.');
+      });
+  }
+
+  // ====== AUDIT ======
+  getAuditLogs(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/audit`);
+  }
+
+  getAuditLogsByRole(role: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/audit/role/${role}`);
+  }
+  settleClaimByOfficer(claimId: number): Observable<ClaimResponse> {
+    return this.http.post<ClaimResponse>(
+      `${this.api}/claims/${claimId}/settle`, {});
+  }
+
+  getProfile(): Observable<any> {
+    return this.http.get(`${this.api}/profile`);
+  }
+
+  updateProfile(data: any): Observable<any> {
+    return this.http.put(`${this.api}/profile`, data);
+  }
+
+  changePassword(data: { currentPassword: string; newPassword: string; confirmPassword: string }): Observable<any> {
+    return this.http.put(`${this.api}/profile/change-password`, data);
+  }
 }

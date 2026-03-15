@@ -7,109 +7,174 @@ import { AuthResponse, LoginRequest, RegisterRequest } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-    private apiUrl = environment.apiUrl;
-    private tokenKey = 'hs_token';
-    private userKey = 'hs_user';
+  private apiUrl = environment.apiUrl;
+  private tokenKey = 'hs_token';
+  private userKey = 'hs_user';
+  private refreshKey = 'hs_refresh'; // ← NEW
 
-    private loggedIn = new BehaviorSubject<boolean>(this.hasToken());
-    isLoggedIn$ = this.loggedIn.asObservable();
+  private loggedIn = new BehaviorSubject<boolean>(this.hasToken());
+  isLoggedIn$ = this.loggedIn.asObservable();
 
-    constructor(private http: HttpClient, private router: Router) { }
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {}
 
-    login(request: LoginRequest): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, request).pipe(
-            tap(res => {
-                this.storeSession(res);
-                this.loggedIn.next(true);
-            })
-        );
+  // ── existing methods (unchanged) ──
+
+  login(request: LoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, request).pipe(
+      tap((res) => {
+        this.storeSession(res);
+        this.loggedIn.next(true);
+      }),
+    );
+  }
+
+  register(request: RegisterRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, request).pipe(
+      tap((res) => {
+        this.storeSession(res);
+        this.loggedIn.next(true);
+      }),
+    );
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    localStorage.removeItem(this.refreshKey); // ← NEW
+    this.loggedIn.next(false);
+    this.router.navigate(['/login']);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  getRefreshToken(): string | null {
+    // ← NEW
+    return localStorage.getItem(this.refreshKey);
+  }
+
+  getUser(): any {
+    const user = localStorage.getItem(this.userKey);
+    return user ? JSON.parse(user) : null;
+  }
+
+  getRole(): string {
+    const token = this.getToken();
+    if (!token) return '';
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role || '';
+    } catch {
+      return '';
     }
+  }
 
-    register(request: RegisterRequest): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, request).pipe(
-            tap(res => {
-                this.storeSession(res);
-                this.loggedIn.next(true);
-            })
-        );
-    }
+  getUserName(): string {
+    const user = this.getUser();
+    return user?.firstName || '';
+  }
 
-    logout(): void {
-        localStorage.removeItem(this.tokenKey);
-        localStorage.removeItem(this.userKey);
-        this.loggedIn.next(false);
-        this.router.navigate(['/login']);
-    }
+  getUserEmail(): string {
+    // ← NEW (used by notification service)
+    const user = this.getUser();
+    return user?.email || '';
+  }
 
-    getToken(): string | null {
-        return localStorage.getItem(this.tokenKey);
-    }
+  getUserRole(): string {
+    const user = this.getUser();
+    return user?.role || this.getRole().replace('ROLE_', '');
+  }
 
-    getUser(): any {
-        const user = localStorage.getItem(this.userKey);
-        return user ? JSON.parse(user) : null;
-    }
+  isLoggedIn(): boolean {
+    return this.hasToken();
+  }
 
-    getRole(): string {
-        const token = this.getToken();
-        if (!token) return '';
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.role || '';
-        } catch {
-            return '';
-        }
-    }
+  isAdmin(): boolean {
+    return this.getRole() === 'ROLE_ADMIN';
+  }
 
-    getUserName(): string {
-        const user = this.getUser();
-        return user?.firstName || '';
-    }
+  isCustomer(): boolean {
+    return this.getRole() === 'ROLE_CUSTOMER';
+  }
 
-    getUserRole(): string {
-        const user = this.getUser();
-        return user?.role || this.getRole().replace('ROLE_', '');
-    }
+  isUnderwriter(): boolean {
+    return this.getRole() === 'ROLE_UNDERWRITER';
+  }
 
-    isLoggedIn(): boolean {
-        return this.hasToken();
-    }
+  isClaimsOfficer(): boolean {
+    return this.getRole() === 'ROLE_CLAIMS_OFFICER';
+  }
 
-    isAdmin(): boolean {
-        return this.getRole() === 'ROLE_ADMIN';
-    }
+  getDashboardRoute(): string {
+    const role = this.getRole();
+    if (role === 'ROLE_ADMIN') return '/admin/dashboard';
+    if (role === 'ROLE_UNDERWRITER') return '/underwriter/dashboard';
+    if (role === 'ROLE_CLAIMS_OFFICER') return '/claims-officer/dashboard';
+    return '/customer/dashboard';
+  }
 
-    isCustomer(): boolean {
-        return this.getRole() === 'ROLE_CUSTOMER';
-    }
+  // ── NEW: Refresh token ──
+  refreshToken(): Observable<any> {
+    const refreshToken = this.getRefreshToken();
+    return this.http.post<any>(`${this.apiUrl}/auth/refresh`, { refreshToken }).pipe(
+      tap((res) => {
+        localStorage.setItem(this.tokenKey, res.accessToken);
+        localStorage.setItem(this.refreshKey, res.refreshToken);
+      }),
+    );
+  }
 
-    isUnderwriter(): boolean {
-        return this.getRole() === 'ROLE_UNDERWRITER';
-    }
+  // ── NEW: Forgot password ──
+  sendForgotPasswordOtp(email: string): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/auth/forgot-password`,
+      { email },
+      { responseType: 'json' },
+    );
+  }
 
-    isClaimsOfficer(): boolean {
-        return this.getRole() === 'ROLE_CLAIMS_OFFICER';
-    }
+  resetPassword(email: string, otp: string, newPassword: string): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/auth/reset-password`,
+      { email, otp, newPassword },
+      { responseType: 'json' },
+    );
+  }
 
-    getDashboardRoute(): string {
-        const role = this.getRole();
-        if (role === 'ROLE_ADMIN') return '/admin/dashboard';
-        if (role === 'ROLE_UNDERWRITER') return '/underwriter/dashboard';
-        if (role === 'ROLE_CLAIMS_OFFICER') return '/claims-officer/dashboard';
-        return '/customer/dashboard';
-    }
+  // ── NEW: PDF download ──
+  downloadPolicyCertificate(policyId: number): void {
+    const token = this.getToken();
+    const url = `${this.apiUrl}/pdf/policy/${policyId}/certificate`;
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => res.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `policy_${policyId}_certificate.pdf`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+  }
 
-    private storeSession(res: AuthResponse): void {
-        localStorage.setItem(this.tokenKey, res.token);
-        localStorage.setItem(this.userKey, JSON.stringify({
-            userId: res.userId,
-            firstName: res.firstName,
-            email: res.email,
-            role: res.role
-        }));
-    }
+  private storeSession(res: AuthResponse): void {
+    localStorage.setItem(this.tokenKey, res.token);
+    localStorage.setItem(this.refreshKey, res.refreshToken); // ← NEW
+    localStorage.setItem(
+      this.userKey,
+      JSON.stringify({
+        userId: res.userId,
+        firstName: res.firstName,
+        email: res.email,
+        role: res.role,
+      }),
+    );
+  }
 
-    private hasToken(): boolean {
-        return !!localStorage.getItem(this.tokenKey);
-    }
+  private hasToken(): boolean {
+    return !!localStorage.getItem(this.tokenKey);
+  }
 }

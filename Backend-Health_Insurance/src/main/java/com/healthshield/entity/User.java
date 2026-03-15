@@ -38,6 +38,18 @@ public class User implements UserDetails {
     @Column(columnDefinition = "boolean default true")
     private Boolean isActive = true;
 
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "city", length = 100)
+    private String city;
+
+    @Column(name = "state", length = 100)
+    private String state;
+
+    @Column(name = "pincode", length = 10)
+    private String pincode;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

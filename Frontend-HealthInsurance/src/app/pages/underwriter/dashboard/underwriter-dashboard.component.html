@@ -1,83 +1,360 @@
 <div class="page-wrapper">
-    <!-- Welcome Banner -->
-    <div class="welcome-banner">
-        <div class="welcome-content">
-            <h1>Welcome, {{ profile?.underwriterName || 'Underwriter' }}</h1>
-            <p>License: {{ profile?.licenseNumber }}</p>
-        </div>
+
+  <!-- Welcome Banner -->
+  <div class="welcome-banner">
+    <div class="welcome-content">
+      <h1>Welcome, {{ profile?.underwriterName || 'Underwriter' }}</h1>
+      <p>License: {{ profile?.licenseNumber }}</p>
+    </div>
+    <a routerLink="/underwriter/profile" class="btn btn-outline-profile">
+      <span class="material-icons" style="font-size:17px;vertical-align:middle">
+        account_circle
+      </span>
+      My Profile
+    </a>
+  </div>
+
+  @if (profile) {
+
+    <!-- ── Tab Nav ── -->
+    <div class="tab-nav">
+      <button class="tab-btn"
+              [class.active]="activeTab === 'overview'"
+              (click)="activeTab = 'overview'">
+        <span class="material-icons"
+              style="font-size:16px;vertical-align:middle">
+          dashboard
+        </span>
+        Overview
+      </button>
+      <button class="tab-btn"
+              [class.active]="activeTab === 'analytics'"
+              (click)="activeTab = 'analytics'">
+        <span class="material-icons"
+              style="font-size:16px;vertical-align:middle">
+          bar_chart
+        </span>
+        My Analytics
+      </button>
     </div>
 
-    @if (profile) {
-    <!-- Stats Cards -->
-    <div class="stats-grid">
+    <!-- ══════════════════════════════════════ -->
+      <!-- TAB 1: OVERVIEW                        -->
+      <!-- ══════════════════════════════════════ -->
+    @if (activeTab === 'overview') {
+
+      <!-- Pending alert -->
+      @if ((profile.pendingAssignments || 0) > 0) {
+        <div class="pending-alert">
+          <span class="material-icons"
+                style="color:#f59e0b;font-size:20px">
+            pending_actions
+          </span>
+          <span>
+            You have
+            <strong>
+              {{ profile.pendingAssignments }} pending assignment(s)
+            </strong>
+            awaiting your quote.
+          </span>
+          <a routerLink="/underwriter/pending" class="alert-cta">
+            Review Now →
+          </a>
+        </div>
+      }
+
+      <!-- Stats Cards -->
+      <div class="stats-grid">
         <div class="stat-card stat-urgent">
-            <div class="stat-icon yellow"><span class="material-icons">pending_actions</span></div>
-            <div class="stat-info">
-                <h3>{{ profile.pendingAssignments }}</h3>
-                <p>Pending Assignments</p>
-            </div>
+          <div class="stat-icon yellow">
+            <span class="material-icons">pending_actions</span>
+          </div>
+          <div class="stat-info">
+            <h3>{{ profile.pendingAssignments }}</h3>
+            <p>Pending Assignments</p>
+          </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon blue"><span class="material-icons">send</span></div>
-            <div class="stat-info">
-                <h3>{{ profile.totalQuotesSent }}</h3>
-                <p>Quotes Sent</p>
-            </div>
+          <div class="stat-icon blue">
+            <span class="material-icons">send</span>
+          </div>
+          <div class="stat-info">
+            <h3>{{ profile.totalQuotesSent }}</h3>
+            <p>Quotes Sent</p>
+          </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green"><span class="material-icons">verified_user</span></div>
-            <div class="stat-info">
-                <h3>{{ profile.activePolicies }}</h3>
-                <p>Active Policies</p>
-            </div>
+          <div class="stat-icon green">
+            <span class="material-icons">verified_user</span>
+          </div>
+          <div class="stat-info">
+            <h3>{{ profile.activePolicies }}</h3>
+            <p>Active Policies</p>
+          </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon purple"><span class="material-icons">people</span></div>
-            <div class="stat-info">
-                <h3>{{ profile.totalCustomersServed }}</h3>
-                <p>Customers Served</p>
-            </div>
+          <div class="stat-icon purple">
+            <span class="material-icons">people</span>
+          </div>
+          <div class="stat-info">
+            <h3>{{ profile.totalCustomersServed }}</h3>
+            <p>Customers Served</p>
+          </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green"><span class="material-icons">account_balance_wallet</span></div>
-            <div class="stat-info">
-                <h3>{{ formatAmount(profile.totalPremiumGenerated) }}</h3>
-                <p>Total Premium</p>
-            </div>
+          <div class="stat-icon green">
+            <span class="material-icons">account_balance_wallet</span>
+          </div>
+          <div class="stat-info">
+            <h3>{{ formatAmount(profile.totalPremiumGenerated) }}</h3>
+            <p>Total Premium</p>
+          </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon teal"><span class="material-icons">payments</span></div>
-            <div class="stat-info">
-                <h3>{{ formatAmount(profile.totalCommissionEarned) }}</h3>
-                <p>Commission Earned</p>
-            </div>
+          <div class="stat-icon teal">
+            <span class="material-icons">payments</span>
+          </div>
+          <div class="stat-info">
+            <h3>{{ formatAmount(profile.totalCommissionEarned) }}</h3>
+            <p>Commission Earned</p>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Quick Actions -->
-    <div class="quick-actions">
+      <!-- Quick Actions -->
+      <div class="quick-actions">
         <h2>Quick Actions</h2>
         <div class="actions-grid">
-            <a routerLink="/underwriter/pending" class="action-card">
-                <span class="action-icon"><span class="material-icons">pending_actions</span></span>
-                <span class="action-label">Pending</span>
-                <span class="action-desc">View and quote</span>
-                @if (profile.pendingAssignments > 0) {
-                <span class="action-badge">{{ profile.pendingAssignments }}</span>
-                }
-            </a>
-            <a routerLink="/underwriter/policies" class="action-card">
-                <span class="action-icon"><span class="material-icons">policy</span></span>
-                <span class="action-label">All Policies</span>
-                <span class="action-desc">View assigned policies</span>
-            </a>
-            <a routerLink="/underwriter/plans" class="action-card">
-                <span class="action-icon"><span class="material-icons">health_and_safety</span></span>
-                <span class="action-label">Browse Plans</span>
-                <span class="action-desc">View insurance products</span>
-            </a>
+          <a routerLink="/underwriter/pending" class="action-card">
+            <span class="action-icon">
+              <span class="material-icons">pending_actions</span>
+            </span>
+            <span class="action-label">Pending</span>
+            <span class="action-desc">View and quote</span>
+            @if ((profile.pendingAssignments || 0) > 0) {
+              <span class="action-badge">
+                {{ profile.pendingAssignments }}
+              </span>
+            }
+          </a>
+          <a routerLink="/underwriter/policies" class="action-card">
+            <span class="action-icon">
+              <span class="material-icons">policy</span>
+            </span>
+            <span class="action-label">All Policies</span>
+            <span class="action-desc">View assigned policies</span>
+          </a>
+          <a routerLink="/underwriter/plans" class="action-card">
+            <span class="action-icon">
+              <span class="material-icons">health_and_safety</span>
+            </span>
+            <span class="action-label">Browse Plans</span>
+            <span class="action-desc">View insurance products</span>
+          </a>
         </div>
-    </div>
+      </div>
     }
-</div>
 
+    <!-- ══════════════════════════════════════ -->
+      <!-- TAB 2: ANALYTICS                       -->
+      <!-- ══════════════════════════════════════ -->
+    @if (activeTab === 'analytics') {
+      <div class="analytics-grid">
+
+        <!-- ── KPI Row — all 5 boxes inside one card ── -->
+        <div class="uw-card kpi-row">
+
+          <!-- Conversion Rate -->
+          <div class="kpi-box">
+            <div class="kpi-icon"
+                 style="background:#eff6ff;color:#1e40af">
+              <span class="material-icons">trending_up</span>
+            </div>
+            <div class="kpi-val">{{ conversionRate }}%</div>
+            <div class="kpi-lbl">Conversion Rate</div>
+            <div class="kpi-sub">Quoted → Active</div>
+          </div>
+
+          <!-- Avg Premium -->
+          <div class="kpi-box">
+            <div class="kpi-icon"
+                 style="background:#f0fdf4;color:#16a34a">
+              <span class="material-icons">payments</span>
+            </div>
+            <div class="kpi-val">{{ formatAmount(averagePremium) }}</div>
+            <div class="kpi-lbl">Avg Premium</div>
+            <div class="kpi-sub">Per policy</div>
+          </div>
+
+          <!-- Commission Rate -->
+          <div class="kpi-box">
+            <div class="kpi-icon"
+                 style="background:#fdf4ff;color:#7c3aed">
+              <span class="material-icons">percent</span>
+            </div>
+            <div class="kpi-val">{{ profile.commissionPercentage }}%</div>
+            <div class="kpi-lbl">Commission Rate</div>
+            <div class="kpi-sub">Per policy</div>
+          </div>
+
+          <!-- Total Assigned -->
+          <div class="kpi-box">
+            <div class="kpi-icon"
+                 style="background:#fff7ed;color:#ea580c">
+              <span class="material-icons">folder_special</span>
+            </div>
+            <div class="kpi-val">{{ policies.length }}</div>
+            <div class="kpi-lbl">Total Assigned</div>
+            <div class="kpi-sub">All time</div>
+          </div>
+
+          <!-- Awaiting Payment — INSIDE kpi-row ✅ -->
+          <div class="kpi-box">
+            <div class="kpi-icon"
+                 style="background:#fef3c7;color:#d97706">
+              <span class="material-icons">pending</span>
+            </div>
+            <div class="kpi-val">{{ pendingQuoteCount }}</div>
+            <div class="kpi-lbl">Awaiting Payment</div>
+            <div class="kpi-sub">Quote sent</div>
+          </div>
+
+        </div>
+        <!-- ── end kpi-row ── -->
+
+        <!-- Policy Status Chart -->
+        <div class="uw-card">
+          <h3 class="card-title">
+            <span class="material-icons"
+                  style="vertical-align:middle;font-size:17px;margin-right:6px">
+              donut_large
+            </span>
+            Policy Status Breakdown
+          </h3>
+
+          @if (policyStatusBars.length > 0) {
+            <div class="status-bars">
+              @for (bar of policyStatusBars; track bar.key) {
+                <div class="sbar-row">
+                  <div class="sbar-dot"
+                       [style.background]="bar.color">
+                  </div>
+                  <div class="sbar-label">{{ bar.label }}</div>
+                  <div class="sbar-track">
+                    <div class="sbar-fill"
+                         [style.width]="bar.pct + '%'"
+                         [style.background]="bar.color">
+                    </div>
+                  </div>
+                  <div class="sbar-count"
+                       [style.color]="bar.color">
+                    {{ bar.count }}
+                  </div>
+                  <div class="sbar-pct">{{ bar.pct }}%</div>
+                </div>
+              }
+            </div>
+
+            <!-- Status pills -->
+            <div class="status-pills">
+              @for (bar of policyStatusBars; track bar.key) {
+                <div class="status-pill"
+                     [style.background]="bar.color + '15'"
+                     [style.border-color]="bar.color + '40'">
+                  <span [style.color]="bar.color"
+                        style="font-weight:700">
+                    {{ bar.count }}
+                  </span>
+                  <span style="font-size:11px;color:#64748b">
+                    {{ bar.label }}
+                  </span>
+                </div>
+              }
+            </div>
+
+          } @else {
+            <div class="empty-chart">No policy data yet</div>
+          }
+        </div>
+
+        <!-- Top Plans by Volume -->
+        <div class="uw-card">
+          <h3 class="card-title">
+            <span class="material-icons"
+                  style="vertical-align:middle;font-size:17px;margin-right:6px">
+              workspace_premium
+            </span>
+            Top Plans by Volume
+          </h3>
+
+          @if (topPlans.length > 0) {
+            <div class="top-plans">
+              @for (plan of topPlans; track plan.name; let i = $index) {
+                <div class="plan-row">
+                  <div class="plan-rank"
+                       [style.background]="i === 0 ? '#fef3c7'
+                           : i === 1 ? '#f1f5f9' : '#fff7ed'"
+                       [style.color]="i === 0 ? '#d97706'
+                           : i === 1 ? '#64748b' : '#ea580c'">
+                    {{ i + 1 }}
+                  </div>
+                  <div class="plan-name">{{ plan.name }}</div>
+                  <div class="plan-bar-wrap">
+                    <div class="plan-bar-fill"
+                         [style.width]="(plan.count /
+                             (topPlans[0]?.count || 1)) * 100 + '%'">
+                    </div>
+                  </div>
+                  <div class="plan-count">{{ plan.count }}</div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-chart">No plan data yet</div>
+          }
+        </div>
+
+        <!-- Recent Active Policies -->
+        <div class="uw-card full-width">
+          <h3 class="card-title">
+            <span class="material-icons"
+                  style="vertical-align:middle;font-size:17px;margin-right:6px">
+              verified_user
+            </span>
+            Recent Active Policies
+          </h3>
+
+          @if (recentActivePolicies.length > 0) {
+            <div class="active-policies-list">
+              @for (p of recentActivePolicies; track p.policyId) {
+                <div class="ap-row">
+                  <div class="ap-num">{{ p.policyNumber }}</div>
+                  <div class="ap-customer">{{ p.customerName }}</div>
+                  <div class="ap-plan">{{ p.planName }}</div>
+                  <div class="ap-premium">
+                    {{ formatCurrency(p.premiumAmount) }}/yr
+                  </div>
+                  <div class="ap-commission">
+                    <span style="color:#16a34a;font-weight:600">
+                      +{{ formatCurrency(p.commissionAmount || 0) }}
+                    </span>
+                    <span style="font-size:10px;color:#94a3b8">
+                      commission
+                    </span>
+                  </div>
+                  <div class="ap-expiry">
+                    Expires: {{ p.endDate | date:'dd MMM yyyy' }}
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-chart">No active policies yet</div>
+          }
+        </div>
+
+      </div>
+    }
+
+  }
+</div>

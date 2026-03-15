@@ -2,17 +2,20 @@ spring:
   application:
     name: Corporate_Health_Insurance
 
+  # ── Database (unchanged) ──
   datasource:
     url: jdbc:h2:mem:healthshielddb
     driver-class-name: org.h2.Driver
     username: sa
     password:
 
+  # ── H2 Console (unchanged) ──
   h2:
     console:
       enabled: true
       path: /h2-console
 
+  # ── JPA (unchanged) ──
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -22,19 +25,52 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.H2Dialect
 
+  # ── NEW: Gmail SMTP ──
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jayaprakashpuntikura@gmail.com
+    password: nytt owrp rwnz qwlg
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+  # ── NEW: Async thread pool (for @Async email sending) ──
+  task:
+    execution:
+      pool:
+        core-size: 5
+        max-size: 10
+        queue-capacity: 25
+    scheduling:
+      pool:
+        size: 5
+
+# ── JWT (unchanged) ──
 jwt:
   secret: YTJiM2M0ZDVlNmY3ZzhoOWkwajFrMmwzbTRuNW82cDdxOHI5czB0MXUydjN3NHg1eTZ6N2E4YjljMGQxZTJm
   expiration: 86400000
+  refresh-expiration-days: 7
 
+razorpay:
+  key-id: rzp_test_SRCzBQEYK3vijN
+  key-secret: OkbU9Z7s8G7w40Iv9oU2P1Hk
+# ── Springdoc / Swagger (unchanged) ──
 springdoc:
   api-docs:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
 
+# ── Server (unchanged) ──
 server:
   port: 8080
 
+# ── File upload (unchanged) ──
 file:
   upload:
     dir: uploads/claims

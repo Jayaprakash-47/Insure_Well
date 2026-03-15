@@ -1,0 +1,3 @@
+:host {
+  display: contents; /* renders the button directly, no wrapper div */
+}

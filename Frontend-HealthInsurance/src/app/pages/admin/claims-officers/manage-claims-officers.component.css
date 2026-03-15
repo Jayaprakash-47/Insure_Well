@@ -1,37 +1,37 @@
 .success-msg {
-    margin-top: 0.75rem;
-    color: #059669;
-    font-weight: 600;
-    font-size: 0.875rem;
+  margin-top: 0.75rem;
+  color: #059669;
+  font-weight: 600;
+  font-size: 0.875rem;
 }
 
 .error-msg {
-    margin-top: 0.75rem;
-    color: #dc2626;
-    font-size: 0.875rem;
+  margin-top: 0.75rem;
+  color: #dc2626;
+  font-size: 0.875rem;
 }
 
 .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
 }
 
 .form-control.error {
-    border-color: #ef4444;
+  border-color: #ef4444;
 }
 
 .form-control.error:focus {
-    border-color: #ef4444;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
 .error-message {
-    color: #ef4444;
-    font-size: 0.75rem;
-    margin-top: 0.25rem;
-    display: block;
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
 }

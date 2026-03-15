@@ -35,24 +35,30 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+                        // ── existing public endpoints (unchanged) ──
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/plans/**").permitAll()
                         .requestMatchers("/api/premium/calculate").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
 
-                        // Admin endpoints
+                        // ── NEW: SSE subscription (needs token in query param, not header) ──
+                        .requestMatchers("/api/notifications/subscribe").permitAll()
+
+                        // ── existing role-based endpoints (unchanged) ──
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-
-                        // Underwriter endpoints
                         .requestMatchers("/api/underwriter/**").hasRole("UNDERWRITER")
-
-                        // Claims Officer endpoints
                         .requestMatchers("/api/claims-officer/**").hasRole("CLAIMS_OFFICER")
 
-                        // Everything else requires authentication
+                        .requestMatchers("/api/claims/*/documents/*/view").authenticated()
+                        .requestMatchers("/api/claims/*/documents/*/download").authenticated()
+
+                        .requestMatchers("/api/payments/**").authenticated()
+
+                        .requestMatchers("/api/razorpay/**").authenticated()
+
+                        .requestMatchers("/api/profile/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -73,7 +79,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:3000", "http://localhost:55983","http://localhost:62486"));
+        config.setAllowedOrigins(List.of(
+                "http://localhost:4200",
+                "http://localhost:3000",
+                "http://localhost:55983",
+                "http://localhost:62486"
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

@@ -1,75 +1,444 @@
 <div class="page-wrapper">
-    <!-- Welcome Banner -->
-    <div class="welcome-banner">
-        <div class="welcome-content">
-            <h1>Welcome back, {{ auth.getUserName() }}!</h1>
-            <p>Here's an overview of your health insurance portfolio</p>
-        </div>
-        <a routerLink="/customer/plans" class="btn btn-primary">Browse Plans</a>
-    </div>
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon green">
-                <span class="material-icons">menu_book</span>
-            </div>
-            <div class="stat-info">
-                <h3>{{ policies.length }}</h3>
-                <p>Total Policies</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon blue">
-                <span class="material-icons">verified_user</span>
-            </div>
-            <div class="stat-info">
-                <h3>{{ activePolicies }}</h3>
-                <p>Active Policies</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon yellow">
-                <span class="material-icons">hourglass_top</span>
-            </div>
-            <div class="stat-info">
-                <h3>{{ pendingPolicies }}</h3>
-                <p>Awaiting Quote / Payment</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon red">
-                <span class="material-icons">assignment_late</span>
-            </div>
-            <div class="stat-info">
-                <h3>{{ pendingClaims }}</h3>
-                <p>Pending Claims</p>
-            </div>
-        </div>
+  <!-- Welcome Banner -->
+  <div class="welcome-banner">
+    <div class="welcome-content">
+      <h1>Welcome back, {{ auth.getUserName() }}!</h1>
+      <p>Here's an overview of your health insurance portfolio</p>
     </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a routerLink="/customer/plans" class="btn btn-primary">Browse Plans</a>
+      <a routerLink="/customer/profile" class="btn btn-outline-profile">
+        <span class="material-icons" style="font-size:17px;vertical-align:middle">
+          account_circle
+        </span>
+        My Profile
+      </a>
+    </div>
+  </div>
 
-    <div class="quick-actions">
-        <h2>Quick Actions</h2>
-        <div class="actions-grid">
-            <a routerLink="/customer/plans" class="action-card">
-                <span class="action-icon"><span class="material-icons">search</span></span>
-                <span class="action-label">Browse Plans</span>
-                <span class="action-desc">Explore insurance options</span>
-            </a>
-            <a routerLink="/customer/policies" class="action-card">
-                <span class="action-icon"><span class="material-icons">inventory_2</span></span>
-                <span class="action-label">My Policies</span>
-                <span class="action-desc">View & manage policies</span>
-            </a>
-            <a routerLink="/customer/claims" class="action-card">
-                <span class="action-icon"><span class="material-icons">receipt_long</span></span>
-                <span class="action-label">My Claims</span>
-                <span class="action-desc">Track claim status</span>
-            </a>
-            <a routerLink="/customer/claims/new" class="action-card">
-                <span class="action-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" /></svg></span>
-                <span class="action-label">File Claim</span>
-                <span class="action-desc">Submit a new claim</span>
-            </a>
-        </div>
+  <!-- Expiring Soon Alert -->
+  @if (expiringSoon.length > 0) {
+    <div class="alert-banner">
+      <span class="material-icons" style="color:#f59e0b;font-size:20px">warning</span>
+      <span>
+        <strong>{{ expiringSoon.length }} policy(ies) expiring soon!</strong>
+        {{ expiringSoon[0].policyNumber }} expires in
+        {{ getDaysUntilExpiry(expiringSoon[0]) }} days.
+      </span>
+      <a routerLink="/customer/policies" class="alert-link">Renew Now →</a>
     </div>
+  }
+
+  <!-- NCB Alert -->
+  @if (ncbPolicies.length > 0) {
+    <div class="alert-banner ncb-alert">
+      <span style="font-size:18px">🎁</span>
+      <span>
+        <strong>No-Claim Bonus active!</strong>
+        You've earned a {{ ncbPolicies[0].noClaimBonus }}% discount
+        on your next renewal.
+      </span>
+    </div>
+  }
+
+  <!-- Stat Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon green">
+        <span class="material-icons">menu_book</span>
+      </div>
+      <div class="stat-info">
+        <h3>{{ policies.length }}</h3>
+        <p>Total Policies</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">
+        <span class="material-icons">verified_user</span>
+      </div>
+      <div class="stat-info">
+        <h3>{{ activePolicies }}</h3>
+        <p>Active Policies</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon yellow">
+        <span class="material-icons">hourglass_top</span>
+      </div>
+      <div class="stat-info">
+        <h3>{{ pendingPolicies }}</h3>
+        <p>Awaiting Quote / Payment</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon red">
+        <span class="material-icons">assignment_late</span>
+      </div>
+      <div class="stat-info">
+        <h3>{{ pendingClaims }}</h3>
+        <p>Pending Claims</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Row -->
+  @if (activePolicies > 0 || claims.length > 0) {
+    <div class="analytics-row">
+
+      <!-- Coverage Utilization -->
+      @if (activePolicies > 0) {
+        <div class="analytics-card">
+          <h3 class="analytics-title">
+            <span class="material-icons"
+                  style="font-size:16px;vertical-align:middle;margin-right:4px">
+              shield
+            </span>
+            Coverage Utilization
+          </h3>
+          <div class="coverage-bar-stack">
+            <div class="stack-used"
+                 [style.width]="coverageUsedPct + '%'"
+                 [title]="'Used: ' + formatCurrency(totalClaimed)">
+            </div>
+            <div class="stack-remaining"
+                 [style.width]="coverageRemainingPct + '%'"
+                 [title]="'Remaining: ' + formatCurrency(totalRemaining)">
+            </div>
+          </div>
+          <div class="coverage-labels">
+            <div class="cov-label">
+              <span class="dot dot-used"></span>
+              <span>Used: {{ formatCurrency(totalClaimed) }}</span>
+              <strong>({{ coverageUsedPct }}%)</strong>
+            </div>
+            <div class="cov-label">
+              <span class="dot dot-remaining"></span>
+              <span>Available: {{ formatCurrency(totalRemaining) }}</span>
+              <strong>({{ coverageRemainingPct }}%)</strong>
+            </div>
+          </div>
+          <div class="total-coverage">
+            Total Coverage: <strong>{{ formatCurrency(totalCoverage) }}</strong>
+          </div>
+          @for (p of policies; track p.policyId) {
+            @if (p.policyStatus === 'ACTIVE') {
+              <div class="policy-mini-row">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:12px;font-weight:600;color:#0f1f3d">
+                    {{ p.policyNumber }}
+                  </div>
+                  <div style="font-size:11px;color:#64748b">{{ p.planName }}</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                  <div style="font-size:12px;font-weight:600;color:#10b981">
+                    {{ formatCurrency(p.remainingCoverage || p.coverageAmount) }}
+                  </div>
+                  <div style="font-size:10px;color:#94a3b8">remaining</div>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+
+      <!-- Claims Breakdown -->
+      @if (claims.length > 0) {
+        <div class="analytics-card">
+          <h3 class="analytics-title">
+            <span class="material-icons"
+                  style="font-size:16px;vertical-align:middle;margin-right:4px">
+              receipt_long
+            </span>
+            Claims Breakdown
+            <span style="font-size:12px;color:#94a3b8;font-weight:400;margin-left:6px">
+              ({{ claims.length }} total)
+            </span>
+          </h3>
+          <div class="claims-bars">
+            @for (bar of claimsBreakdown; track bar.key) {
+              <div class="cbar-row">
+                <div class="cbar-label">{{ bar.label }}</div>
+                <div class="cbar-track">
+                  <div class="cbar-fill"
+                       [style.width]="bar.pct + '%'"
+                       [style.background]="bar.color">
+                  </div>
+                </div>
+                <div class="cbar-count" [style.color]="bar.color">
+                  {{ bar.count }}
+                </div>
+              </div>
+            }
+          </div>
+          <div class="claims-total-row">
+            <div class="claims-total-item">
+              <div class="claims-total-val">
+                {{ formatCurrency(claims.reduce(
+                (s, c) => s + (c.claimAmount || 0), 0)) }}
+              </div>
+              <div class="claims-total-label">Total Claimed</div>
+            </div>
+            <div class="claims-total-item">
+              <div class="claims-total-val" style="color:#10b981">
+                {{ formatCurrency(claims.reduce(
+                (s, c) => s + (c.approvedAmount || 0), 0)) }}
+              </div>
+              <div class="claims-total-label">Total Approved</div>
+            </div>
+            <div class="claims-total-item">
+              <div class="claims-total-val" style="color:#16a34a">
+                {{ formatCurrency(claims.reduce(
+                (s, c) => s + (c.settlementAmount || 0), 0)) }}
+              </div>
+              <div class="claims-total-label">Total Settled</div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Policy Status Tracker -->
+  @if (policies.length > 0) {
+    <div class="section-card">
+      <h2 class="section-title">
+        <span class="material-icons"
+              style="vertical-align:middle;font-size:18px;margin-right:6px">
+          timeline
+        </span>
+        Policy Status Tracker
+      </h2>
+      @for (p of policies; track p.policyId) {
+        <div class="policy-tracker">
+          <div class="tracker-header">
+            <strong>{{ p.policyNumber }}</strong>
+            <span style="color:#64748b;font-size:12px">{{ p.planName }}</span>
+            <span class="tracker-status"
+                  [style.background]="getPolicyStatusColor(p.policyStatus) + '20'"
+                  [style.color]="getPolicyStatusColor(p.policyStatus)">
+              {{ p.policyStatus }}
+            </span>
+          </div>
+          <div class="policy-steps">
+            @for (step of getPolicySteps(p); track step.key; let last = $last) {
+              <div class="pstep" [class]="'pstep-' + step.state">
+                @if (!last) {
+                  <div class="pstep-line"
+                       [class.done]="step.state === 'completed'">
+                  </div>
+                }
+                <div class="pstep-dot">
+                  <span class="material-icons" style="font-size:14px">
+                    {{ step.icon }}
+                  </span>
+                </div>
+                <div class="pstep-label">{{ step.label }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── NEW: Payment History Section ── -->
+  @if (payments.length > 0) {
+    <div class="section-card" style="margin-bottom:1.5rem">
+
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;
+                  flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <div>
+          <h2 class="section-title" style="margin:0">
+            <span class="material-icons"
+                  style="vertical-align:middle;font-size:18px;margin-right:6px">
+              credit_card
+            </span>
+            Payment History
+          </h2>
+          <p style="font-size:12px;color:#64748b;margin:4px 0 0">
+            Total Paid:
+            <strong style="color:#16a34a">
+              {{ formatCurrency(totalAmountPaid) }}
+            </strong>
+            across {{ payments.length }} payment(s)
+          </p>
+        </div>
+
+        <!-- Filter by policy -->
+        <select [(ngModel)]="paymentFilter"
+                style="padding:6px 12px;border:1px solid #e2e8f0;
+                       border-radius:8px;font-size:13px;
+                       color:#374151;background:white;cursor:pointer">
+          <option value="ALL">All Policies</option>
+          @for (pno of uniquePolicyNumbers; track pno) {
+            <option [value]="pno">{{ pno }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- KPI Summary -->
+      <div class="payment-kpi-row">
+        <div class="payment-kpi">
+          <div class="payment-kpi-val" style="color:#16a34a">
+            {{ formatCurrency(totalAmountPaid) }}
+          </div>
+          <div class="payment-kpi-label">Total Paid</div>
+        </div>
+        <div class="payment-kpi">
+          <div class="payment-kpi-val" style="color:#3b82f6">
+            {{ payments.length }}
+          </div>
+          <div class="payment-kpi-label">Transactions</div>
+        </div>
+        <div class="payment-kpi">
+          <div class="payment-kpi-val" style="color:#8b5cf6">
+            {{ uniquePolicyNumbers.length }}
+          </div>
+          <div class="payment-kpi-label">Policies Paid</div>
+        </div>
+        <div class="payment-kpi">
+          <div class="payment-kpi-val" style="color:#f59e0b">
+            {{ payments.filter(p => p.paymentStatus === 'SUCCESS').length }}
+          </div>
+          <div class="payment-kpi-label">Successful</div>
+        </div>
+      </div>
+
+      <!-- Payment Table -->
+      <div class="payment-table-wrap">
+        <table class="payment-table">
+          <thead>
+          <tr>
+            <th>Policy</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Transaction ID</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Receipt</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (p of filteredPayments; track p.paymentId) {
+              <tr>
+                <td>
+                  <div style="font-weight:600;color:#0f1f3d;font-size:13px">
+                    {{ p.policyNumber }}
+                  </div>
+                  <div style="font-size:11px;color:#94a3b8">
+                    ID: {{ p.policyId }}
+                  </div>
+                </td>
+                <td>
+                  <strong style="color:#0f1f3d">
+                    {{ formatCurrency(p.amount) }}
+                  </strong>
+                </td>
+                <td>
+                  <div style="display:flex;align-items:center;
+                              gap:5px;font-size:13px">
+                    <span>{{ getPaymentMethodIcon(p.paymentMethod) }}</span>
+                    <span>{{ p.paymentMethod }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span style="font-family:monospace;font-size:11px;
+                               color:#64748b;word-break:break-all">
+                    {{ p.transactionId | slice:0:20 }}...
+                  </span>
+                </td>
+                <td style="font-size:12px;color:#374151;white-space:nowrap">
+                  {{ p.paymentDate | date:'dd MMM yyyy' }}
+                  <div style="font-size:10px;color:#94a3b8">
+                    {{ p.paymentDate | date:'h:mm a' }}
+                  </div>
+                </td>
+                <td>
+                  <span class="payment-status-badge"
+                        [style.background]="getPaymentStatusColor(p.paymentStatus) + '20'"
+                        [style.color]="getPaymentStatusColor(p.paymentStatus)">
+                    @if (p.paymentStatus === 'SUCCESS') { ✓ }
+                    @else if (p.paymentStatus === 'FAILED') { ✕ }
+                    {{ p.paymentStatus }}
+                  </span>
+                </td>
+                <td>
+                  @if (p.paymentStatus === 'SUCCESS') {
+                    <button class="btn-receipt"
+                            (click)="downloadReceipt(p)"
+                            [disabled]="downloadingReceipt === p.paymentId">
+                      @if (downloadingReceipt === p.paymentId) {
+                        <span class="material-icons"
+                              style="font-size:14px;
+                                     animation:spin 1s linear infinite">
+                          hourglass_empty
+                        </span>
+                      } @else {
+                        <span class="material-icons" style="font-size:14px">
+                          picture_as_pdf
+                        </span>
+                        Receipt
+                      }
+                    </button>
+                  } @else {
+                    <span style="color:#94a3b8;font-size:12px">—</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (filteredPayments.length === 0) {
+        <div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px">
+          No payments found for this policy
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="actions-grid">
+      <a routerLink="/customer/plans" class="action-card">
+        <span class="action-icon">
+          <span class="material-icons">search</span>
+        </span>
+        <span class="action-label">Browse Plans</span>
+        <span class="action-desc">Explore insurance options</span>
+      </a>
+      <a routerLink="/customer/policies" class="action-card">
+        <span class="action-icon">
+          <span class="material-icons">inventory_2</span>
+        </span>
+        <span class="action-label">My Policies</span>
+        <span class="action-desc">View & manage policies</span>
+      </a>
+      <a routerLink="/customer/claims" class="action-card">
+        <span class="action-icon">
+          <span class="material-icons">receipt_long</span>
+        </span>
+        <span class="action-label">My Claims</span>
+        <span class="action-desc">Track claim status</span>
+      </a>
+      <a routerLink="/customer/claims/new" class="action-card">
+        <span class="action-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+               viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832
+                 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0
+                 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+          </svg>
+        </span>
+        <span class="action-label">File Claim</span>
+        <span class="action-desc">Submit a new claim</span>
+      </a>
+    </div>
+  </div>
+
 </div>

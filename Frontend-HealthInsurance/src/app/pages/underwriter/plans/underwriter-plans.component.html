@@ -1,7 +1,10 @@
 <div class="page">
   <div class="page-header">
     <div>
-      <h1><span class="material-icons" style="vertical-align: middle;">local_hospital</span> Available Plans</h1>
+      <h1>
+        <span class="material-icons" style="vertical-align: middle">local_hospital</span> Available
+        Plans
+      </h1>
       <p>Insurance plans you can reference when evaluating policy applications.</p>
     </div>
     <a routerLink="/underwriter/dashboard" class="btn-back">← Dashboard</a>
@@ -37,12 +40,27 @@
             </div>
           </div>
           <div class="plan-features">
-            <div><span class="material-icons" [style.color]="p.maternityCover ? '#10b981' : '#dc2626'" style="font-size: 1rem; vertical-align: middle;">{{ p.maternityCover ? 'check' : 'close' }}</span> Maternity Cover</div>
-            <div><span class="material-icons" [style.color]="p.preExistingDiseaseCover ? '#10b981' : '#dc2626'" style="font-size: 1rem; vertical-align: middle;">{{ p.preExistingDiseaseCover ? 'check' : 'close' }}</span> Pre-existing Diseases</div>
+            <div>
+              <span
+                class="material-icons"
+                [style.color]="p.maternityCover ? '#10b981' : '#dc2626'"
+                style="font-size: 1rem; vertical-align: middle"
+                >{{ p.maternityCover ? 'check' : 'close' }}</span
+              >
+              Maternity Cover
+            </div>
+            <div>
+              <span
+                class="material-icons"
+                [style.color]="p.preExistingDiseaseCover ? '#10b981' : '#dc2626'"
+                style="font-size: 1rem; vertical-align: middle"
+                >{{ p.preExistingDiseaseCover ? 'check' : 'close' }}</span
+              >
+              Pre-existing Diseases
+            </div>
           </div>
         </div>
       }
     </div>
   }
 </div>
-

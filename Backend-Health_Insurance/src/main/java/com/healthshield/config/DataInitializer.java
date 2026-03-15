@@ -39,7 +39,7 @@ public class DataInitializer implements CommandLineRunner {
         log.info("  Admin           : admin@healthshield.com / Admin@1234");
         log.info("  Claims Officer  : ravi.co@healthshield.com / Officer@1234");
          log.info("  Under Writer    : priya.underwriter@healthshield.com / Agent@1234");
-        log.info("  Customer        : jayaprakash@gmail.com / Jaya@1234");
+        log.info("  Customer        : jayaprakashpuntikura@gmail.com / Jaya@1234");
         log.info("═══════════════════════════════════════════════════════════");
     }
 
@@ -96,11 +96,11 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // Seed Customer
-        if (!userRepository.existsByEmail("jayaprakash@gmail.com")) {
+        if (!userRepository.existsByEmail("jayaprakashpuntikura@gmail.com")) {
             Customer customer = new Customer();
             customer.setFirstName("Jayaprakash");
             customer.setLastName("Kumar");
-            customer.setEmail("jayaprakash@gmail.com");
+            customer.setEmail("jayaprakashpuntikura@gmail.com");          // ← updated
             customer.setPassword(passwordEncoder.encode("Jaya@1234"));
             customer.setPhone("9000000003");
             customer.setIsActive(true);
@@ -111,7 +111,7 @@ public class DataInitializer implements CommandLineRunner {
             customer.setState("Tamil Nadu");
             customer.setPincode("600001");
             userRepository.save(customer);
-            log.info("✅ Customer seeded: jayaprakash@gmail.com");
+            log.info("✅ Customer seeded: jayaprakashpuntikura@gmail.com"); // ← updated
         }
     }
 

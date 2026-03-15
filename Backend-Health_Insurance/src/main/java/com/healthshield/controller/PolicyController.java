@@ -111,4 +111,14 @@ public class PolicyController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    /** Reapply for a policy after underwriter raised a concern — updates details and resets to PENDING */
+    @PutMapping(value = "/{id}/reapply", consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<PolicyResponse> reapplyPolicy(@AuthenticationPrincipal User user,
+                                                         @PathVariable Long id,
+                                                         @RequestPart("policy") @Valid PolicyPurchaseRequest request,
+                                                         @RequestPart(value = "healthCheckReport", required = false) MultipartFile healthCheckReport) {
+        return ResponseEntity.ok(policyService.reapplyPolicy(user.getUserId(), id, request, healthCheckReport));
+    }
 }

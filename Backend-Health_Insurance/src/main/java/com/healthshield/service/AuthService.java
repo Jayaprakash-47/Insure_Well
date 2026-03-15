@@ -23,6 +23,7 @@ public class AuthService {
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService; // ← NEW
 
     public AuthResponse register(CustomerRegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -47,6 +48,7 @@ public class AuthService {
 
         Customer saved = customerRepository.save(customer);
         String token = jwtUtil.generateToken(saved);
+        String refreshToken = refreshTokenService.createRefreshToken(saved.getEmail()); // ← NEW
 
         return AuthResponse.builder()
                 .token(token)
@@ -56,6 +58,7 @@ public class AuthService {
                 .email(saved.getEmail())
                 .role(extractRole(saved))
                 .message("Registration successful")
+                .refreshToken(refreshToken) // ← NEW
                 .build();
     }
 
@@ -72,6 +75,7 @@ public class AuthService {
         }
 
         String token = jwtUtil.generateToken(user);
+        String refreshToken = refreshTokenService.createRefreshToken(user.getEmail()); // ← NEW
 
         return AuthResponse.builder()
                 .token(token)
@@ -81,16 +85,13 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(extractRole(user))
                 .message("Login successful")
+                .refreshToken(refreshToken) // ← NEW
                 .build();
     }
 
-    /**
-     * Extract the role from the User's discriminator value.
-     * Returns the user_type column value: ADMIN, UNDERWRITER, CUSTOMER, CLAIMS_OFFICER
-     */
     private String extractRole(User user) {
-        // The discriminator value annotation on each subclass gives us the role
-        jakarta.persistence.DiscriminatorValue dv = user.getClass().getAnnotation(jakarta.persistence.DiscriminatorValue.class);
+        jakarta.persistence.DiscriminatorValue dv =
+                user.getClass().getAnnotation(jakarta.persistence.DiscriminatorValue.class);
         return (dv != null) ? dv.value() : "USER";
     }
 }

@@ -1,225 +1,246 @@
 <div class="landing-page">
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-bg-pattern"></div>
-        <div class="container">
-            <div class="hero-content">
-                <span class="trust-badge">
-                    <span class="material-icons" style="font-size: 16px;">verified_user</span>
-                    IRDAI Registered Insurance
-                </span>
-                <h1 class="hero-title">
-                    Protect Your Health,<br>
-                    <span class="highlight">Protect Your Future.</span>
-                </h1>
-                <p class="hero-subtitle">Simple, reliable, and transparent health insurance plans for you and your family. Get covered starting at just ₹500/month with cashless treatment at 5000+ hospitals.</p>
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-bg-pattern"></div>
+    <div class="container">
+      <div class="hero-content">
+        <span class="trust-badge">
+          <span class="material-icons" style="font-size: 16px">verified_user</span>
+          IRDAI Registered Insurance
+        </span>
+        <h1 class="hero-title">
+          Protect Your Health,<br />
+          <span class="highlight">Protect Your Future.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Simple, reliable, and transparent health insurance plans for you and your family. Get
+          covered starting at just ₹500/month with cashless treatment at 5000+ hospitals.
+        </p>
 
-                <div class="hero-actions">
-                    <a routerLink="/plans" class="btn btn-hero-primary">
-                        <span class="material-icons" style="font-size: 20px;">search</span>
-                        Explore Plans
-                    </a>
-                    @if (!auth.isLoggedIn()) {
-                        <a routerLink="/register" class="btn btn-hero-outline">Create Account</a>
-                    }
-                </div>
-            </div>
+        <div class="hero-actions">
+          <a routerLink="/plans" class="btn btn-hero-primary">
+            <span class="material-icons" style="font-size: 20px">search</span>
+            Explore Plans
+          </a>
+          @if (!auth.isLoggedIn()) {
+            <a routerLink="/register" class="btn btn-hero-outline">Create Account</a>
+          }
+        </div>
+      </div>
 
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <div class="hero-stat-icon">
-                        <span class="material-icons" style="font-size: 28px;">local_hospital</span>
-                    </div>
-                    <div class="hero-stat-info">
-                        <span class="hero-stat-num">5,000+</span>
-                        <span class="hero-stat-label">Network Hospitals</span>
-                    </div>
-                </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-icon">
-                        <span class="material-icons" style="font-size: 28px;">verified</span>
-                    </div>
-                    <div class="hero-stat-info">
-                        <span class="hero-stat-num">99%</span>
-                        <span class="hero-stat-label">Settlement Ratio</span>
-                    </div>
-                </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-icon">
-                        <span class="material-icons" style="font-size: 28px;">support_agent</span>
-                    </div>
-                    <div class="hero-stat-info">
-                        <span class="hero-stat-num">24/7</span>
-                        <span class="hero-stat-label">Customer Support</span>
-                    </div>
-                </div>
-            </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-icon">
+            <span class="material-icons" style="font-size: 28px">local_hospital</span>
+          </div>
+          <div class="hero-stat-info">
+            <span class="hero-stat-num">5,000+</span>
+            <span class="hero-stat-label">Network Hospitals</span>
+          </div>
         </div>
-    </section>
+        <div class="hero-stat">
+          <div class="hero-stat-icon">
+            <span class="material-icons" style="font-size: 28px">verified</span>
+          </div>
+          <div class="hero-stat-info">
+            <span class="hero-stat-num">99%</span>
+            <span class="hero-stat-label">Settlement Ratio</span>
+          </div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-icon">
+            <span class="material-icons" style="font-size: 28px">support_agent</span>
+          </div>
+          <div class="hero-stat-info">
+            <span class="hero-stat-num">24/7</span>
+            <span class="hero-stat-label">Customer Support</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <!-- How It Works -->
-    <section class="how-it-works-section">
-        <div class="container">
-            <div class="section-header text-center">
-                <span class="section-badge">Simple Process</span>
-                <h2 class="section-title">How It Works</h2>
-                <p class="section-desc">Get insured in four easy steps</p>
+  <!-- How It Works -->
+  <section class="how-it-works-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-badge">Simple Process</span>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-desc">Get insured in four easy steps</p>
+      </div>
+      <div class="steps-grid">
+        @for (step of howItWorks; track step.title; let i = $index) {
+          <div class="step-item">
+            <div class="step-number">{{ i + 1 }}</div>
+            <div class="step-icon-wrap">
+              <span class="material-icons" style="font-size: 32px">{{ step.icon }}</span>
             </div>
-            <div class="steps-grid">
-                @for (step of howItWorks; track step.title; let i = $index) {
-                <div class="step-item">
-                    <div class="step-number">{{ i + 1 }}</div>
-                    <div class="step-icon-wrap"><span class="material-icons" style="font-size: 32px;">{{ step.icon }}</span></div>
-                    <h3>{{ step.title }}</h3>
-                    <p>{{ step.desc }}</p>
-                </div>
-                }
-            </div>
-        </div>
-    </section>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.desc }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
 
-    <!-- Features -->
-    <section class="features-section">
-        <div class="container">
-            <div class="section-header text-center">
-                <span class="section-badge">Our Advantages</span>
-                <h2 class="section-title">Why Choose InsureWell?</h2>
-                <p class="section-desc">Industry-leading features that make us stand out</p>
+  <!-- Features -->
+  <section class="features-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-badge">Our Advantages</span>
+        <h2 class="section-title">Why Choose InsureWell?</h2>
+        <p class="section-desc">Industry-leading features that make us stand out</p>
+      </div>
+      <div class="features-grid">
+        @for (feature of features; track feature.title) {
+          <div class="feature-card">
+            <div class="feature-icon-wrap">
+              <span class="material-icons" style="font-size: 32px">{{ feature.icon }}</span>
             </div>
-            <div class="features-grid">
-                @for (feature of features; track feature.title) {
-                <div class="feature-card">
-                    <div class="feature-icon-wrap"><span class="material-icons" style="font-size: 32px;">{{ feature.icon }}</span></div>
-                    <h3>{{ feature.title }}</h3>
-                    <p>{{ feature.desc }}</p>
-                </div>
-                }
-            </div>
-        </div>
-    </section>
-    <!-- Plans Section -->
-    <section class="plans-section">
-        <div class="container">
-            <div class="section-header text-center">
-                <span class="section-badge">Choose Your Plan</span>
-                <h2 class="section-title">Our Most Popular Plans</h2>
-                <p class="section-desc">Comprehensive coverage options for every need</p>
-            </div>
-            <div class="plans-grid">
-                @for (plan of plans; track plan.name) {
-                <div class="plan-card" [class.featured]="plan.popular">
-                    @if (plan.popular) {
-                    <div class="popular-tag">
-                        <span class="material-icons" style="font-size: 14px;">star</span>
-                        Most Popular
-                    </div>
-                    }
-                    <h3>{{ plan.name }}</h3>
-                    <div class="plan-price">{{ plan.price }}</div>
-                    <div class="plan-coverage">{{ plan.coverage }}</div>
-                    <ul class="plan-features">
-                        @for (f of plan.features; track f) {
-                        <li>
-                            <span class="material-icons" style="font-size: 18px; color: #10b981;">check_circle</span>
-                            {{ f }}
-                        </li>
-                        }
-                    </ul>
-                    <a routerLink="/register" class="btn btn-full" [class.btn-primary]="plan.popular" [class.btn-outline]="!plan.popular">
-                        Get Quote
-                        <span class="material-icons" style="font-size: 18px;">arrow_forward</span>
-                    </a>
-                </div>
-                }
-            </div>
-        </div>
-    </section>
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.desc }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+  <!-- Plans Section -->
+  <section class="plans-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-badge">Choose Your Plan</span>
+        <h2 class="section-title">Our Most Popular Plans</h2>
+        <p class="section-desc">Comprehensive coverage options for every need</p>
+      </div>
+      <div class="plans-grid">
+        @for (plan of plans; track plan.name) {
+          <div class="plan-card" [class.featured]="plan.popular">
+            @if (plan.popular) {
+              <div class="popular-tag">
+                <span class="material-icons" style="font-size: 14px">star</span>
+                Most Popular
+              </div>
+            }
+            <h3>{{ plan.name }}</h3>
+            <div class="plan-price">{{ plan.price }}</div>
+            <div class="plan-coverage">{{ plan.coverage }}</div>
+            <ul class="plan-features">
+              @for (f of plan.features; track f) {
+                <li>
+                  <span class="material-icons" style="font-size: 18px; color: #10b981"
+                    >check_circle</span
+                  >
+                  {{ f }}
+                </li>
+              }
+            </ul>
+            <a
+              routerLink="/register"
+              class="btn btn-full"
+              [class.btn-primary]="plan.popular"
+              [class.btn-outline]="!plan.popular"
+            >
+              Get Quote
+              <span class="material-icons" style="font-size: 18px">arrow_forward</span>
+            </a>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
 
-    <!-- Testimonials -->
-    <section class="testimonials-section">
-        <div class="container">
-            <div class="section-header text-center">
-                <span class="section-badge">Customer Stories</span>
-                <h2 class="section-title">What Our Customers Say</h2>
-                <p class="section-desc">Join thousands of satisfied policyholders</p>
+  <!-- Testimonials -->
+  <section class="testimonials-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-badge">Customer Stories</span>
+        <h2 class="section-title">What Our Customers Say</h2>
+        <p class="section-desc">Join thousands of satisfied policyholders</p>
+      </div>
+      <div class="testimonials-grid">
+        @for (t of testimonials; track t.name) {
+          <div class="testimonial-card">
+            <div class="testimonial-stars" style="color: #fbbf24; display: flex; gap: 2px">
+              <span class="material-icons" style="font-size: 1.25rem">star</span>
+              <span class="material-icons" style="font-size: 1.25rem">star</span>
+              <span class="material-icons" style="font-size: 1.25rem">star</span>
+              <span class="material-icons" style="font-size: 1.25rem">star</span>
+              <span class="material-icons" style="font-size: 1.25rem">star</span>
             </div>
-            <div class="testimonials-grid">
-                @for (t of testimonials; track t.name) {
-                <div class="testimonial-card">
-                    <div class="testimonial-stars" style="color: #fbbf24; display: flex; gap: 2px;">
-                        <span class="material-icons" style="font-size: 1.25rem;">star</span>
-                        <span class="material-icons" style="font-size: 1.25rem;">star</span>
-                        <span class="material-icons" style="font-size: 1.25rem;">star</span>
-                        <span class="material-icons" style="font-size: 1.25rem;">star</span>
-                        <span class="material-icons" style="font-size: 1.25rem;">star</span>
-                    </div>
-                    <p class="testimonial-text">"{{ t.text }}"</p>
-                    <div class="testimonial-author">
-                        <div class="testimonial-avatar">{{ t.name.charAt(0) }}</div>
-                        <div>
-                            <strong>{{ t.name }}</strong>
-                            <span>{{ t.role }}</span>
-                        </div>
-                    </div>
-                </div>
-                }
+            <p class="testimonial-text">"{{ t.text }}"</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">{{ t.name.charAt(0) }}</div>
+              <div>
+                <strong>{{ t.name }}</strong>
+                <span>{{ t.role }}</span>
+              </div>
             </div>
-        </div>
-    </section>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="container text-center">
-            <h2>Ready to Secure Your Future?</h2>
-            <p>Join 50,000+ families who trust InsureWell for their health coverage</p>
-            <div class="cta-actions">
-                <a routerLink="/register" class="btn btn-cta-primary">Get Started Free</a>
-                <a routerLink="/plans" class="btn btn-cta-outline">View All Plans</a>
-            </div>
-        </div>
-    </section>
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container text-center">
+      <h2>Ready to Secure Your Future?</h2>
+      <p>Join 50,000+ families who trust InsureWell for their health coverage</p>
+      <div class="cta-actions">
+        <a routerLink="/register" class="btn btn-cta-primary">Get Started Free</a>
+        <a routerLink="/plans" class="btn btn-cta-outline">View All Plans</a>
+      </div>
+    </div>
+  </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <span class="material-icons" style="font-size: 28px; color: #a3243b;">verified_user</span>
-                        InsureWell
-                    </div>
-                    <p>Your trusted partner in healthcare protection. IRDAI registered health insurance provider committed to transparency and service.</p>
-                </div>
-                <div class="footer-col">
-                    <h4>Company</h4>
-                    <a>About Us</a>
-                    <a>Careers</a>
-                    <a>Contact</a>
-                    <a>Press</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Products</h4>
-                    <a routerLink="/plans">Individual Plans</a>
-                    <a routerLink="/plans">Family Plans</a>
-                    <a routerLink="/plans">Senior Plans</a>
-                    <a>Group Insurance</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Support</h4>
-                    <a routerLink="/login">My Account</a>
-                    <a>Help Center</a>
-                    <a>Privacy Policy</a>
-                    <a>Terms of Service</a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>© 2026 InsureWell Insurance Private Limited. IRDAI Registration: 001. All rights reserved.</p>
-                <div class="footer-social">
-                    <a>LinkedIn</a>
-                    <a>Twitter</a>
-                    <a>Facebook</a>
-                </div>
-            </div>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <span class="material-icons" style="font-size: 28px; color: #a3243b"
+              >verified_user</span
+            >
+            InsureWell
+          </div>
+          <p>
+            Your trusted partner in healthcare protection. IRDAI registered health insurance
+            provider committed to transparency and service.
+          </p>
         </div>
-    </footer>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a>About Us</a>
+          <a>Careers</a>
+          <a>Contact</a>
+          <a>Press</a>
+        </div>
+        <div class="footer-col">
+          <h4>Products</h4>
+          <a routerLink="/plans">Individual Plans</a>
+          <a routerLink="/plans">Family Plans</a>
+          <a routerLink="/plans">Senior Plans</a>
+          <a>Group Insurance</a>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <a routerLink="/login">My Account</a>
+          <a>Help Center</a>
+          <a>Privacy Policy</a>
+          <a>Terms of Service</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>
+          © 2026 InsureWell Insurance Private Limited. IRDAI Registration: 001. All rights reserved.
+        </p>
+        <div class="footer-social">
+          <a>LinkedIn</a>
+          <a>Twitter</a>
+          <a>Facebook</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 </div>

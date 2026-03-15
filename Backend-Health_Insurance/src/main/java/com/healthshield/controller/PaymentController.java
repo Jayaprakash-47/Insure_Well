@@ -3,10 +3,13 @@ package com.healthshield.controller;
 import com.healthshield.dto.request.PaymentRequest;
 import com.healthshield.dto.response.PaymentResponse;
 import com.healthshield.entity.User;
+import com.healthshield.service.PaymentReceiptService;
 import com.healthshield.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +23,7 @@ import java.util.List;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final PaymentReceiptService paymentReceiptService;
 
     @PostMapping
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -52,6 +56,21 @@ public class PaymentController {
     public ResponseEntity<List<PaymentResponse>> getByPolicy(@AuthenticationPrincipal User user,
                                                                @PathVariable Long id) {
         return ResponseEntity.ok(paymentService.getPaymentsByPolicy(user, id));
+    }
+    @GetMapping("/{id}/receipt")
+    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN')")
+    public ResponseEntity<byte[]> downloadReceipt(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
+
+        PaymentResponse payment = paymentService.getPaymentById(user, id);
+        byte[] pdf = paymentReceiptService.generateReceipt(id);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment",
+                "receipt_" + payment.getTransactionId() + ".pdf");
+        return ResponseEntity.ok().headers(headers).body(pdf);
     }
 }
 
