@@ -382,7 +382,7 @@ export class ApiService {
   getAuditLogsByRole(role: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.api}/audit/role/${role}`);
   }
-  settleClaimByOfficer(claimId: number): Observable<ClaimResponse> {
+  settleClaimAsOfficer(claimId: number): Observable<ClaimResponse> {
     return this.http.post<ClaimResponse>(
       `${this.api}/claims/${claimId}/settle`, {});
   }

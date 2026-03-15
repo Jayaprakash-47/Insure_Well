@@ -7,6 +7,7 @@ import { NotificationBellComponent } from './shared/notification-bell/notificati
 import { NotificationService } from './core/services/notification.service';
 import { DarkModeService } from './core/services/dark-mode.service';
 import {DarkModeToggle} from './shared/dark-mode-toggle/dark-mode-toggle';
+import {LoadingOverlay} from './shared/loading-overlay/loading-overlay';
 
 
 @Component({
@@ -19,6 +20,7 @@ import {DarkModeToggle} from './shared/dark-mode-toggle/dark-mode-toggle';
     CommonModule,
     NotificationBellComponent,
     DarkModeToggle,
+    LoadingOverlay
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -62,14 +64,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   getProfileRoute(): string {
-    const role = this.auth.getRole();
-    const map: Record<string, string> = {
-      ADMIN:          '/admin/profile',
-      UNDERWRITER:    '/underwriter/profile',
-      CLAIMS_OFFICER: '/claims-officer/profile',
-      CUSTOMER:       '/customer/profile',
-    };
-    return map[role] || '/customer/profile';
+    if (this.auth.isAdmin())         return '/admin/profile';
+    if (this.auth.isUnderwriter())   return '/underwriter/profile';
+    if (this.auth.isClaimsOfficer()) return '/claims-officer/profile';
+    return '/customer/profile';
   }
 
   getNavLinks(): { label: string; route: string; icon: string }[] {

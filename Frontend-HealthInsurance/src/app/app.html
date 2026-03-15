@@ -2,6 +2,7 @@
 <!-- CHANGES: Added <app-dark-mode-toggle> just before closing of the file -->
 
 <!-- Toast Container -->
+<app-loading-overlay></app-loading-overlay>
 <div class="toast-container">
   @for (t of toast.toasts$ | async; track t.id) {
     <div class="toast toast-{{ t.type }}">

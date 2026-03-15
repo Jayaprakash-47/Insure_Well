@@ -31,12 +31,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/claims")
 @RequiredArgsConstructor
-@Slf4j  // ← NEW: adds log field
+@Slf4j
 public class ClaimController {
 
     private final ClaimService claimService;
     private final ClaimRepository claimRepository;
 
+    // ── File a new claim ──
     @PostMapping(consumes = {"multipart/form-data"})
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ClaimResponse> fileClaim(
@@ -49,13 +50,16 @@ public class ClaimController {
                 HttpStatus.CREATED);
     }
 
+    // ── Customer: my claims ──
     @GetMapping("/my-claims")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<ClaimResponse>> getMyClaims(
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(claimService.getClaimsByUser(user.getUserId()));
+        return ResponseEntity.ok(
+                claimService.getClaimsByUser(user.getUserId()));
     }
 
+    // ── Get single claim by ID ──
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','CLAIMS_OFFICER')")
     public ResponseEntity<ClaimResponse> getClaimById(
@@ -64,18 +68,21 @@ public class ClaimController {
         return ResponseEntity.ok(claimService.getClaimById(user, id));
     }
 
+    // ── Get all claims (Claims Officer) ──
     @GetMapping
     @PreAuthorize("hasAnyRole('CLAIMS_OFFICER')")
     public ResponseEntity<List<ClaimResponse>> getAllClaims() {
         return ResponseEntity.ok(claimService.getAllClaims());
     }
 
+    // ── Get pending claims ──
     @GetMapping("/pending")
     @PreAuthorize("hasAnyRole('ADMIN','CLAIMS_OFFICER')")
     public ResponseEntity<List<ClaimResponse>> getPendingClaims() {
         return ResponseEntity.ok(claimService.getPendingClaims());
     }
 
+    // ── Get claims by status ──
     @GetMapping("/status/{status}")
     @PreAuthorize("hasAnyRole('ADMIN','CLAIMS_OFFICER')")
     public ResponseEntity<List<ClaimResponse>> getClaimsByStatus(
@@ -83,6 +90,7 @@ public class ClaimController {
         return ResponseEntity.ok(claimService.getClaimsByStatus(status));
     }
 
+    // ── Admin: update claim status ──
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ClaimResponse> updateStatus(
@@ -91,6 +99,7 @@ public class ClaimController {
         return ResponseEntity.ok(claimService.updateClaimStatus(id, request));
     }
 
+    // ── Get claim documents ──
     @GetMapping("/{id}/documents")
     @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','CLAIMS_OFFICER','UNDERWRITER')")
     public ResponseEntity<List<ClaimDocumentResponse>> getDocuments(
@@ -99,7 +108,7 @@ public class ClaimController {
         return ResponseEntity.ok(claimService.getClaimDocuments(user, id));
     }
 
-    // ── KEEP original download by docId (existing functionality) ──
+    // ── Download by docId ──
     @GetMapping("/{claimId}/documents/{docId}/download")
     @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','CLAIMS_OFFICER','UNDERWRITER')")
     public ResponseEntity<Resource> downloadDocumentById(
@@ -128,14 +137,15 @@ public class ClaimController {
         }
     }
 
-    // ── NEW: View by fileName ──
+    // ── View by fileName (opens inline) ──
     @GetMapping("/{claimId}/documents/view/{fileName}")
     public ResponseEntity<Resource> viewDocumentByName(
             @PathVariable Long claimId,
             @PathVariable String fileName) {
         try {
             Claim claim = claimRepository.findById(claimId)
-                    .orElseThrow(() -> new RuntimeException("Claim not found"));
+                    .orElseThrow(() -> new RuntimeException(
+                            "Claim not found"));
 
             Path filePath = Paths.get("uploads/claims",
                     claim.getClaimNumber(), fileName);
@@ -162,14 +172,15 @@ public class ClaimController {
         }
     }
 
-    // ── NEW: Download by fileName ──
+    // ── Download by fileName (saves file) ──
     @GetMapping("/{claimId}/documents/download/{fileName}")
     public ResponseEntity<Resource> downloadDocumentByName(
             @PathVariable Long claimId,
             @PathVariable String fileName) {
         try {
             Claim claim = claimRepository.findById(claimId)
-                    .orElseThrow(() -> new RuntimeException("Claim not found"));
+                    .orElseThrow(() -> new RuntimeException(
+                            "Claim not found"));
 
             Path filePath = Paths.get("uploads/claims",
                     claim.getClaimNumber(), fileName);
@@ -192,8 +203,11 @@ public class ClaimController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    // ── Settle claim (Claims Officer + Admin) ──
+    // ← FIXED: Only ONE settle endpoint (removed duplicate)
     @PostMapping("/{claimId}/settle")
-    @PreAuthorize("hasAnyRole('CLAIMS_OFFICER','ADMIN')")
+    @PreAuthorize("hasAnyRole('CLAIMS_OFFICER', 'ADMIN')")
     public ResponseEntity<ClaimResponse> settleClaim(
             @PathVariable Long claimId,
             @AuthenticationPrincipal User user) {

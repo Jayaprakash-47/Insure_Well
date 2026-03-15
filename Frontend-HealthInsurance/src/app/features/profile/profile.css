@@ -1,4 +1,4 @@
-/* FILE: src/app/features/profile/profile.component.css */
+/* FILE: src/app/pages/profile/profile.component.css */
 
 /* ═══════════════════════════════════════════════════════════════════
    PAGE LAYOUT
@@ -11,11 +11,11 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   HERO BANNER
+   HERO BANNER — Burgundy
 ═══════════════════════════════════════════════════════════════════ */
 .profile-hero {
   position: relative;
-  background: linear-gradient(135deg, #1a1f5e 0%, #2d3494 50%, #3b4fc8 100%);
+  background: linear-gradient(135deg, #3d0010 0%, #560015 40%, #800020 100%);
   border-radius: 20px;
   padding: 36px 36px 32px;
   display: flex;
@@ -23,13 +23,13 @@
   gap: 28px;
   margin-bottom: 24px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(45, 52, 148, 0.32);
+  box-shadow: 0 8px 32px rgba(128, 0, 32, 0.38);
 }
 
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 80% 50%, rgba(255, 255, 255, 0.07) 0%, transparent 65%);
+  background: radial-gradient(ellipse at 80% 50%, rgba(255,255,255,0.07) 0%, transparent 65%);
   pointer-events: none;
 }
 
@@ -38,11 +38,11 @@
   width: 84px;
   height: 84px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255,255,255,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid rgba(255, 255, 255, 0.28);
+  border: 3px solid rgba(255,255,255,0.28);
   position: relative;
   z-index: 1;
 }
@@ -51,7 +51,7 @@
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4fc3f7, #7986cb);
+  background: linear-gradient(135deg, #e05577, #800020);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,7 +114,7 @@
 
 .hero-email {
   margin: 0 0 4px;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255,255,255,0.75);
   font-size: 13.5px;
   display: flex;
   align-items: center;
@@ -124,7 +124,7 @@
 .hero-joined {
   margin: 6px 0 0;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(255,255,255,0.48);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -158,14 +158,14 @@
 
 .tab-btn:hover {
   color: #374151;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255,255,255,0.6);
 }
 
 .tab-btn.active {
   background: #fff;
-  color: #2d3494;
+  color: #800020;
   font-weight: 600;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -175,7 +175,7 @@
   background: #fff;
   border-radius: 16px;
   padding: 30px 32px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
   border: 1px solid #edf0f7;
 }
 
@@ -215,9 +215,7 @@
   gap: 5px;
 }
 
-.info-item.full-width {
-  grid-column: 1 / -1;
-}
+.info-item.full-width { grid-column: 1 / -1; }
 
 .info-item label {
   font-size: 11px;
@@ -273,9 +271,7 @@
   gap: 6px;
 }
 
-.form-group.full-width {
-  grid-column: 1 / -1;
-}
+.form-group.full-width { grid-column: 1 / -1; }
 
 .form-group label {
   font-size: 13px;
@@ -283,9 +279,7 @@
   color: #374151;
 }
 
-.req {
-  color: #ef4444;
-}
+.req { color: #ef4444; }
 
 .form-group input {
   padding: 10px 14px;
@@ -301,8 +295,8 @@
 }
 
 .form-group input:focus {
-  border-color: #2d3494;
-  box-shadow: 0 0 0 3px rgba(45, 52, 148, 0.1);
+  border-color: #800020;
+  box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.12);
 }
 
 .form-group input.input-error {
@@ -323,21 +317,14 @@
   margin-top: 2px;
 }
 
-.hint {
-  font-size: 12px;
-  color: #9ca3af;
-}
+.hint { font-size: 12px; color: #9ca3af; }
 
 /* ═══════════════════════════════════════════════════════════════════
    PASSWORD INPUT WRAP
 ═══════════════════════════════════════════════════════════════════ */
-.pw-input-wrap {
-  position: relative;
-}
+.pw-input-wrap { position: relative; }
 
-.pw-input-wrap input {
-  padding-right: 46px;
-}
+.pw-input-wrap input { padding-right: 46px; }
 
 .eye-btn {
   position: absolute;
@@ -354,9 +341,7 @@
   transition: color 0.2s;
 }
 
-.eye-btn:hover {
-  color: #374151;
-}
+.eye-btn:hover { color: #374151; }
 
 /* ═══════════════════════════════════════════════════════════════════
    STRENGTH BAR
@@ -403,8 +388,8 @@
    PASSWORD RULES CHECKLIST
 ═══════════════════════════════════════════════════════════════════ */
 .pw-rules {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: #fdf2f4;
+  border: 1px solid #f9d5dc;
   border-radius: 10px;
   padding: 14px 16px;
 }
@@ -442,14 +427,8 @@
   transition: opacity 0.2s;
 }
 
-.pw-rules li.rule-ok {
-  color: #10b981;
-}
-
-.pw-rules li.rule-ok svg {
-  opacity: 1;
-  color: #10b981;
-}
+.pw-rules li.rule-ok          { color: #10b981; }
+.pw-rules li.rule-ok svg      { opacity: 1; color: #10b981; }
 
 /* ═══════════════════════════════════════════════════════════════════
    FORM ACTIONS
@@ -464,7 +443,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   BUTTONS
+   BUTTONS — Burgundy
 ═══════════════════════════════════════════════════════════════════ */
 .btn {
   display: inline-flex;
@@ -481,14 +460,14 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #2d3494, #3b4fc8);
+  background: linear-gradient(135deg, #800020, #6b001a);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(45, 52, 148, 0.28);
+  box-shadow: 0 2px 8px rgba(128, 0, 32, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #252c7e, #3343b0);
-  box-shadow: 0 4px 16px rgba(45, 52, 148, 0.38);
+  background: linear-gradient(135deg, #6b001a, #560015);
+  box-shadow: 0 4px 16px rgba(128, 0, 32, 0.42);
   transform: translateY(-1px);
 }
 
@@ -502,11 +481,11 @@
 .btn-outline-dark {
   background: transparent;
   color: #fff;
-  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  border: 1.5px solid rgba(255,255,255,0.45);
 }
 
 .btn-outline-dark:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255,255,255,0.12);
 }
 
 .btn-ghost {
@@ -514,9 +493,7 @@
   color: #374151;
 }
 
-.btn-ghost:hover {
-  background: #e5e7eb;
-}
+.btn-ghost:hover { background: #e5e7eb; }
 
 /* ═══════════════════════════════════════════════════════════════════
    SPINNER
@@ -524,7 +501,7 @@
 .spinner {
   width: 15px;
   height: 15px;
-  border: 2px solid rgba(255, 255, 255, 0.35);
+  border: 2px solid rgba(255,255,255,0.35);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
@@ -532,9 +509,7 @@
   flex-shrink: 0;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ═══════════════════════════════════════════════════════════════════
    RESPONSIVE
@@ -547,35 +522,12 @@
     gap: 16px;
   }
 
-  .hero-email {
-    justify-content: center;
-  }
-
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .info-item.full-width {
-    grid-column: 1;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-group.full-width {
-    grid-column: 1;
-  }
-
-  .card {
-    padding: 20px 18px;
-  }
-
-  .form-actions {
-    flex-direction: column-reverse;
-  }
-
-  .btn {
-    justify-content: center;
-  }
+  .hero-email         { justify-content: center; }
+  .info-grid          { grid-template-columns: 1fr; }
+  .info-item.full-width { grid-column: 1; }
+  .form-grid          { grid-template-columns: 1fr; }
+  .form-group.full-width { grid-column: 1; }
+  .card               { padding: 20px 18px; }
+  .form-actions       { flex-direction: column-reverse; }
+  .btn                { justify-content: center; }
 }

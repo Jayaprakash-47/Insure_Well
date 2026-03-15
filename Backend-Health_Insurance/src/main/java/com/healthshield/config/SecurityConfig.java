@@ -59,6 +59,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/profile/**").authenticated()
 
+                        .requestMatchers("/api/claims/*/settle").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

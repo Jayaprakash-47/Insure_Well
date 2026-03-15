@@ -16,6 +16,10 @@ import { ClaimResponse, ClaimReviewRequest } from '../../../core/models/models';
 export class ClaimReviewComponent implements OnInit {
   claim: ClaimResponse | null = null;
   submitting = false;
+  settling = false;
+
+  // ── NEW: modal flag ──
+  showSettlementModal = false;
 
   decision = '';
   approvedAmount: number | null = null;
@@ -40,7 +44,8 @@ export class ClaimReviewComponent implements OnInit {
       },
       error: (err) => {
         this.toast.error(
-          'Failed to load claim: ' + (err.error?.message || err.message || 'Unknown error'),
+          'Failed to load claim: '
+          + (err.error?.message || err.message || 'Unknown error'),
         );
       },
     });
@@ -53,56 +58,83 @@ export class ClaimReviewComponent implements OnInit {
     );
   }
 
-  // ── NEW: viewDocument — tries fileName first, falls back to docId ──
+  // ── Open settlement modal (replaces confirm()) ──
+  openSettlementModal(): void {
+    this.showSettlementModal = true;
+  }
+
+  closeSettlementModal(): void {
+    this.showSettlementModal = false;
+  }
+
+  // ── FIXED: No confirm(), uses officer endpoint ──
+  settleClaim(): void {
+    if (!this.claim) return;
+    this.settling = true;
+    this.showSettlementModal = false;
+    this.cdr.detectChanges();
+
+    // ← Uses settleClaimAsOfficer (POST /claims/{id}/settle)
+    // NOT settleClaim (POST /admin/claims/{id}/settle)
+    this.api.settleClaimAsOfficer(this.claim.claimId).subscribe({
+      next: (updated) => {
+        this.settling = false;
+        this.claim = updated;
+        this.toast.success(
+          'Settlement of '
+          + this.formatCurrency(updated.settlementAmount)
+          + ' processed successfully! 🎉'
+        );
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.settling = false;
+        this.toast.error(err.error?.message || 'Settlement failed');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ── View document ──
   viewDocument(doc: any): void {
     if (!this.claim) return;
-
     if (doc.fileName) {
-      // ← Use new viewDocument by fileName
       this.api.viewDocument(this.claim.claimId, doc.fileName);
     } else if (doc.documentId) {
-      // ← Fallback: use downloadDocumentById and open in tab
-      this.api.downloadDocumentById(this.claim.claimId, doc.documentId).subscribe({
-        next: (blob) => {
-          const url = window.URL.createObjectURL(blob);
-          window.open(url, '_blank');
-        },
-        error: () => this.toast.error('Failed to view document'),
-      });
+      this.api.downloadDocumentById(this.claim.claimId, doc.documentId)
+        .subscribe({
+          next: (blob) => window.open(
+            window.URL.createObjectURL(blob), '_blank'),
+          error: () => this.toast.error('Failed to view document'),
+        });
     } else {
       this.toast.error('Document not available');
     }
   }
 
-  // ── NEW: downloadDocument — tries fileName first, falls back to docId ──
+  // ── Download document ──
   downloadDocument(doc: any): void {
     if (!this.claim) return;
-
     if (doc.fileName) {
-      // ← Use new downloadDocument by fileName
       this.api.downloadDocument(this.claim.claimId, doc.fileName);
     } else if (doc.documentId) {
-      // ← Fallback: use downloadDocumentById
-      this.api.downloadDocumentById(this.claim.claimId, doc.documentId).subscribe({
-        next: (blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = doc.fileName || doc.originalFileName
-            || `Document_${doc.documentId}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
-        },
-        error: () => this.toast.error('Failed to download document'),
-      });
+      this.api.downloadDocumentById(this.claim.claimId, doc.documentId)
+        .subscribe({
+          next: (blob) => {
+            const a = document.createElement('a');
+            a.href = window.URL.createObjectURL(blob);
+            a.download = doc.fileName || doc.originalFileName
+              || `Document_${doc.documentId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          },
+          error: () => this.toast.error('Failed to download document'),
+        });
     } else {
       this.toast.error('Document not available');
     }
   }
-
-  // ── existing methods unchanged ──
 
   submitReview(): void {
     if (!this.decision) {
@@ -139,7 +171,8 @@ export class ClaimReviewComponent implements OnInit {
     this.api.reviewClaim(this.claim!.claimId, request).subscribe({
       next: (updated) => {
         this.toast.success(
-          `Claim ${updated.claimNumber} — ${this.decision.replace('_', ' ')} successfully`,
+          `Claim ${updated.claimNumber} — `
+          + `${this.decision.replace('_', ' ')} successfully`,
         );
         this.router.navigate(['/claims-officer/my-claims']);
       },
@@ -162,40 +195,14 @@ export class ClaimReviewComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
-      SUBMITTED: 'badge-submitted',
-      UNDER_REVIEW: 'badge-info',
-      APPROVED: 'badge-approved',
-      REJECTED: 'badge-rejected',
-      DOCUMENT_PENDING: 'badge-pending',
-      PARTIALLY_APPROVED: 'badge-info',
-      SETTLED: 'badge-success',
+      SUBMITTED:           'badge-submitted',
+      UNDER_REVIEW:        'badge-info',
+      APPROVED:            'badge-approved',
+      REJECTED:            'badge-rejected',
+      DOCUMENT_PENDING:    'badge-pending',
+      PARTIALLY_APPROVED:  'badge-info',
+      SETTLED:             'badge-success',
     };
     return map[status] || 'badge-info';
-  }
-  // Add this property
-  settling = false;
-
-// Add this method
-  settleClaim(): void {
-    if (!this.claim) return;
-    if (!confirm(
-      `Process settlement of ${this.formatCurrency(this.claim.approvedAmount)} for claim ${this.claim.claimNumber}?`
-    )) return;
-
-    this.settling = true;
-    this.api.settleClaim(this.claim.claimId).subscribe({
-      next: (updated) => {
-        this.settling = false;
-        this.claim = updated;
-        this.toast.success(
-          `Settlement of ${this.formatCurrency(updated.settlementAmount)} processed successfully!`
-        );
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.settling = false;
-        this.toast.error(err.error?.message || 'Settlement failed');
-      }
-    });
   }
 }
