@@ -18,8 +18,8 @@ export class FileClaimComponent implements OnInit {
   filing = false;
   selectedFiles: File[] = [];
 
-  // ── NEW: today for [max] binding ──
-  today = new Date().toISOString().split('T')[0];
+  // ✅ Use local date (not UTC) — fixes IST timezone offset issue
+  today = this.toLocalDateString(new Date());
 
   form = {
     policyId: 0,
@@ -52,13 +52,25 @@ export class FileClaimComponent implements OnInit {
     });
   }
 
-  // ── Helper: get currently selected policy ──
-  getSelectedPolicy(): PolicyResponse | undefined {
-    return this.policies.find(
-      p => p.policyId === +this.form.policyId);
+  // ✅ Converts any Date to "yyyy-MM-dd" in LOCAL time (not UTC)
+  toLocalDateString(date: Date): string {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
   }
 
-  // ── Helper: format currency ──
+  getSelectedPolicy(): PolicyResponse | undefined {
+    return this.policies.find(p => p.policyId === +this.form.policyId);
+  }
+
+  // ✅ Returns policy start date as "yyyy-MM-dd" safe for [min] binding in template
+  getPolicyStartDateString(): string {
+    const policy = this.getSelectedPolicy();
+    if (!policy?.startDate) return '';
+    return this.toLocalDateString(new Date(policy.startDate));
+  }
+
   formatCurrency(n: number): string {
     return '₹' + (n || 0).toLocaleString('en-IN');
   }
@@ -74,6 +86,7 @@ export class FileClaimComponent implements OnInit {
   }
 
   validateField(field: string): void {
+    // ✅ Single today, normalized to midnight local time
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -82,7 +95,8 @@ export class FileClaimComponent implements OnInit {
       case 'policyId':
         if (!this.form.policyId)
           this.errors.policyId = 'Please select a policy';
-        else delete this.errors.policyId;
+        else
+          delete this.errors.policyId;
         break;
 
       case 'hospitalName':
@@ -90,7 +104,8 @@ export class FileClaimComponent implements OnInit {
           this.errors.hospitalName = 'Hospital name is required';
         else if (this.form.hospitalName.trim().length < 3)
           this.errors.hospitalName = 'Enter a valid hospital name';
-        else delete this.errors.hospitalName;
+        else
+          delete this.errors.hospitalName;
         break;
 
       case 'claimAmount':
@@ -98,28 +113,27 @@ export class FileClaimComponent implements OnInit {
           this.errors.claimAmount = 'Valid claim amount is required';
         } else {
           const policy = this.getSelectedPolicy();
-          const remaining = policy?.remainingCoverage
-            || policy?.coverageAmount || 0;
+          const remaining = policy?.remainingCoverage || policy?.coverageAmount || 0;
           if (remaining > 0 && this.form.claimAmount > remaining) {
             this.errors.claimAmount =
-              'Amount exceeds your remaining coverage of '
-              + this.formatCurrency(remaining);
+              'Amount exceeds your remaining coverage of ' +
+              this.formatCurrency(remaining);
           } else {
             delete this.errors.claimAmount;
           }
         }
         break;
 
-      case 'admissionDate':
+      case 'admissionDate': {
         if (!this.form.admissionDate) {
           this.errors.admissionDate = 'Admission date is required';
         } else {
-          const admission = new Date(this.form.admissionDate);
-          admission.setHours(0, 0, 0, 0);
+          // ✅ Parse date parts directly — avoids UTC-to-local shift
+          const [ay, am, ad] = this.form.admissionDate.split('-').map(Number);
+          const admission = new Date(ay, am - 1, ad);
 
           if (admission > today) {
-            this.errors.admissionDate =
-              'Admission date cannot be a future date';
+            this.errors.admissionDate = 'Admission date cannot be a future date';
           } else {
             const policy = this.getSelectedPolicy();
             if (policy?.startDate) {
@@ -127,9 +141,9 @@ export class FileClaimComponent implements OnInit {
               policyStart.setHours(0, 0, 0, 0);
               if (admission < policyStart) {
                 this.errors.admissionDate =
-                  'Admission date cannot be before policy start ('
-                  + policyStart.toLocaleDateString('en-IN', {
-                    day: '2-digit', month: 'short', year: 'numeric'
+                  'Admission date cannot be before policy start (' +
+                  policyStart.toLocaleDateString('en-IN', {
+                    day: '2-digit', month: 'short', year: 'numeric',
                   }) + ')';
               } else {
                 delete this.errors.admissionDate;
@@ -138,26 +152,28 @@ export class FileClaimComponent implements OnInit {
               delete this.errors.admissionDate;
             }
           }
-          // Re-validate discharge if already filled
-          if (this.form.dischargeDate) {
-            this.validateField('dischargeDate');
-          }
+        }
+
+        if (!this.errors.admissionDate && this.form.dischargeDate) {
+          this.validateField('dischargeDate');
         }
         break;
+      }
 
-      case 'dischargeDate':
+      case 'dischargeDate': {
         if (!this.form.dischargeDate) {
           this.errors.dischargeDate = 'Discharge date is required';
         } else {
-          const discharge = new Date(this.form.dischargeDate);
-          discharge.setHours(0, 0, 0, 0);
+          // ✅ Parse date parts directly — avoids UTC-to-local shift
+          const [dy, dm, dd] = this.form.dischargeDate.split('-').map(Number);
+          const discharge = new Date(dy, dm - 1, dd);
 
           if (discharge > today) {
-            this.errors.dischargeDate =
-              'Discharge date cannot be a future date';
+            this.errors.dischargeDate = 'Discharge date cannot be a future date';
           } else if (this.form.admissionDate) {
-            const admission = new Date(this.form.admissionDate);
-            admission.setHours(0, 0, 0, 0);
+            const [ay, am, ad] = this.form.admissionDate.split('-').map(Number);
+            const admission = new Date(ay, am - 1, ad);
+
             if (discharge < admission) {
               this.errors.dischargeDate =
                 'Discharge date cannot be before admission date';
@@ -169,14 +185,15 @@ export class FileClaimComponent implements OnInit {
           }
         }
         break;
+      }
 
       case 'diagnosis':
         if (!this.form.diagnosis?.trim())
           this.errors.diagnosis = 'Diagnosis is required';
         else if (this.form.diagnosis.trim().length < 3)
-          this.errors.diagnosis =
-            'Please provide a more detailed diagnosis';
-        else delete this.errors.diagnosis;
+          this.errors.diagnosis = 'Please provide a more detailed diagnosis';
+        else
+          delete this.errors.diagnosis;
         break;
     }
   }
@@ -184,30 +201,29 @@ export class FileClaimComponent implements OnInit {
   submit(): void {
     this.errors = {};
     this.touched = {
-      policyId: true, hospitalName: true,
-      claimAmount: true, admissionDate: true,
-      dischargeDate: true, diagnosis: true, documents: true,
+      policyId: true,
+      hospitalName: true,
+      claimAmount: true,
+      admissionDate: true,
+      dischargeDate: true,
+      diagnosis: true,
+      documents: true,
     };
 
-    // Run all validations
-    ['policyId', 'hospitalName', 'claimAmount',
-      'admissionDate', 'dischargeDate', 'diagnosis']
+    ['policyId', 'hospitalName', 'claimAmount', 'admissionDate', 'dischargeDate', 'diagnosis']
       .forEach(f => this.validateField(f));
 
     if (this.selectedFiles.length === 0) {
       this.errors.documents =
-        'At least one supporting document is required '
-        + '(bill, prescription, or report)';
+        'At least one supporting document is required (bill, prescription, or report)';
     }
 
     if (Object.keys(this.errors).length > 0) {
       this.toast.error('Please fix the errors before submitting');
       setTimeout(() => {
-        const firstError = document.querySelector(
-          '.form-control.error, .error-message');
+        const firstError = document.querySelector('.form-control.error, .error-message');
         if (firstError)
-          (firstError as HTMLElement)
-            .scrollIntoView({ behavior: 'smooth', block: 'center' });
+          (firstError as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
       return;
     }
@@ -216,9 +232,10 @@ export class FileClaimComponent implements OnInit {
     this.cdr.detectChanges();
 
     const formData = new FormData();
-    formData.append('claim',
-      new Blob([JSON.stringify(this.form)],
-        { type: 'application/json' }));
+    formData.append(
+      'claim',
+      new Blob([JSON.stringify(this.form)], { type: 'application/json' }),
+    );
 
     for (const file of this.selectedFiles) {
       formData.append('documents', file);

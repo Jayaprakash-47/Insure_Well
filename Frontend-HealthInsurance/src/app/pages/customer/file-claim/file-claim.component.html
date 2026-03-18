@@ -21,8 +21,7 @@
                   [(ngModel)]="form.policyId"
                   name="pid"
                   [class.error]="errors.policyId"
-                  (change)="onBlur('policyId');
-                            onBlur('claimAmount')">
+                  (change)="onBlur('policyId'); onBlur('claimAmount')">
             @for (p of policies; track p.policyId) {
               <option [value]="p.policyId">
                 {{ p.policyNumber }} — {{ p.planName }}
@@ -32,29 +31,19 @@
           @if (errors.policyId) {
             <span class="error-message">{{ errors.policyId }}</span>
           }
-          <!-- Policy coverage info -->
           @if (getSelectedPolicy()) {
-            <small style="color:#64748b;font-size:11px;
-                          margin-top:4px;display:block">
+            <small style="color:#64748b;font-size:11px;margin-top:4px;display:block">
               Coverage:
               <strong style="color:#0f1f3d">
                 {{ formatCurrency(getSelectedPolicy()!.coverageAmount) }}
               </strong>
               &nbsp;|&nbsp; Remaining:
               <strong style="color:#10b981">
-                {{
-                  formatCurrency(
-                    getSelectedPolicy()!.remainingCoverage
-                    || getSelectedPolicy()!.coverageAmount
-                  )
-                }}
+                {{ formatCurrency(getSelectedPolicy()!.remainingCoverage || getSelectedPolicy()!.coverageAmount) }}
               </strong>
               &nbsp;|&nbsp; Policy start:
               <strong>
-                {{
-                  getSelectedPolicy()!.startDate
-                    | date:'dd MMM yyyy'
-                }}
+                {{ getSelectedPolicy()!.startDate | date:'dd MMM yyyy' }}
               </strong>
             </small>
           }
@@ -82,20 +71,11 @@
                  [class.error]="errors.claimAmount"
                  (blur)="onBlur('claimAmount')"
                  (change)="onBlur('claimAmount')" />
-          <!-- Remaining coverage hint -->
-          @if (getSelectedPolicy() &&
-          !errors.claimAmount &&
-          form.claimAmount === 0) {
-            <small style="color:#64748b;font-size:11px;
-                          margin-top:4px;display:block">
+          @if (getSelectedPolicy() && !errors.claimAmount && form.claimAmount === 0) {
+            <small style="color:#64748b;font-size:11px;margin-top:4px;display:block">
               Max claimable:
               <strong style="color:#10b981">
-                {{
-                  formatCurrency(
-                    getSelectedPolicy()!.remainingCoverage
-                    || getSelectedPolicy()!.coverageAmount
-                  )
-                }}
+                {{ formatCurrency(getSelectedPolicy()!.remainingCoverage || getSelectedPolicy()!.coverageAmount) }}
               </strong>
             </small>
           }
@@ -129,7 +109,7 @@
                    name="ad"
                    type="date"
                    [max]="today"
-                   [min]="getSelectedPolicy()?.startDate || ''"
+                   [min]="getPolicyStartDateString()"
                    [class.error]="errors.admissionDate"
                    (blur)="onBlur('admissionDate')"
                    (change)="onBlur('admissionDate')" />
@@ -151,7 +131,7 @@
                    name="dd"
                    type="date"
                    [max]="today"
-                   [min]="form.admissionDate || ''"
+                   [min]="form.admissionDate || getPolicyStartDateString()"
                    [class.error]="errors.dischargeDate"
                    (blur)="onBlur('dischargeDate')"
                    (change)="onBlur('dischargeDate')" />
@@ -185,9 +165,7 @@
 
         <!-- ── Supporting Documents ── -->
         <div class="form-group">
-          <label>
-            Supporting Documents <span class="required">*</span>
-          </label>
+          <label>Supporting Documents <span class="required">*</span></label>
           <input type="file"
                  class="form-control"
                  [class.error]="errors.documents"
@@ -195,26 +173,20 @@
                  multiple
                  accept="image/*,.pdf"
                  style="padding-bottom:35px" />
-
           @if (selectedFiles.length > 0) {
             <small style="color:#10b981;margin-top:5px;display:block">
-              <span class="material-icons"
-                    style="font-size:14px;vertical-align:middle">
+              <span class="material-icons" style="font-size:14px;vertical-align:middle">
                 check_circle
               </span>
               {{ selectedFiles.length }} file(s) selected
             </small>
           } @else {
             <small style="color:#666;margin-top:5px;display:block">
-              Required: Upload bills, prescriptions,
-              or diagnostic reports (PDF/images)
+              Required: Upload bills, prescriptions, or diagnostic reports (PDF/images)
             </small>
           }
-
           @if (errors.documents) {
-            <span class="error-message file-upload-error">
-              {{ errors.documents }}
-            </span>
+            <span class="error-message file-upload-error">{{ errors.documents }}</span>
           }
         </div>
 
@@ -224,21 +196,16 @@
                 style="width:100%"
                 [disabled]="filing">
           @if (filing) {
-            <span style="display:flex;align-items:center;
-                         justify-content:center;gap:8px">
+            <span style="display:flex;align-items:center;justify-content:center;gap:8px">
               <span class="material-icons"
-                    style="font-size:16px;
-                           animation:spin 1s linear infinite">
+                    style="font-size:16px;animation:spin 1s linear infinite">
                 hourglass_empty
               </span>
               Filing Claim...
             </span>
           } @else {
-            <span style="display:flex;align-items:center;
-                         justify-content:center;gap:8px">
-              <span class="material-icons" style="font-size:16px">
-                send
-              </span>
+            <span style="display:flex;align-items:center;justify-content:center;gap:8px">
+              <span class="material-icons" style="font-size:16px">send</span>
               Submit Claim
             </span>
           }
