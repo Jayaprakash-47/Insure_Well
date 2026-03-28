@@ -1,3 +1,5 @@
+<!-- FILE: src/app/pages/customer/dashboard/customer-dashboard.component.html -->
+
 <div class="page-wrapper">
 
   <!-- Welcome Banner -->
@@ -7,6 +9,12 @@
       <p>Here's an overview of your health insurance portfolio</p>
     </div>
     <div style="display:flex;align-items:center;gap:12px">
+      @if (profile?.aadhaarVerified) {
+        <span class="kyc-badge" style="background:#dcfce7; color:#166534; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:700; display:flex; align-items:center; gap:4px">
+          <span class="material-icons" style="font-size:16px">verified</span>
+          KYC VERIFIED
+        </span>
+      }
       <a routerLink="/customer/plans" class="btn btn-primary">Browse Plans</a>
       <a routerLink="/customer/profile" class="btn btn-outline-profile">
         <span class="material-icons" style="font-size:17px;vertical-align:middle">
@@ -42,6 +50,31 @@
     </div>
   }
 
+  <!-- Concern Alert -->
+  @if (concernPolicies.length > 0 && concernPolicies[0].kycStatus !== 'REJECTED') {
+    <div class="alert-banner concern-alert">
+      <span class="material-icons" style="color:#dc2626;font-size:20px">warning</span>
+      <span>
+        <strong>{{ concernPolicies.length }} policy(ies) need your attention!</strong>
+        An underwriter or officer has raised a concern. Please review the remarks and re-upload any required documents.
+      </span>
+      <a routerLink="/customer/policies" class="alert-link">View Details →</a>
+    </div>
+  }
+
+  <!-- Navigation Tabs -->
+  <div class="dash-tabs" style="display:flex; gap:16px; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-top: 10px;">
+    <button style="padding: 12px 24px; font-size: 15px; font-weight: 600; cursor:pointer; background:none; border:none; border-bottom: 3px solid transparent; transition: all 0.2s ease-in-out;"
+            [style.border-bottom-color]="activeTab === 'OVERVIEW' ? '#0f1f3d' : 'transparent'"
+            [style.color]="activeTab === 'OVERVIEW' ? '#0f1f3d' : '#64748b'"
+            (click)="activeTab = 'OVERVIEW'">Overview</button>
+    <button style="padding: 12px 24px; font-size: 15px; font-weight: 600; cursor:pointer; background:none; border:none; border-bottom: 3px solid transparent; transition: all 0.2s ease-in-out;"
+            [style.border-bottom-color]="activeTab === 'ANALYTICS' ? '#0f1f3d' : 'transparent'"
+            [style.color]="activeTab === 'ANALYTICS' ? '#0f1f3d' : '#64748b'"
+            (click)="activeTab = 'ANALYTICS'">Analytics Panel</button>
+  </div>
+
+  @if (activeTab === 'OVERVIEW') {
   <!-- Stat Cards -->
   <div class="stats-grid">
     <div class="stat-card">
@@ -82,11 +115,60 @@
     </div>
   </div>
 
-  <!-- Analytics Row -->
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="actions-grid">
+      <a routerLink="/customer/plans" class="action-card">
+        <span class="action-icon">
+          <span class="material-icons">search</span>
+        </span>
+        <span class="action-label">Browse Plans</span>
+        <span class="action-desc">Explore insurance options</span>
+      </a>
+      <a routerLink="/customer/policies" class="action-card">
+        <span class="action-icon">
+          <span class="material-icons">inventory_2</span>
+        </span>
+        <span class="action-label">My Policies</span>
+        <span class="action-desc">View &amp; manage policies</span>
+      </a>
+      <a routerLink="/customer/claims" class="action-card">
+        <span class="action-icon">
+          <span class="material-icons">receipt_long</span>
+        </span>
+        <span class="action-label">My Claims</span>
+        <span class="action-desc">Track claim status</span>
+      </a>
+      <a routerLink="/customer/claims/new" class="action-card">
+        <span class="action-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+               viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832
+                 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0
+                 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+          </svg>
+        </span>
+        <span class="action-label">File Claim</span>
+        <span class="action-desc">Submit a new claim</span>
+      </a>
+      <a routerLink="/customer/request-agent" class="action-card">
+        <span class="action-icon">
+          <span class="material-icons">support_agent</span>
+        </span>
+        <span class="action-label">Request Agent</span>
+        <span class="action-desc">Get help from an agent</span>
+      </a>
+    </div>
+  </div>
+  } <!-- END OVERVIEW TAB -->
+  
+  @if (activeTab === 'ANALYTICS') {
+  <!-- Coverage Utilization -->
   @if (activePolicies > 0 || claims.length > 0) {
     <div class="analytics-row">
 
-      <!-- Coverage Utilization -->
       @if (activePolicies > 0) {
         <div class="analytics-card">
           <h3 class="analytics-title">
@@ -174,22 +256,19 @@
           <div class="claims-total-row">
             <div class="claims-total-item">
               <div class="claims-total-val">
-                {{ formatCurrency(claims.reduce(
-                (s, c) => s + (c.claimAmount || 0), 0)) }}
+                {{ formatCurrency(totalClaimedAmount) }}
               </div>
               <div class="claims-total-label">Total Claimed</div>
             </div>
             <div class="claims-total-item">
               <div class="claims-total-val" style="color:#10b981">
-                {{ formatCurrency(claims.reduce(
-                (s, c) => s + (c.approvedAmount || 0), 0)) }}
+                {{ formatCurrency(totalApprovedAmount) }}
               </div>
               <div class="claims-total-label">Total Approved</div>
             </div>
             <div class="claims-total-item">
               <div class="claims-total-val" style="color:#16a34a">
-                {{ formatCurrency(claims.reduce(
-                (s, c) => s + (c.settlementAmount || 0), 0)) }}
+                {{ formatCurrency(totalSettledAmount) }}
               </div>
               <div class="claims-total-label">Total Settled</div>
             </div>
@@ -224,14 +303,10 @@
             @for (step of getPolicySteps(p); track step.key; let last = $last) {
               <div class="pstep" [class]="'pstep-' + step.state">
                 @if (!last) {
-                  <div class="pstep-line"
-                       [class.done]="step.state === 'completed'">
-                  </div>
+                  <div class="pstep-line" [class.done]="step.state === 'completed'"></div>
                 }
                 <div class="pstep-dot">
-                  <span class="material-icons" style="font-size:14px">
-                    {{ step.icon }}
-                  </span>
+                  <span class="material-icons" style="font-size:14px">{{ step.icon }}</span>
                 </div>
                 <div class="pstep-label">{{ step.label }}</div>
               </div>
@@ -242,11 +317,9 @@
     </div>
   }
 
-  <!-- ── NEW: Payment History Section ── -->
+  <!-- Payment History -->
   @if (payments.length > 0) {
     <div class="section-card" style="margin-bottom:1.5rem">
-
-      <!-- Header -->
       <div style="display:flex;align-items:center;justify-content:space-between;
                   flex-wrap:wrap;gap:12px;margin-bottom:16px">
         <div>
@@ -259,14 +332,10 @@
           </h2>
           <p style="font-size:12px;color:#64748b;margin:4px 0 0">
             Total Paid:
-            <strong style="color:#16a34a">
-              {{ formatCurrency(totalAmountPaid) }}
-            </strong>
+            <strong style="color:#16a34a">{{ formatCurrency(totalAmountPaid) }}</strong>
             across {{ payments.length }} payment(s)
           </p>
         </div>
-
-        <!-- Filter by policy -->
         <select [(ngModel)]="paymentFilter"
                 style="padding:6px 12px;border:1px solid #e2e8f0;
                        border-radius:8px;font-size:13px;
@@ -278,7 +347,6 @@
         </select>
       </div>
 
-      <!-- KPI Summary -->
       <div class="payment-kpi-row">
         <div class="payment-kpi">
           <div class="payment-kpi-val" style="color:#16a34a">
@@ -300,13 +368,12 @@
         </div>
         <div class="payment-kpi">
           <div class="payment-kpi-val" style="color:#f59e0b">
-            {{ payments.filter(p => p.paymentStatus === 'SUCCESS').length }}
+            {{ totalSuccessfulPayments }}
           </div>
           <div class="payment-kpi-label">Successful</div>
         </div>
       </div>
 
-      <!-- Payment Table -->
       <div class="payment-table-wrap">
         <table class="payment-table">
           <thead>
@@ -327,18 +394,13 @@
                   <div style="font-weight:600;color:#0f1f3d;font-size:13px">
                     {{ p.policyNumber }}
                   </div>
-                  <div style="font-size:11px;color:#94a3b8">
-                    ID: {{ p.policyId }}
-                  </div>
+                  <div style="font-size:11px;color:#94a3b8">ID: {{ p.policyId }}</div>
                 </td>
                 <td>
-                  <strong style="color:#0f1f3d">
-                    {{ formatCurrency(p.amount) }}
-                  </strong>
+                  <strong style="color:#0f1f3d">{{ formatCurrency(p.amount) }}</strong>
                 </td>
                 <td>
-                  <div style="display:flex;align-items:center;
-                              gap:5px;font-size:13px">
+                  <div style="display:flex;align-items:center;gap:5px;font-size:13px">
                     <span>{{ getPaymentMethodIcon(p.paymentMethod) }}</span>
                     <span>{{ p.paymentMethod }}</span>
                   </div>
@@ -371,8 +433,7 @@
                             [disabled]="downloadingReceipt === p.paymentId">
                       @if (downloadingReceipt === p.paymentId) {
                         <span class="material-icons"
-                              style="font-size:14px;
-                                     animation:spin 1s linear infinite">
+                              style="font-size:14px;animation:spin 1s linear infinite">
                           hourglass_empty
                         </span>
                       } @else {
@@ -399,46 +460,8 @@
       }
     </div>
   }
+  } <!-- END ANALYTICS TAB -->
 
-  <!-- Quick Actions -->
-  <div class="quick-actions">
-    <h2>Quick Actions</h2>
-    <div class="actions-grid">
-      <a routerLink="/customer/plans" class="action-card">
-        <span class="action-icon">
-          <span class="material-icons">search</span>
-        </span>
-        <span class="action-label">Browse Plans</span>
-        <span class="action-desc">Explore insurance options</span>
-      </a>
-      <a routerLink="/customer/policies" class="action-card">
-        <span class="action-icon">
-          <span class="material-icons">inventory_2</span>
-        </span>
-        <span class="action-label">My Policies</span>
-        <span class="action-desc">View & manage policies</span>
-      </a>
-      <a routerLink="/customer/claims" class="action-card">
-        <span class="action-icon">
-          <span class="material-icons">receipt_long</span>
-        </span>
-        <span class="action-label">My Claims</span>
-        <span class="action-desc">Track claim status</span>
-      </a>
-      <a routerLink="/customer/claims/new" class="action-card">
-        <span class="action-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-               viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832
-                 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0
-                 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
-          </svg>
-        </span>
-        <span class="action-label">File Claim</span>
-        <span class="action-desc">Submit a new claim</span>
-      </a>
-    </div>
-  </div>
+  <app-chatbot></app-chatbot>
 
 </div>

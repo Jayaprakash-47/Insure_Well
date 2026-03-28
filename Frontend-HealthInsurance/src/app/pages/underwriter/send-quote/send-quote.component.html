@@ -43,6 +43,23 @@
           <label>Status</label>
           <span class="badge badge-assigned">{{ policy.policyStatus }}</span>
         </div>
+        
+        <div class="detail-row kyc-row" style="margin-top:12px; padding:12px; border-radius:8px; border:1px solid #e2e8f0" 
+             [style.background]="policy.kycStatus === 'VERIFIED' ? '#f0fdf4' : '#fff7ed'">
+          <label style="color:#64748b">KYC Status</label>
+          @if (policy.kycStatus === 'VERIFIED') {
+            <span style="color:#16a34a; font-weight:700; display:flex; align-items:center; gap:4px">
+              <span class="material-icons" style="font-size:18px">verified</span>
+              KYC VERIFIED (Sandbox)
+            </span>
+          } @else {
+            <span style="color:#ea580c; font-weight:700; display:flex; align-items:center; gap:4px">
+              <span class="material-icons" style="font-size:18px">pending_actions</span>
+              PENDING VERIFICATION
+            </span>
+          }
+        </div>
+        
         <div class="detail-row">
           <label>Assigned At</label>
           <span>{{ policy.assignedAt | date: 'dd MMM yyyy, h:mm a' }}</span>
@@ -78,6 +95,25 @@
             }
           </div>
         }
+
+        <div class="ai-verification-action" style="margin-top:24px; padding:16px; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px">
+            <span class="material-icons" style="color:#6366f1">auto_awesome</span>
+            <div>
+              <h4 style="margin:0; font-size:14px">AI Document Cross-Check</h4>
+              <p style="margin:2px 0 0; font-size:12px; color:#64748b">Verify Aadhaar and Health Report authenticity using Claude AI.</p>
+            </div>
+          </div>
+          <button class="btn btn-secondary" style="width:100%; justify-content:center; background:#fff; border:1px solid #6366f1; color:#6366f1" 
+                  (click)="runAiVerification()" [disabled]="verifyingAi">
+            @if (verifyingAi) {
+              <span class="spinner"></span> Verifying...
+            } @else {
+              <span class="material-icons" style="font-size:18px; margin-right:8px">verified</span>
+              Run AI Verification
+            }
+          </button>
+        </div>
       </div>
 
       <!-- ── RIGHT: Quote Panel ── -->
@@ -252,6 +288,53 @@
           </div>
 
           @if (quoteAmount) {
+            <!-- Formula Breakdown Table -->
+            @if (riskBreakdown.length > 0) {
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:14px">
+                <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+                  <span class="material-icons" style="font-size:14px">calculate</span>
+                  Premium Formula Breakdown
+                </div>
+
+                <!-- Base Premium row -->
+                <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px">
+                  <span style="color:#64748b;display:flex;align-items:center;gap:5px">
+                    <span class="material-icons" style="font-size:13px;color:#3b82f6">shield</span>
+                    Base Premium <small style="color:#94a3b8;margin-left:4px">(2% × ₹{{ (policy.coverageAmount||0).toLocaleString() }})</small>
+                  </span>
+                  <strong style="color:#0f1f3d">₹{{ (((policy.coverageAmount||0)*0.02)).toLocaleString() }}</strong>
+                </div>
+
+                <!-- Each risk factor -->
+                @for (factor of riskBreakdown; track factor.label) {
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:13px">
+                    <span style="display:flex;align-items:center;gap:5px;color:#374151">
+                      <span class="material-icons" style="font-size:13px" [style.color]="factor.color">{{ factor.icon }}</span>
+                      {{ factor.label }}
+                      <small style="color:#94a3b8">{{ factor.value }}</small>
+                    </span>
+                    <span style="display:flex;align-items:center;gap:6px">
+                      <span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px"
+                            [style.background]="factor.color+'20'"
+                            [style.color]="factor.color">
+                        {{ factor.risk }}
+                      </span>
+                      <strong style="font-size:13px" [style.color]="factor.color">×{{ factor.multiplier.toFixed(1) }}</strong>
+                    </span>
+                  </div>
+                }
+
+                <!-- Formula result -->
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;font-size:13px;font-weight:700;color:#374151">
+                  <span>
+                    <span class="material-icons" style="font-size:13px;vertical-align:middle;color:#800020">auto_fix_high</span>
+                    Formula Result
+                  </span>
+                  <strong style="font-size:15px;color:#800020">₹{{ calculatedQuote.toLocaleString() }}/yr</strong>
+                </div>
+              </div>
+            }
+
             <div class="commission-preview">
               <div class="preview-row">
                 <span>Quote Amount</span>
@@ -300,6 +383,40 @@
               {{ error }}
             </div>
           }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- AI REPORT MODAL -->
+  @if (showAiReport) {
+    <div class="modal-backdrop">
+      <div class="modal-card" style="max-width:550px; width:90%; background:#fff; border-radius:12px; overflow:hidden">
+        <div style="background:#0f172a; color:#fff; padding:20px; display:flex; justify-content:space-between; align-items:center">
+          <div style="display:flex; align-items:center; gap:10px">
+            <span class="material-icons" style="color:#818cf8">auto_awesome</span>
+            <h3 style="margin:0; font-size:1.1rem; color:#fff">AI Verification Report</h3>
+          </div>
+          <button (click)="showAiReport = false" style="background:none; border:none; color:#94a3b8; cursor:pointer">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+        
+        <div style="padding:24px; max-height:400px; overflow-y:auto">
+          <div class="ai-report-content" style="white-space:pre-wrap; font-family:'Inter', sans-serif; line-height:1.6; color:#334155">
+            {{ aiReport }}
+          </div>
+          
+          <div style="margin-top:24px; padding:12px; background:#f0f9ff; border-radius:8px; border:1px solid #bae6fd; display:flex; gap:12px">
+            <span class="material-icons" style="color:#0284c7; font-size:20px">info</span>
+            <p style="margin:0; font-size:12px; color:#0369a1">
+              This report was generated by analyzing the uploaded documents. Please use this as a reference during your final decision.
+            </p>
+          </div>
+        </div>
+
+        <div style="padding:16px 24px; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end">
+          <button class="btn btn-primary" (click)="showAiReport = false">Acknowledge</button>
         </div>
       </div>
     </div>

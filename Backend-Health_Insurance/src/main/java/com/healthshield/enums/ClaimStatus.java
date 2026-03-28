@@ -8,6 +8,7 @@ public enum ClaimStatus {
     PARTIALLY_APPROVED,  // Approved but with reduced amount
     REJECTED,            // Rejected with reason
     SETTLEMENT_IN_PROGRESS, // Approved and payment being processed
+    TRANSFER_INITIATED,  // Razorpay transfer initiated
     SETTLED,             // Final — money disbursed to customer/hospital
     APPEAL_REQUESTED     // Customer appealed a rejection
 }

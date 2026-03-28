@@ -21,6 +21,12 @@
         {{ formatRole(profile?.role) }}
       </span>
 
+      @if (profile?.aadhaarVerified) {
+        <span class="kyc-badge-pill" style="margin-left:8px; background:rgba(16,185,129,0.2); color:#10b981; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:700; border:1px solid #10b981">
+          KYC VERIFIED
+        </span>
+      }
+
       <p class="hero-email">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2">
@@ -51,6 +57,20 @@
       </svg>
       Profile Info
     </button>
+
+    <!-- NEW: Bank Details Tab (Only for CUSTOMER) -->
+    @if (profile?.role === 'CUSTOMER') {
+      <button class="tab-btn" [class.active]="activeTab === 'bank'"
+              (click)="activeTab = 'bank'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
+          <line x1="2" y1="10" x2="22" y2="10"/>
+        </svg>
+        Bank Details
+        <span style="font-size:10px; opacity:0.8; margin-left:4px">(Required for Claims)</span>
+      </button>
+    }
 
     <button class="tab-btn" [class.active]="activeTab === 'password'"
             (click)="activeTab = 'password'">
@@ -123,25 +143,59 @@
 
           <div class="info-item full-width">
             <label>Address</label>
-            <span>{{ profile?.address || '—' }}</span>
+            <span [class.text-muted]="!profile?.address">{{ profile?.address || 'Not Provided' }}</span>
           </div>
 
           <div class="info-item">
             <label>City</label>
-            <span>{{ profile?.city || '—' }}</span>
+            <span [class.text-muted]="!profile?.city">{{ profile?.city || 'Not Provided' }}</span>
           </div>
 
           <div class="info-item">
             <label>State</label>
-            <span>{{ profile?.state || '—' }}</span>
+            <span [class.text-muted]="!profile?.state">{{ profile?.state || 'Not Provided' }}</span>
           </div>
 
           <div class="info-item">
             <label>Pincode</label>
-            <span>{{ profile?.pincode || '—' }}</span>
+            <span [class.text-muted]="!profile?.pincode">{{ profile?.pincode || 'Not Provided' }}</span>
           </div>
 
         </div>
+
+        <!-- ── AADHAAR VERIFICATION (Only for CUSTOMER) ── -->
+        @if (profile?.role === 'CUSTOMER') {
+          <div class="aadhaar-section">
+            <div class="aadhaar-box">
+              <div class="aadhaar-info">
+                <span class="material-icons" style="font-size:32px; color:#1e293b">
+                  fingerprint
+                </span>
+                <div style="margin-left:12px">
+                  <h4 style="margin:0;font-size:16px">Aadhaar e-KYC</h4>
+                  <p style="margin:4px 0 0;font-size:13px;color:#64748b">
+                    @if (profile?.aadhaarVerified) {
+                      Your identity has been verified.
+                    } @else {
+                      Complete e-KYC during policy application.
+                    }
+                  </p>
+                </div>
+              </div>
+              <div class="aadhaar-action">
+                @if (profile?.aadhaarVerified) {
+                  <span class="badge badge-success" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:20px;background:#dcfce7;color:#166534">
+                    <span class="material-icons" style="font-size:16px">verified</span> Verified
+                  </span>
+                } @else {
+                  <span class="badge" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:20px;background:#f1f5f9;color:#64748b">
+                    <span class="material-icons" style="font-size:16px">pending</span> Pending
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+        }
       }
 
       <!-- ── EDIT MODE ─────────────────────────────────────────────── -->
@@ -235,6 +289,114 @@
             </button>
           </div>
 
+        </form>
+      }
+
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       BANK DETAILS TAB (Only for CUSTOMER)
+  ══════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'bank' && profile?.role === 'CUSTOMER') {
+    <div class="card profile-card">
+
+      <div class="card-header">
+        <div>
+          <h2>Bank Details</h2>
+          <p class="card-sub">Manage your bank account for claim settlements</p>
+        </div>
+        @if (!bankEditMode && hasBankDetails) {
+          <button class="btn btn-primary" (click)="enterBankEditMode()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Edit Bank Details
+          </button>
+        }
+      </div>
+
+      <!-- ── VIEW MODE ─────────────────────────────────────────────── -->
+      @if (!bankEditMode && hasBankDetails) {
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Account Holder Name</label>
+            <span>{{ profile?.accountHolderName || '—' }}</span>
+          </div>
+
+          <div class="info-item">
+            <label>Account Number</label>
+            <span>{{ profile?.accountNumber || '—' }}</span>
+          </div>
+
+          <div class="info-item">
+            <label>IFSC Code</label>
+            <span>{{ profile?.ifscCode || '—' }}</span>
+          </div>
+
+          <div class="info-item">
+            <label>Bank Name</label>
+            <span>{{ profile?.bankName || '—' }}</span>
+          </div>
+        </div>
+      }
+
+      <!-- ── EDIT MODE ─────────────────────────────────────────────── -->
+      @if (bankEditMode || !hasBankDetails) {
+        <form #bankForm="ngForm" (ngSubmit)="saveProfile(bankForm, true)" novalidate>
+          <div class="form-grid">
+
+            <div class="form-group full-width">
+              <label for="accName">Account Holder Name</label>
+              <input id="accName" name="accName" type="text"
+                     [(ngModel)]="editData.accountHolderName"
+                     placeholder="Name on bank account">
+            </div>
+
+            <div class="form-group">
+              <label for="accNo">Account Number</label>
+              <input id="accNo" name="accNo" type="text"
+                     [(ngModel)]="editData.accountNumber"
+                     placeholder="Bank account number">
+            </div>
+
+            <div class="form-group">
+              <label for="ifsc">IFSC Code</label>
+              <input id="ifsc" name="ifsc" type="text"
+                     [(ngModel)]="editData.ifscCode"
+                     placeholder="e.g. HDFC0001234">
+            </div>
+
+            <div class="form-group">
+              <label for="bankName">Bank Name</label>
+              <input id="bankName" name="bankName" type="text"
+                     [(ngModel)]="editData.bankName"
+                     placeholder="e.g. HDFC Bank">
+            </div>
+
+          </div>
+
+          <div class="form-actions">
+            @if (hasBankDetails) {
+              <button type="button" class="btn btn-ghost" (click)="cancelBankEdit()">
+                Cancel
+              </button>
+            }
+            <button type="submit" class="btn btn-primary"
+                    [disabled]="saving || bankForm.invalid">
+              @if (saving) {
+                <span class="spinner"></span> Saving…
+              } @else {
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {{ hasBankDetails ? 'Save Details' : 'Add Bank Account' }}
+              }
+            </button>
+          </div>
         </form>
       }
 
@@ -435,5 +597,6 @@
 
     </div>
   }
+
 
 </div>

@@ -2,18 +2,16 @@
 
 <div class="page">
 
-  <!-- ══════════════════════════════════════ -->
-  <!-- STEP 1: Choose Plan                    -->
-  <!-- ══════════════════════════════════════ -->
+  <!-- ══════════════════════════════════════════════════════════
+       STEP 1: Choose Plan
+  ══════════════════════════════════════════════════════════ -->
   @if (step === 1) {
     <div>
       <div class="page-header">
         <div>
           <h1>Choose Your Plan</h1>
-          <p>
-            Select an insurance plan that suits you. Our underwriter will
-            calculate your exact premium after reviewing your details.
-          </p>
+          <p>Select an insurance plan that suits you. Our underwriter will
+            calculate your exact premium after reviewing your details.</p>
         </div>
       </div>
 
@@ -22,6 +20,8 @@
       }
 
       @if (!loading) {
+
+
         <!-- Search & Filter -->
         <div class="search-filter-bar">
           <div class="search-filter-top">
@@ -34,9 +34,7 @@
             <div class="filter-bar" style="margin-top:0">
               <button class="filter-btn"
                       [class.active]="selectedPlanType === 'ALL'"
-                      (click)="setFilter('ALL')">
-                All
-              </button>
+                      (click)="setFilter('ALL')">All</button>
               @for (type of planTypes; track type) {
                 <button class="filter-btn"
                         [class.active]="selectedPlanType === type"
@@ -47,7 +45,7 @@
             </div>
           </div>
 
-          <!-- ── Sort & Coverage Range bar ── -->
+          <!-- Sort & Coverage Range bar -->
           <div class="filter-sort-bar">
             <div class="sort-group">
               <span class="material-icons sort-icon">sort</span>
@@ -58,9 +56,7 @@
                 <option value="coverage_desc">Highest Coverage</option>
               </select>
             </div>
-
             <div class="filter-divider"></div>
-
             <div class="coverage-group">
               <span class="material-icons sort-icon">account_balance_wallet</span>
               <span class="coverage-label">Coverage Range:</span>
@@ -73,6 +69,167 @@
           </div>
         </div>
 
+        <!-- ── FIX 3: Comparison Banner ── -->
+        @if (selectedForComparison.length >= 1) {
+          <div class="comparison-banner">
+            <div class="comparison-banner-left">
+              <span class="material-icons" style="color:#800020">compare</span>
+              <span>
+                <strong>{{ selectedForComparison.length }}</strong> plan(s) selected for comparison
+                @for (p of selectedForComparison; track p.planId) {
+                  <span class="comp-tag">
+                    {{ p.planName }}
+                    <button class="comp-remove" (click)="toggleComparison(p, $event)">×</button>
+                  </span>
+                }
+              </span>
+            </div>
+            <div class="comparison-banner-right">
+              @if (selectedForComparison.length >= 2) {
+                <button class="btn btn-primary btn-sm" (click)="showComparison = true">
+                  <span class="material-icons" style="font-size:15px">compare_arrows</span>
+                  Compare Plans
+                </button>
+              }
+              <button class="btn btn-secondary btn-sm" (click)="clearComparison()">
+                Clear
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ── FIX 3: Comparison Modal ── -->
+        @if (showComparison && selectedForComparison.length >= 2) {
+          <div class="comparison-overlay" (click)="showComparison = false">
+            <div class="comparison-modal" (click)="$event.stopPropagation()">
+
+              <div class="comparison-header">
+                <h2>
+                  <span class="material-icons">compare_arrows</span>
+                  Plan Comparison
+                </h2>
+                <button class="modal-close" (click)="showComparison = false"><span class="material-icons" style="font-size:18px">close</span></button>
+              </div>
+
+              <div class="comparison-table-wrap">
+                <table class="comparison-table">
+                  <thead>
+                  <tr>
+                    <th class="feature-col">Feature</th>
+                    @for (p of selectedForComparison; track p.planId) {
+                      <th class="plan-col">
+                        <div class="comp-plan-name">{{ p.planName }}</div>
+                        <div class="comp-plan-type">{{ p.planType }}</div>
+                      </th>
+                    }
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr>
+                    <td class="feature-label">
+                      <span class="material-icons feat-icon">shield</span>
+                      Max Coverage
+                    </td>
+                    @for (p of selectedForComparison; track p.planId) {
+                      <td class="comp-val highlight-val">
+                        ₹{{ formatCoverage(p.coverageAmount) }}
+                      </td>
+                    }
+                  </tr>
+                  <tr>
+                    <td class="feature-label">
+                      <span class="material-icons feat-icon">payments</span>
+                      Base Premium / yr
+                    </td>
+                    @for (p of selectedForComparison; track p.planId) {
+                      <td class="comp-val">
+                        ₹{{ formatCoverage(p.basePremiumAmount) }}
+                      </td>
+                    }
+                  </tr>
+                  <tr>
+                    <td class="feature-label">
+                      <span class="material-icons feat-icon">person</span>
+                      Age Range
+                    </td>
+                    @for (p of selectedForComparison; track p.planId) {
+                      <td class="comp-val">
+                        {{ p.minAgeLimit }}–{{ p.maxAgeLimit }} yrs
+                      </td>
+                    }
+                  </tr>
+                  <tr>
+                    <td class="feature-label">
+                      <span class="material-icons feat-icon">hourglass_top</span>
+                      Waiting Period
+                    </td>
+                    @for (p of selectedForComparison; track p.planId) {
+                      <td class="comp-val">
+                        {{ p.waitingPeriodMonths }} month(s)
+                      </td>
+                    }
+                  </tr>
+                  <tr>
+                    <td class="feature-label">
+                      <span class="material-icons feat-icon">calendar_month</span>
+                      Duration
+                    </td>
+                    @for (p of selectedForComparison; track p.planId) {
+                      <td class="comp-val">
+                        {{ p.planDurationMonths }} months
+                      </td>
+                    }
+                  </tr>
+                  <tr>
+                    <td class="feature-label">
+                      <span class="material-icons feat-icon">pregnant_woman</span>
+                      Maternity Cover
+                    </td>
+                    @for (p of selectedForComparison; track p.planId) {
+                      <td class="comp-val">
+                        @if (p.maternityCover) {
+                          <span class="comp-yes"><span class="material-icons" style="font-size:13px;vertical-align:middle">check_circle</span> Covered</span>
+                        } @else {
+                          <span class="comp-no">✗ Not Covered</span>
+                        }
+                      </td>
+                    }
+                  </tr>
+                  <tr>
+                    <td class="feature-label">
+                      <span class="material-icons feat-icon">medical_services</span>
+                      Pre-existing Disease
+                    </td>
+                    @for (p of selectedForComparison; track p.planId) {
+                      <td class="comp-val">
+                        @if (p.preExistingDiseaseCover) {
+                          <span class="comp-yes"><span class="material-icons" style="font-size:13px;vertical-align:middle">check_circle</span> Covered</span>
+                        } @else {
+                          <span class="comp-no">✗ Not Covered</span>
+                        }
+                      </td>
+                    }
+                  </tr>
+                  <tr class="comp-action-row">
+                    <td class="feature-label">Select</td>
+                    @for (p of selectedForComparison; track p.planId) {
+                      <td class="comp-val">
+                        <button class="btn btn-primary btn-sm"
+                                (click)="selectPlan(p)">
+                          Choose This Plan <span class="material-icons" style="font-size:14px;vertical-align:middle">arrow_forward</span>
+                        </button>
+                      </td>
+                    }
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        }
+
+        <!-- Plans Grid -->
         @if (filteredPlans.length === 0) {
           <div class="empty-state">
             <h3>No plans found</h3>
@@ -81,70 +238,74 @@
         } @else {
           <div class="plans-grid">
             @for (p of filteredPlans; track p) {
-              <div class="plan-card" (click)="selectPlan(p)">
+              <div class="plan-card" [class.card-selected-compare]="isSelectedForComparison(p)"
+                   (click)="selectPlan(p)">
+
+                <!-- ── FIX 3: Compare checkbox ── -->
+                <div class="compare-checkbox-row" (click)="$event.stopPropagation()">
+                  <label class="compare-label">
+                    <input type="checkbox"
+                           [checked]="isSelectedForComparison(p)"
+                           (change)="toggleComparison(p, $event)" />
+                    Compare
+                  </label>
+                </div>
+
                 <div class="plan-badge">{{ p.planType | titlecase }}</div>
                 <h3>{{ p.planName }}</h3>
                 <p class="plan-desc">{{ p.description }}</p>
+
                 <div class="plan-highlights">
                   <div class="highlight-item">
                     <span class="highlight-icon"></span>
                     <div>
                       <div class="highlight-label">Max Coverage</div>
-                      <div class="highlight-val">
-                        ₹{{ formatCoverage(p.coverageAmount) }}
-                      </div>
+                      <div class="highlight-val">₹{{ formatCoverage(p.coverageAmount) }}</div>
                     </div>
                   </div>
                   <div class="highlight-item">
                     <span class="highlight-icon"></span>
                     <div>
                       <div class="highlight-label">Base Premium</div>
-                      <div class="highlight-val">
-                        ₹{{ formatCoverage(p.basePremiumAmount) }}/yr
-                      </div>
+                      <div class="highlight-val">₹{{ formatCoverage(p.basePremiumAmount) }}/yr</div>
                     </div>
                   </div>
                   <div class="highlight-item">
                     <span class="highlight-icon"></span>
                     <div>
                       <div class="highlight-label">Age Range</div>
-                      <div class="highlight-val">
-                        {{ p.minAgeLimit }}–{{ p.maxAgeLimit }} yrs
-                      </div>
+                      <div class="highlight-val">{{ p.minAgeLimit }}–{{ p.maxAgeLimit }} yrs</div>
                     </div>
                   </div>
                   <div class="highlight-item">
                     <span class="highlight-icon"></span>
                     <div>
                       <div class="highlight-label">Waiting Period</div>
-                      <div class="highlight-val">
-                        {{ p.waitingPeriodMonths }} months
-                      </div>
+                      <div class="highlight-val">{{ p.waitingPeriodMonths }} months</div>
                     </div>
                   </div>
                   <div class="highlight-item">
                     <span class="highlight-icon"></span>
                     <div>
                       <div class="highlight-label">Duration</div>
-                      <div class="highlight-val">
-                        {{ p.planDurationMonths }} months
-                      </div>
+                      <div class="highlight-val">{{ p.planDurationMonths }} months</div>
                     </div>
                   </div>
                 </div>
+
                 <div class="plan-tags">
-                  <span [class.tag-yes]="p.maternityCover"
-                        [class.tag-no]="!p.maternityCover">
-                    {{ p.maternityCover ? '✓' : '✗' }} Maternity
+                  <span [class.tag-yes]="p.maternityCover" [class.tag-no]="!p.maternityCover">
+                    <span class="material-icons" style="font-size:13px;vertical-align:middle" [style.color]="p.maternityCover ? '#10b981' : '#ef4444'">{{ p.maternityCover ? 'check_circle' : 'cancel' }}</span> Maternity
                   </span>
                   <span [class.tag-yes]="p.preExistingDiseaseCover"
                         [class.tag-no]="!p.preExistingDiseaseCover">
-                    {{ p.preExistingDiseaseCover ? '✓' : '✗' }} Pre-existing
+                    <span class="material-icons" style="font-size:13px;vertical-align:middle" [style.color]="p.preExistingDiseaseCover ? '#10b981' : '#ef4444'">{{ p.preExistingDiseaseCover ? 'check_circle' : 'cancel' }}</span> Pre-existing
                   </span>
                 </div>
-                <button class="btn btn-primary plan-select-btn"
+
+                <button class="btn btn-primary plan-select-btn" 
                         (click)="selectPlan(p)">
-                  Select This Plan →
+                  Select This Plan <span class="material-icons" style="font-size:14px;vertical-align:middle">arrow_forward</span>
                 </button>
               </div>
             }
@@ -154,29 +315,24 @@
     </div>
   }
 
-  <!-- ══════════════════════════════════════ -->
-  <!-- STEP 2: Request Policy Form            -->
-  <!-- ══════════════════════════════════════ -->
+  <!-- ══════════════════════════════════════════════════════════
+       STEP 2: Request Policy Form
+  ══════════════════════════════════════════════════════════ -->
   @if (step === 2 && selectedPlan) {
     <div class="form-page">
-      <button class="btn-back" (click)="step = 1">← Back to Plans</button>
+      <button class="btn-back" (click)="step = 1"><span class="material-icons" style="font-size:16px;vertical-align:middle">arrow_back</span> Back to Plans</button>
 
       <div class="form-header">
         <div class="selected-plan-tag">{{ selectedPlan.planName }}</div>
         <h1>Request Policy</h1>
-        <p>
-          Fill in your details. Our underwriter will review your application
-          and send you a customized premium quote.
-        </p>
+        <p>Fill in your details. Our underwriter will review your application
+          and send you a customized premium quote.</p>
 
-        <!-- Plan eligibility info banners -->
         <div class="eligibility-row">
           <div class="eligibility-badge eligibility-blue">
             <span class="material-icons eligibility-icon">person</span>
             Age Eligibility:
-            <strong>
-              {{ selectedPlan.minAgeLimit }}–{{ selectedPlan.maxAgeLimit }} years
-            </strong>
+            <strong>{{ selectedPlan.minAgeLimit }}–{{ selectedPlan.maxAgeLimit }} years</strong>
           </div>
           <div class="eligibility-badge eligibility-green">
             <span class="material-icons eligibility-icon">hourglass_top</span>
@@ -187,6 +343,12 @@
             <span class="material-icons eligibility-icon">shield</span>
             Coverage:
             <strong>₹{{ formatCoverage(selectedPlan.coverageAmount) }}</strong>
+          </div>
+          <!-- FIX 1: Show plan type badge -->
+          <div class="eligibility-badge eligibility-purple">
+            <span class="material-icons eligibility-icon">group</span>
+            Plan Type:
+            <strong>{{ selectedPlan.planType }}</strong>
           </div>
         </div>
       </div>
@@ -232,49 +394,76 @@
         <div class="section">
           <h3>Health Check Report</h3>
           <div class="form-group">
-            <label>
-              Upload Health Check Report <span class="required">*</span>
-            </label>
-            <input type="file"
-                   (change)="onHealthCheckReportSelect($event)"
-                   accept=".pdf,.jpg,.jpeg,.png"
-                   class="form-control file-input"
-                   [class.error]="errors.healthCheckReport" />
-            <small class="upload-hint">
-              Mandatory: Upload your recent health check report (PDF, JPG, PNG)
-            </small>
+            <label>Upload Health Check Report <span class="required">*</span></label>
+            <div class="file-upload-area" [class.file-upload-error-border]="errors.healthCheckReport">
+              <input type="file"
+                     id="healthUpload"
+                     (change)="onHealthCheckReportSelect($event)"
+                     accept=".pdf,.jpg,.jpeg,.png"
+                     class="file-input-hidden" />
+              <label for="healthUpload" class="file-upload-label">
+                @if (form.healthCheckReport) {
+                  <span class="material-icons" style="color:#059669;font-size:28px">
+                    check_circle
+                  </span>
+                  <span class="file-name-display">{{ form.healthCheckReport.name }}</span>
+                  <span class="file-change-hint">Click to change</span>
+                } @else {
+                  <span class="material-icons" style="color:#94a3b8;font-size:28px">
+                    upload_file
+                  </span>
+                  <span class="file-upload-text">Click to upload Health Report</span>
+                  <span class="file-upload-hint">PDF, JPG, PNG — max 10MB</span>
+                }
+              </label>
+            </div>
             @if (errors.healthCheckReport) {
-              <span class="error-message file-upload-error">
-                {{ errors.healthCheckReport }}
-              </span>
+              <span class="error-message">{{ errors.healthCheckReport }}</span>
             }
           </div>
         </div>
 
-        <!-- ── Members ── -->
+        <!-- ── FIX 1: Members — hide Add Member for INDIVIDUAL plans ── -->
         <div class="section">
           <div class="section-header">
             <h3>Members to Insure</h3>
-            <button class="btn-add" (click)="addMember()">+ Add Member</button>
+            <!-- FIX 1: Only show Add Member for non-INDIVIDUAL plans -->
+            @if (!isIndividualPlan) {
+              <button class="btn-add" (click)="addMember()">+ Add Member</button>
+            } @else {
+              <span class="individual-note">
+                <span class="material-icons" style="font-size:15px;vertical-align:middle">
+                  info
+                </span>
+                Individual plan — covers 1 member only
+              </span>
+            }
           </div>
           <p class="section-note">
-            Add all members (including yourself) who need to be covered.
+            @if (isIndividualPlan) {
+              This is an Individual plan. Only the primary insured member is covered.
+            } @else {
+              Add all members (including yourself) who need to be covered.
+            }
           </p>
 
           @for (m of form.members; track m; let i = $index) {
             <div class="member-card">
               <div class="member-header">
-                <strong>Member {{ i + 1 }}</strong>
-                @if (form.members.length > 1) {
-                  <button class="btn-remove" (click)="removeMember(i)">
-                    ✕ Remove
-                  </button>
+                <strong>
+                  @if (isIndividualPlan) {
+                    Primary Insured Member
+                  } @else {
+                    Member {{ i + 1 }}
+                  }
+                </strong>
+                <!-- FIX 1: Never show remove for individual plans -->
+                @if (!isIndividualPlan && form.members.length > 1) {
+                  <button class="btn-remove" (click)="removeMember(i)"><span class="material-icons" style="font-size:13px;vertical-align:middle">close</span> Remove</button>
                 }
               </div>
 
               <div class="form-row">
-
-                <!-- Full Name -->
                 <div class="form-group">
                   <label>Full Name <span class="required">*</span></label>
                   <input [(ngModel)]="m.memberName"
@@ -282,13 +471,10 @@
                          [class.error]="errors['member' + i + '_name']"
                          (blur)="onBlur('member' + i + '_name')" />
                   @if (errors['member' + i + '_name']) {
-                    <span class="error-message">
-                      {{ errors['member' + i + '_name'] }}
-                    </span>
+                    <span class="error-message">{{ errors['member' + i + '_name'] }}</span>
                   }
                 </div>
 
-                <!-- Relationship -->
                 <div class="form-group">
                   <label>Relationship <span class="required">*</span></label>
                   <select [(ngModel)]="m.relationship"
@@ -296,20 +482,19 @@
                           (blur)="onBlur('member' + i + '_relationship')">
                     <option value="">— Select —</option>
                     <option value="SELF">Self</option>
-                    <option value="SPOUSE">Spouse</option>
-                    <option value="PARENT">Parent</option>
-                    <option value="CHILD">Child</option>
-                    <option value="SIBLING">Sibling</option>
-                    <option value="OTHER">Other</option>
+                    @if (!isIndividualPlan) {
+                      <option value="SPOUSE">Spouse</option>
+                      <option value="PARENT">Parent</option>
+                      <option value="CHILD">Child</option>
+                      <option value="SIBLING">Sibling</option>
+                      <option value="OTHER">Other</option>
+                    }
                   </select>
                   @if (errors['member' + i + '_relationship']) {
-                    <span class="error-message">
-                      {{ errors['member' + i + '_relationship'] }}
-                    </span>
+                    <span class="error-message">{{ errors['member' + i + '_relationship'] }}</span>
                   }
                 </div>
 
-                <!-- Date of Birth -->
                 <div class="form-group">
                   <label>Date of Birth <span class="required">*</span></label>
                   <input type="date"
@@ -322,22 +507,19 @@
                   @if (!m.dateOfBirth) {
                     <small class="hint-text">
                       Age {{ selectedPlan.minAgeLimit }}–{{ selectedPlan.maxAgeLimit }}
-                      years allowed for this plan
+                      years allowed
                     </small>
                   }
                   @if (errors['member' + i + '_dob']) {
-                    <span class="error-message">
-                      {{ errors['member' + i + '_dob'] }}
-                    </span>
+                    <span class="error-message">{{ errors['member' + i + '_dob'] }}</span>
                   }
                   @if (m.dateOfBirth && !errors['member' + i + '_dob']) {
                     <small class="age-valid-text">
-                      ✓ Age: {{ calcAge(m.dateOfBirth) }} years — eligible
+                      <span class="material-icons" style="font-size:12px;vertical-align:middle;color:#16a34a">check_circle</span> Age: {{ calcAge(m.dateOfBirth) }} years — eligible
                     </small>
                   }
                 </div>
 
-                <!-- Gender -->
                 <div class="form-group">
                   <label>Gender <span class="required">*</span></label>
                   <select [(ngModel)]="m.gender"
@@ -349,28 +531,100 @@
                     <option value="OTHER">Other</option>
                   </select>
                   @if (errors['member' + i + '_gender']) {
-                    <span class="error-message">
-                      {{ errors['member' + i + '_gender'] }}
-                    </span>
+                    <span class="error-message">{{ errors['member' + i + '_gender'] }}</span>
                   }
                 </div>
 
-                <!-- Pre-existing Diseases -->
                 <div class="form-group wide">
-                  <label>Pre-existing Diseases / Conditions</label>
-                  <input [(ngModel)]="m.preExistingDiseases"
-                         placeholder="e.g. Diabetes, Hypertension, None" />
+                  <!-- Pre-existing conditions are determined by the underwriter via health report AI analysis -->
                 </div>
-
               </div>
             </div>
           }
         </div>
 
-        <!-- Submit Button -->
+        <!-- ══ e-KYC Aadhaar Verification ══ -->
+        <div class="section kyc-section" [class.kyc-done]="kycDone">
+          <h3 style="display:flex;align-items:center;gap:8px">
+            <span class="material-icons" [style.color]="kycDone ? '#059669' : '#800020'">
+              {{ kycDone ? 'verified_user' : 'fingerprint' }}
+            </span>
+            Aadhaar e-KYC Verification
+            @if (kycDone) {
+              <span class="kyc-badge-done"><span class="material-icons" style="font-size:12px;vertical-align:middle">verified</span> Verified</span>
+            } @else {
+              <span class="kyc-badge-required">Required</span>
+            }
+          </h3>
+
+          @if (!kycDone) {
+            <p class="kyc-hint">
+              Verify your identity using your 12-digit Aadhaar number.
+              A 6-digit OTP will be sent to your <strong>registered email address</strong>.
+            </p>
+
+            <!-- Step A: Enter Aadhaar -->
+            @if (kycStep === 'idle') {
+              <div class="kyc-input-row">
+                <input type="text"
+                       class="form-control kyc-input"
+                       [(ngModel)]="kycAadhaar"
+                       placeholder="Enter 12-digit Aadhaar number"
+                       maxlength="12"
+                       pattern="\d{12}"
+                       [disabled]="kycLoading" />
+                <button class="btn btn-primary kyc-btn"
+                        (click)="initiateKyc()"
+                        [disabled]="kycLoading || !kycAadhaar">
+                  @if (kycLoading) { Sending... } @else { Send OTP }
+                </button>
+              </div>
+            }
+
+            <!-- Step B: Enter OTP -->
+            @if (kycStep === 'otp-sent') {
+              <div class="kyc-otp-row">
+                <div class="kyc-otp-hint">
+                  <span class="material-icons" style="font-size:16px;color:#059669">email</span>
+                  OTP sent to your registered email! Check your inbox.
+                </div>
+                <div class="kyc-input-row">
+                  <input type="text"
+                         class="form-control kyc-input"
+                         [(ngModel)]="kycOtp"
+                         placeholder="Enter 6-digit OTP"
+                         maxlength="6"
+                         [disabled]="kycLoading" />
+                  <button class="btn btn-primary kyc-btn"
+                          (click)="verifyKycOtp()"
+                          [disabled]="kycLoading || !kycOtp">
+                    @if (kycLoading) { Verifying... } @else { Verify OTP }
+                  </button>
+                </div>
+                <button class="kyc-resend" (click)="kycStep = 'idle'; kycOtp = ''">
+                  <span class="material-icons" style="font-size:14px;vertical-align:middle">arrow_back</span> Change Aadhaar / Resend OTP
+                </button>
+              </div>
+            }
+
+            @if (kycError) {
+              <div class="kyc-error">
+                <span class="material-icons" style="font-size:15px">error_outline</span>
+                {{ kycError }}
+              </div>
+            }
+          } @else {
+            <div class="kyc-success-bar">
+              <span class="material-icons" style="color:#059669;font-size:22px">task_alt</span>
+              Aadhaar KYC verified successfully — you're good to go!
+            </div>
+          }
+        </div>
+
+        <!-- Submit -->
         <button class="btn btn-primary btn-block submit-btn"
                 (click)="submitRequest()"
-                [disabled]="submitting">
+                [disabled]="submitting || (!kycDone)">
           @if (!submitting) {
             <span class="btn-inner">
               <span class="material-icons">send</span>
@@ -385,19 +639,17 @@
           }
         </button>
 
-        <!-- Success Card -->
+
         @if (submitted) {
           <div class="success-card">
             <div class="success-icon">
               <span class="material-icons success-check">check_circle</span>
             </div>
             <h3>Policy Request Submitted!</h3>
-            <p>
-              Your application is under review. You'll see the premium quote
-              in <strong>My Policies</strong> once the underwriter evaluates it.
-            </p>
+            <p>Your application is under review. You'll see the premium quote
+              in <strong>My Policies</strong> once the underwriter evaluates it.</p>
             <button class="btn btn-primary" (click)="goToPolicies()">
-              Go to My Policies →
+              Go to My Policies <span class="material-icons" style="font-size:14px;vertical-align:middle">arrow_forward</span>
             </button>
           </div>
         }

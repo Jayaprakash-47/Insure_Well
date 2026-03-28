@@ -18,6 +18,12 @@ interface ProfileData {
   state: string;
   pincode: string;
   createdAt: string;
+  accountNumber?: string;
+  ifscCode?: string;
+  accountHolderName?: string;
+  bankName?: string;
+  aadhaarNumber?: string;
+  aadhaarVerified?: boolean;
 }
 
 @Component({
@@ -29,9 +35,10 @@ interface ProfileData {
 })
 export class Profile implements OnInit {
 
-  activeTab: 'info' | 'password' = 'info';
+  activeTab: 'info' | 'password' | 'bank' = 'info';
   profile: ProfileData | null = null;
   editMode = false;
+  bankEditMode = false; // Separate edit mode for Bank Details tab
   saving = false;
   changingPw = false;
 
@@ -40,7 +47,8 @@ export class Profile implements OnInit {
   showConfirm = false;
 
   editData = {
-    name: '', phone: '', address: '', city: '', state: '', pincode: ''
+    name: '', phone: '', address: '', city: '', state: '', pincode: '',
+    accountNumber: '', ifscCode: '', accountHolderName: '', bankName: ''
   };
 
   pwData = {
@@ -59,20 +67,20 @@ export class Profile implements OnInit {
 
   loadProfile(): void {
     this.api.getProfile().subscribe({
-      next: (data: ProfileData) => { this.profile = data; },
+      next: (data: ProfileData) => { 
+        this.profile = data; 
+        this.populateEditData();
+      },
       error: () => { this.toast.error('Failed to load profile'); }
     });
   }
 
+  get hasBankDetails(): boolean {
+    return !!(this.profile?.accountNumber && this.profile?.ifscCode && this.profile?.bankName);
+  }
+
   enterEditMode(): void {
-    this.editData = {
-      name:    this.profile?.name    || '',
-      phone:   this.profile?.phone   || '',
-      address: this.profile?.address || '',
-      city:    this.profile?.city    || '',
-      state:   this.profile?.state   || '',
-      pincode: this.profile?.pincode || ''
-    };
+    this.populateEditData();
     this.editMode = true;
   }
 
@@ -80,19 +88,57 @@ export class Profile implements OnInit {
     this.editMode = false;
   }
 
-  saveProfile(form: NgForm): void {
+  enterBankEditMode(): void {
+    this.populateEditData();
+    this.bankEditMode = true;
+  }
+
+  cancelBankEdit(): void {
+    this.bankEditMode = false;
+  }
+
+  private populateEditData(): void {
+    this.editData = {
+      name:    this.profile?.name    || '',
+      phone:   this.profile?.phone   || '',
+      address: this.profile?.address || '',
+      city:    this.profile?.city    || '',
+      state:   this.profile?.state   || '',
+      pincode: this.profile?.pincode || '',
+      accountNumber: this.profile?.accountNumber || '',
+      ifscCode: this.profile?.ifscCode || '',
+      accountHolderName: this.profile?.accountHolderName || '',
+      bankName: this.profile?.bankName || ''
+    };
+  }
+
+  saveProfile(form: NgForm, isBankEdit: boolean = false): void {
     if (form.invalid) return;
     this.saving = true;
     this.api.updateProfile(this.editData).subscribe({
       next: (updated: ProfileData) => {
         this.profile = updated;
-        this.editMode = false;
+        this.populateEditData();
+        if (isBankEdit) {
+          this.bankEditMode = false;
+          this.toast.success(this.hasBankDetails ? 'Bank details updated successfully' : 'Bank details added successfully');
+        } else {
+          this.editMode = false;
+          this.toast.success('Profile updated successfully');
+        }
         this.saving = false;
-        this.toast.success('Profile updated successfully');
       },
       error: (err: any) => {
         this.saving = false;
-        this.toast.error(err?.error?.message || 'Failed to update profile');
+        let errMsg = 'Update failed';
+        if (err?.error?.message) {
+           if (typeof err.error.message === 'object') {
+              errMsg = Object.values(err.error.message).join(', ');
+           } else {
+              errMsg = err.error.message;
+           }
+        }
+        this.toast.error(errMsg);
       }
     });
   }

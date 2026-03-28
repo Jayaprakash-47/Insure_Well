@@ -8,6 +8,7 @@ import { NotificationService } from './core/services/notification.service';
 import { DarkModeService } from './core/services/dark-mode.service';
 import {DarkModeToggle} from './shared/dark-mode-toggle/dark-mode-toggle';
 import {LoadingOverlay} from './shared/loading-overlay/loading-overlay';
+import {ChatbotComponent} from './shared/chatbot/chatbot';
 
 
 @Component({
@@ -20,7 +21,8 @@ import {LoadingOverlay} from './shared/loading-overlay/loading-overlay';
     CommonModule,
     NotificationBellComponent,
     DarkModeToggle,
-    LoadingOverlay
+    LoadingOverlay,
+    ChatbotComponent
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',

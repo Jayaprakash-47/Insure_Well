@@ -30,6 +30,7 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final com.healthshield.service.N8nEmailService n8nEmailService;
 
     // ── existing endpoints (unchanged) ──
     @PostMapping("/register")
@@ -40,6 +41,17 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    // Temporary test endpoint for n8n email
+    @GetMapping("/test-email")
+    public String testEmail() {
+        n8nEmailService.sendEmail(
+            "jayaprakashpuntikura@gmail.com",
+            "InsureWell n8n Test",
+            "Email via n8n is working!"
+        );
+        return "Email sent!";
     }
 
     // ── NEW: Refresh token endpoint ──

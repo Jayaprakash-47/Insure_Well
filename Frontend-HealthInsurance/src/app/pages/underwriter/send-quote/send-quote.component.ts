@@ -30,6 +30,11 @@ export class SendQuoteComponent implements OnInit {
   riskLevel = '';
   riskColor = '';
 
+  // ── AI Verification state ──
+  verifyingAi = false;
+  aiReport: string | null = null;
+  showAiReport = false;
+
   get estimatedCommission(): number {
     return Math.round(this.quoteAmount * (this.commissionPct / 100));
   }
@@ -246,6 +251,22 @@ export class SendQuoteComponent implements OnInit {
         this.sending = false;
         this.error = err?.error?.message || 'Failed to send quote.';
       },
+    });
+  }
+
+  runAiVerification() {
+    if (!this.policy) return;
+    this.verifyingAi = true;
+    this.api.aiVerifyDocuments(this.policy.policyId).subscribe({
+      next: (res: any) => {
+        this.verifyingAi = false;
+        this.aiReport = res.report;
+        this.showAiReport = true;
+      },
+      error: (err: any) => {
+        this.verifyingAi = false;
+        this.error = 'AI Verification failed: ' + (err?.error?.message || 'Server error');
+      }
     });
   }
 }

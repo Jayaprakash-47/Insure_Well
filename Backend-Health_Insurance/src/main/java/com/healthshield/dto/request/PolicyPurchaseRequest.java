@@ -23,4 +23,6 @@ public class PolicyPurchaseRequest {
 
     @Valid
     private List<PolicyMemberRequest> members;
+
+    private String kycTransactionId;
 }

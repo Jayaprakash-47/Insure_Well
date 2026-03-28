@@ -1,113 +1,119 @@
-<div class="page-wrapper">
-  <div class="page-header">
-    <a routerLink="/claims-officer/my-claims" class="back-link">← Back to My Claims</a>
+<div class="review-page">
+  <div class="review-header">
+    <a routerLink="/claims-officer/my-claims" class="back-link">
+      <span class="material-icons" style="font-size:16px;vertical-align:middle">arrow_back</span>
+      Back to My Claims
+    </a>
     <h1>Claim Review</h1>
   </div>
 
   @if (claim) {
-    <div class="review-layout">
 
-      <!-- ── Left: Claim Detail Card ── -->
-      <div class="claim-detail-card card">
-        <div class="detail-header">
+    <!-- ══════════ SPLIT-VIEW ══════════ -->
+    <div class="split-view">
+
+      <!-- ── LEFT: OCR / Document Intelligence Panel ── -->
+      <div class="split-left">
+
+        <!-- Claim Identity -->
+        <div class="claim-id-bar">
           <div>
-            <h2>{{ claim.claimNumber }}</h2>
-            <span class="badge" [ngClass]="getStatusClass(claim.claimStatus)">
-              {{ claim.claimStatus }}
-            </span>
+            <div class="claim-number">{{ claim.claimNumber }}</div>
+            <div class="claim-sub">{{ claim.customerName }} · {{ claim.policyNumber }}</div>
           </div>
-          <div class="claim-total">{{ formatCurrency(claim.claimAmount) }}</div>
+          <div class="claim-amount-chip">{{ formatCurrency(claim.claimAmount) }}</div>
         </div>
 
-        <div class="detail-grid">
-          <div class="detail-item">
-            <span class="item-label">Customer</span>
-            <span class="item-value">{{ claim.customerName }}</span>
+        <!-- AI Claim Auditor Panel -->
+        <!-- AI Claim Auditor Panel -->
+        <div class="ai-panel">
+          <div class="ai-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+            <div>
+              <span class="material-icons" style="color:#f59e0b; vertical-align:middle;">smart_toy</span>
+              <strong style="margin-left:8px;">AI Document Auditor</strong>
+            </div>
+            <button (click)="runAiAudit()" [disabled]="auditLoading" class="btn btn-sm btn-primary" style="display:flex; align-items:center; gap:4px">
+              @if (auditLoading) {
+                <span class="spinner" style="width:12px; height:12px; border-width:2px; display:inline-block;"></span> Extracting...
+              } @else {
+                Run AI Audit
+              }
+            </button>
           </div>
-          <div class="detail-item">
-            <span class="item-label">Policy</span>
-            <span class="item-value">{{ claim.policyNumber }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="item-label">Claim Type</span>
-            <span class="item-value">{{ claim.claimType }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="item-label">Hospital</span>
-            <span class="item-value">{{ claim.hospitalName }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="item-label">Admission Date</span>
-            <span class="item-value">{{ claim.admissionDate | date: 'mediumDate' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="item-label">Discharge Date</span>
-            <span class="item-value">{{ claim.dischargeDate | date: 'mediumDate' }}</span>
-          </div>
-          <div class="detail-item full-width">
-            <span class="item-label">Diagnosis</span>
-            <span class="item-value">{{ claim.diagnosis }}</span>
-          </div>
-          <div class="detail-item full-width">
-            <span class="item-label">Filed On</span>
-            <span class="item-value">{{ claim.createdAt | date: 'medium' }}</span>
-          </div>
+
+          @if (auditError) {
+            <p style="color:red; background:#fee2e2; padding:8px; border-radius:4px">{{ auditError }}</p>
+          }
+
+          @if (auditResult) {
+            <!-- Amount Comparison -->
+            <div class="amount-comparison" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:1rem; border: 1px solid" [style.border-color]="auditResult.amountMatch ? '#10b981' : '#ef4444'">
+              <div class="amount-box" style="text-align:center">
+                <label style="display:block; font-size:12px; color:#64748b; text-transform:uppercase">Customer Claimed</label>
+                <strong style="font-size:1.2rem; color:#0f1f3d">₹{{ claim.claimAmount | number }}</strong>
+              </div>
+              <div class="vs" style="font-weight:bold; font-size:1.1rem" [style.color]="auditResult.amountMatch ? '#10b981' : '#ef4444'">
+                {{ auditResult.amountMatch ? '✅ MATCH' : '⚠️ MISMATCH' }}
+              </div>
+              <div class="amount-box" style="text-align:center">
+                <label style="display:block; font-size:12px; color:#64748b; text-transform:uppercase">AI Extracted</label>
+                <strong style="font-size:1.2rem; color:#0f1f3d">₹{{ auditResult.extractedAmount | number }}</strong>
+              </div>
+            </div>
+
+            <!-- Extracted Details -->
+            <table class="audit-table" style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+              <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding:8px 0; color:#64748b">Hospital (Bill)</td>
+                <td style="padding:8px 0; font-weight:500; text-align:right" [style.color]="auditResult.hospitalName !== claim.hospitalName ? '#dc2626' : 'inherit'">
+                  {{ auditResult.hospitalName }}
+                  @if (auditResult.hospitalName !== claim.hospitalName) {
+                    <div style="font-size:0.75rem">⚠️ Claimed: {{ claim.hospitalName }}</div>
+                  }
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding:8px 0; color:#64748b">Patient Name</td>
+                <td style="padding:8px 0; font-weight:500; text-align:right">{{ auditResult.patientName }}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding:8px 0; color:#64748b">Diagnosis</td>
+                <td style="padding:8px 0; font-weight:500; text-align:right">{{ auditResult.diagnosis || 'N/A' }}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0; color:#64748b">AI Confidence</td>
+                <td style="padding:8px 0; font-weight:bold; text-align:right" 
+                    [style.color]="auditResult.confidence === 'HIGH' ? '#10b981' : (auditResult.confidence === 'MEDIUM' ? '#f59e0b' : '#ef4444')">
+                  {{ auditResult.confidence }} {{ auditResult.confidence === 'HIGH' ? '🟢' : '⚠️' }}
+                </td>
+              </tr>
+            </table>
+          } @else if (!auditLoading) {
+            <p class="ai-no-pdf">Click 'Run AI Audit' to analyze the submitted bill.</p>
+          }
         </div>
 
-        <!-- Settlement Info -->
-        @if (claim.tpaReferenceNumber) {
-          <div class="settlement-info">
-            <h4>
-              <span class="material-icons" style="vertical-align:middle">
-                account_balance
-              </span>
-              Settlement Info
-            </h4>
-            <p><strong>TPA Reference:</strong> {{ claim.tpaReferenceNumber }}</p>
-            <p>
-              <strong>Settlement Amount:</strong>
-              {{ formatCurrency(claim.settlementAmount) }}
-            </p>
-            <p>
-              <strong>Settlement Date:</strong>
-              {{ claim.settlementDate | date: 'medium' }}
-            </p>
-          </div>
-        }
-
-        <!-- Documents Section -->
-        <div class="documents-section">
-          <h4>
-            <span class="material-icons"
-                  style="vertical-align:middle;margin-right:4px">
-              folder_open
-            </span>
+        <!-- Documents Submitted -->
+        <div class="doc-section">
+          <div class="section-title">
+            <span class="material-icons" style="font-size:16px;color:#1e40af">folder_open</span>
             Submitted Documents
-          </h4>
-
+          </div>
           @if (claim.documents && claim.documents.length > 0) {
-            <div class="documents-list">
+            <div class="doc-list">
               @for (doc of claim.documents; track doc) {
-                <div class="document-item">
+                <div class="doc-item">
                   <span class="material-icons doc-icon">description</span>
                   <div class="doc-info">
-                    <span class="doc-name">
-                      {{ doc.fileName || doc.originalFileName || 'Document' }}
-                    </span>
-                    <span class="doc-meta">{{ doc.fileType || 'PDF' }}</span>
+                    <span class="doc-name">{{ doc.fileName || doc.originalFileName || 'Document' }}</span>
+                    <span class="doc-meta">{{ doc.fileType || 'Document' }}</span>
                   </div>
-                  <div style="display:flex;gap:4px">
-                    <button class="btn btn-sm" (click)="viewDocument(doc)">
-                      <span class="material-icons" style="font-size:14px">
-                        visibility
-                      </span>
-                      View
+                  <div class="doc-btns">
+                    <button class="btn btn-sm btn-secondary" (click)="viewDocument(doc)">
+                      <span class="material-icons" style="font-size:13px">visibility</span> View
                     </button>
-                    <button class="btn btn-sm" (click)="downloadDocument(doc)">
-                      <span class="material-icons" style="font-size:14px">
-                        download
-                      </span>
-                      Download
+                    <button class="btn btn-sm btn-secondary" (click)="downloadDocument(doc)">
+                      <span class="material-icons" style="font-size:13px">download</span>
                     </button>
                   </div>
                 </div>
@@ -117,191 +123,317 @@
             <p class="no-docs">No documents uploaded by the customer.</p>
           }
         </div>
+
+        <!-- Settlement Info (if settled) -->
+        @if (claim.tpaReferenceNumber) {
+          <div class="settlement-card">
+            <div class="section-title">
+              <span class="material-icons" style="font-size:16px;color:#059669">account_balance</span>
+              Settlement Info
+            </div>
+            <div class="settle-grid">
+              <div><span class="s-lbl">TPA Reference</span><strong>{{ claim.tpaReferenceNumber }}</strong></div>
+              <div><span class="s-lbl">Amount</span><strong>{{ formatCurrency(claim.settlementAmount) }}</strong></div>
+              <div><span class="s-lbl">Date</span><strong>{{ claim.settlementDate | date:'mediumDate' }}</strong></div>
+            </div>
+          </div>
+        }
       </div>
 
-      <!-- ── Right: Decision Panel ── -->
-      @if (canReview) {
-        <div class="decision-panel card">
-          <h3 style="display:flex;align-items:center;gap:8px">
-            <span class="material-icons" style="font-size:1.25rem">
-              edit_document
-            </span>
-            Submit Decision
-          </h3>
+      <!-- ── RIGHT: Claim Form Details + Decision ── -->
+      <div class="split-right">
 
-          <div class="decision-buttons">
-            <button class="decision-btn approve"
-                    [class.selected]="decision === 'APPROVED'"
-                    (click)="setDecision('APPROVED')">
-              <span class="material-icons"
-                    style="font-size:1rem;vertical-align:middle">
-                check_circle
-              </span>
-              Approve
-            </button>
-            <button class="decision-btn partial"
-                    [class.selected]="decision === 'PARTIALLY_APPROVED'"
-                    (click)="setDecision('PARTIALLY_APPROVED')">
-              <span class="material-icons"
-                    style="font-size:1rem;vertical-align:middle">
-                balance
-              </span>
-              Partial
-            </button>
-            <button class="decision-btn reject"
-                    [class.selected]="decision === 'REJECTED'"
-                    (click)="setDecision('REJECTED')">
-              <span class="material-icons"
-                    style="font-size:1rem;vertical-align:middle">
-                cancel
-              </span>
-              Reject
-            </button>
-            <button class="decision-btn pending"
-                    [class.selected]="decision === 'DOCUMENT_PENDING'"
-                    (click)="setDecision('DOCUMENT_PENDING')">
-              <span class="material-icons"
-                    style="font-size:1rem;vertical-align:middle">
-                description
-              </span>
-              Need Docs
-            </button>
+        <!-- Claim Form Details -->
+        <div class="section-title">
+          <span class="material-icons" style="font-size:16px;color:#7c3aed">assignment</span>
+          Customer's Claim Details
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="item-label">Claim Type</span>
+            <span class="item-value">{{ claim.claimType }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="item-label">Hospital</span>
+            <span class="item-value">{{ claim.hospitalName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="item-label">Admission</span>
+            <span class="item-value">{{ claim.admissionDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="item-label">Discharge</span>
+            <span class="item-value">{{ claim.dischargeDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="detail-item full">
+            <span class="item-label">Diagnosis / Description</span>
+            <span class="item-value">{{ claim.diagnosis }}</span>
+          </div>
+          <div class="detail-item full">
+            <span class="item-label">Filed On</span>
+            <span class="item-value">{{ claim.createdAt | date:'medium' }}</span>
+          </div>
+        </div>
+
+        <!-- Bank Details -->
+        <div class="bank-section">
+          <div class="section-title">
+            <span class="material-icons" style="font-size:16px;color:#1e40af">account_balance</span>
+            Settlement Bank Account
+          </div>
+          <div class="bank-grid">
+            <div><span class="s-lbl">Account Holder</span><strong>{{ claim.accountHolderName || '—' }}</strong></div>
+            <div><span class="s-lbl">Account Number</span><strong>{{ claim.accountNumber || '—' }}</strong></div>
+            <div><span class="s-lbl">IFSC Code</span><strong>{{ claim.ifscCode || '—' }}</strong></div>
+            <div><span class="s-lbl">Bank</span><strong>{{ claim.bankName || '—' }}</strong></div>
+          </div>
+        </div>
+
+        <!-- Status Badge -->
+        <div style="margin:12px 0">
+          <span class="status-badge" [ngClass]="getStatusClass(claim.claimStatus)">
+            {{ claim.claimStatus.replace('_', ' ') }}
+          </span>
+        </div>
+
+        <!-- ── Decision Panel ── -->
+        @if (canReview) {
+          <div class="decision-panel">
+            <div class="section-title" style="margin-bottom:12px">
+              <span class="material-icons" style="font-size:16px;color:#800020">edit_document</span>
+              Submit Decision
+            </div>
+
+            <div class="decision-buttons">
+              <button class="decision-btn approve" [class.selected]="decision === 'APPROVED'" (click)="setDecision('APPROVED')">
+                <span class="material-icons" style="font-size:0.95rem">check_circle</span> Approve
+              </button>
+              <button class="decision-btn partial" [class.selected]="decision === 'PARTIALLY_APPROVED'" (click)="setDecision('PARTIALLY_APPROVED')">
+                <span class="material-icons" style="font-size:0.95rem">balance</span> Partial
+              </button>
+              <button class="decision-btn reject" [class.selected]="decision === 'REJECTED'" (click)="setDecision('REJECTED')">
+                <span class="material-icons" style="font-size:0.95rem">cancel</span> Reject
+              </button>
+              <button class="decision-btn pending" [class.selected]="decision === 'DOCUMENT_PENDING'" (click)="setDecision('DOCUMENT_PENDING')">
+                <span class="material-icons" style="font-size:0.95rem">description</span> Need Docs
+              </button>
+            </div>
+
+            @if (decision) {
+              <div class="decision-form">
+                @if (decision === 'APPROVED' || decision === 'PARTIALLY_APPROVED') {
+                  <div class="form-group">
+                    <label>Approved Amount (₹)</label>
+                    <input class="form-control" type="number" [(ngModel)]="approvedAmount"
+                           [max]="claim.claimAmount" placeholder="Enter approved amount" />
+                    <span class="hint">Claimed: {{ formatCurrency(claim.claimAmount) }}</span>
+                  </div>
+                }
+                @if (decision === 'REJECTED') {
+                  <div class="form-group">
+                    <label>Rejection Reason *</label>
+                    <textarea class="form-control" [(ngModel)]="rejectionReason" rows="3"
+                              placeholder="Explain the reason for rejection"></textarea>
+                  </div>
+                }
+                @if (decision === 'DOCUMENT_PENDING') {
+                  <div class="form-group">
+                    <label>Documents Required</label>
+                    <textarea class="form-control" [(ngModel)]="additionalDocumentsRequired" rows="2"
+                              placeholder="List the required documents"></textarea>
+                  </div>
+                }
+                <div class="form-group">
+                  <label>Reviewer Remarks</label>
+                  <textarea class="form-control" [(ngModel)]="reviewerRemarks" rows="2"
+                            placeholder="Your observations (optional)"></textarea>
+                </div>
+                <button class="btn btn-primary full-width" (click)="submitReview()" [disabled]="submitting">
+                  @if (submitting) {
+                    <div class="spinner"></div> Submitting...
+                  } @else {
+                    Submit Decision
+                  }
+                </button>
+              </div>
+            }
           </div>
 
-          @if (decision) {
-            <div class="decision-form">
+        } @else {
+          <!-- Read-only decision summary -->
+          <div class="decision-summary">
+            <div class="section-title">
+              <span class="material-icons" style="font-size:16px;color:#64748b">task_alt</span>
+              Decision Summary
+            </div>
+            @if (claim.reviewerRemarks) {
+              <p><strong>Remarks:</strong> {{ claim.reviewerRemarks }}</p>
+            }
+            @if (claim.approvedAmount) {
+              <p><strong>Approved Amount:</strong> {{ formatCurrency(claim.approvedAmount) }}</p>
+            }
+            @if (claim.rejectionReason) {
+              <p><strong>Rejection Reason:</strong> {{ claim.rejectionReason }}</p>
+            }
 
-              @if (decision === 'APPROVED' || decision === 'PARTIALLY_APPROVED') {
-                <div class="form-group">
-                  <label>Approved Amount (₹)</label>
-                  <input class="form-control"
-                         type="number"
-                         [(ngModel)]="approvedAmount"
-                         [max]="claim.claimAmount"
-                         placeholder="Enter approved amount" />
-                  <span class="hint">
-                    Claimed: {{ formatCurrency(claim.claimAmount) }}
-                  </span>
-                </div>
-              }
-
-              @if (decision === 'REJECTED') {
-                <div class="form-group">
-                  <label>Rejection Reason *</label>
-                  <textarea class="form-control"
-                            [(ngModel)]="rejectionReason"
-                            rows="3"
-                            placeholder="Explain the reason for rejection">
-                  </textarea>
-                </div>
-              }
-
-              @if (decision === 'DOCUMENT_PENDING') {
-                <div class="form-group">
-                  <label>Documents Required</label>
-                  <textarea class="form-control"
-                            [(ngModel)]="additionalDocumentsRequired"
-                            rows="2"
-                            placeholder="List the required documents">
-                  </textarea>
-                </div>
-              }
-
-              <div class="form-group">
-                <label>Reviewer Remarks</label>
-                <textarea class="form-control"
-                          [(ngModel)]="reviewerRemarks"
-                          rows="2"
-                          placeholder="Your observations (optional)">
-                </textarea>
+            <!-- Settle Button -->
+            @if (claim.claimStatus === 'APPROVED' || claim.claimStatus === 'PARTIALLY_APPROVED') {
+              <div class="settle-section">
+                <p class="settle-hint">
+                  <span class="material-icons" style="font-size:14px;vertical-align:middle">info</span>
+                  Approved: <strong>{{ formatCurrency(claim.approvedAmount) }}</strong>.
+                  Click below to process settlement — amount will be transferred to customer's bank account.
+                </p>
+                <button class="btn btn-success full-width" (click)="openSettlementModal()" [disabled]="settling">
+                  @if (settling) {
+                    <div class="spinner"></div> Processing...
+                  } @else {
+                    <span class="material-icons" style="font-size:1rem;vertical-align:middle">payments</span>
+                    Process Settlement — {{ formatCurrency(claim.approvedAmount) }}
+                  }
+                </button>
               </div>
+            }
 
-              <button class="btn btn-primary btn-lg full-width"
-                      (click)="submitReview()"
-                      [disabled]="submitting">
-                @if (submitting) {
-                  <div class="spinner"></div>
-                  Submitting...
-                } @else {
-                  Submit Decision
-                }
-              </button>
-            </div>
-          }
-        </div>
+            <!-- Already settled badge -->
+            @if (claim.claimStatus === 'SETTLED' || claim.claimStatus === 'TRANSFER_INITIATED') {
+              <div class="settled-badge">
+                <span class="material-icons" style="color:#16a34a">check_circle</span>
+                Settlement of {{ formatCurrency(claim.settlementAmount) }}
+                processed on {{ claim.settlementDate | date:'mediumDate' }}
+              </div>
+            }
+          </div>
+        }
 
-      } @else {
+      </div>
+    </div>
+    <!-- ══ END SPLIT VIEW ══ -->
 
-        <!-- ── Read-only panel with Settle button ── -->
-        <div class="decision-panel card read-only">
-          <h3>Decision Summary</h3>
+    <!-- Settlement Modal with IFSC Verification -->
+    @if (showSettlementModal) {
+      <div class="modal-overlay" (click)="closeSettlementModal()">
+        <div class="modal-box" style="max-width:480px" (click)="$event.stopPropagation()">
 
-          @if (claim.reviewerRemarks) {
-            <p><strong>Remarks:</strong> {{ claim.reviewerRemarks }}</p>
-          }
-          @if (claim.approvedAmount) {
-            <p>
-              <strong>Approved Amount:</strong>
-              {{ formatCurrency(claim.approvedAmount) }}
+          <!-- Step 1: IFSC Verification -->
+          @if (!ifscVerified) {
+            <div class="modal-icon">🏦</div>
+            <h3>Verify Bank Account</h3>
+            <p style="color:#64748b;font-size:13px;margin-bottom:16px">
+              Before settling, verify the customer's bank account details using IFSC code.
             </p>
-          }
-          @if (claim.rejectionReason) {
-            <p>
-              <strong>Rejection Reason:</strong>
-              {{ claim.rejectionReason }}
-            </p>
-          }
-          @if (claim.adminRemarks) {
-            <p><strong>Admin Decision:</strong> {{ claim.adminRemarks }}</p>
-          }
 
-          <!-- ── Settle Button ── -->
-          @if (claim.claimStatus === 'APPROVED'
-          || claim.claimStatus === 'PARTIALLY_APPROVED') {
-            <div style="margin-top:20px;padding-top:16px;
-                        border-top:1px solid #f1f5f9">
-              <p style="font-size:13px;color:#64748b;margin-bottom:12px">
-                <span class="material-icons"
-                      style="font-size:14px;vertical-align:middle;margin-right:4px">
-                  info
+            <!-- Show stored IFSC from claim -->
+            @if (claim.ifscCode) {
+              <div style="background:#f8fafc; border-radius:8px; padding:16px; margin-bottom:20px; border:1px solid #e2e8f0;">
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:12px;">
+                  <span class="material-icons" style="font-size:18px; color:#3b82f6;">account_balance</span>
+                  <strong style="color:#0f172a; font-size:14px;">Customer's Bank Details on Record</strong>
+                </div>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; background:#ffffff; padding:12px; border-radius:6px; border:1px solid #cbd5e1;">
+                  <div>
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; margin-bottom:2px;">Bank Name</div>
+                    <div style="font-weight:600; color:#334155; font-size:13px;">{{ claim.bankName || 'Not Provided' }}</div>
+                  </div>
+                  <div>
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; margin-bottom:2px;">IFSC Code</div>
+                    <div style="font-weight:700; color:#1d4ed8; font-family:monospace; letter-spacing:0.5px; font-size:14px;">{{ claim.ifscCode }}</div>
+                  </div>
+                  <div style="grid-column: span 2;">
+                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; margin-bottom:2px;">Account Number</div>
+                    <div style="font-weight:600; color:#0f172a; font-family:monospace; letter-spacing:1px; font-size:16px;">{{ claim.accountNumber }}</div>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:13px;font-weight:600">IFSC Code to Verify</label>
+              <input class="form-control"
+                     [(ngModel)]="ifscInput"
+                     placeholder="e.g. SBIN0001234"
+                     maxlength="11"
+                     style="font-family:monospace;text-transform:uppercase;font-size:14px;letter-spacing:1px"
+                     [style.border-color]="ifscVerifyError ? '#ef4444' : ''"
+                     [disabled]="ifscVerifying" />
+              @if (ifscVerifyError) {
+                <span style="color:#ef4444;font-size:12px;margin-top:4px;display:block">
+                  <span class="material-icons" style="font-size:12px;vertical-align:middle">error</span>
+                  {{ ifscVerifyError }}
                 </span>
-                Approved amount:
-                <strong>{{ formatCurrency(claim.approvedAmount) }}</strong>.
-                Click below to process the final settlement payout.
-              </p>
-              <button class="btn btn-success full-width"
-                      (click)="settleClaim()"
-                      [disabled]="settling">
-                @if (settling) {
-                  <div class="spinner"></div>
-                  Processing...
+              }
+            </div>
+
+            <!-- Fetched bank info display -->
+            @if (ifscBankInfo) {
+              <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px">
+                <div style="font-weight:700;color:#16a34a;margin-bottom:6px">
+                  <span class="material-icons" style="font-size:14px;vertical-align:middle">verified</span>
+                  IFSC Valid — Bank Details Found
+                </div>
+                <div><strong>Bank:</strong> {{ ifscBankInfo.bank }}</div>
+                <div><strong>Branch:</strong> {{ ifscBankInfo.branch }}</div>
+                <div><strong>City:</strong> {{ ifscBankInfo.city }}, {{ ifscBankInfo.state }}</div>
+              </div>
+            }
+
+            <div class="modal-actions">
+              <button class="btn btn-outline" (click)="closeSettlementModal()">Cancel</button>
+              <button class="btn btn-primary" (click)="verifyIfsc()" [disabled]="ifscVerifying || !ifscInput.trim()">
+                @if (ifscVerifying) {
+                  <div class="spinner" style="width:14px;height:14px;display:inline-block;margin-right:6px"></div> Verifying...
                 } @else {
-                  <span class="material-icons"
-                        style="font-size:1rem;vertical-align:middle;margin-right:4px">
-                    payments
-                  </span>
-                  Process Settlement —
-                  {{ formatCurrency(claim.approvedAmount) }}
+                  <span class="material-icons" style="font-size:14px;vertical-align:middle">search</span>
+                  Verify IFSC
+                }
+              </button>
+            </div>
+
+            @if (ifscBankInfo) {
+              <div style="margin-top:12px">
+                <button class="btn btn-success full-width" (click)="confirmIfscAndProceed()">
+                  <span class="material-icons" style="font-size:14px;vertical-align:middle">check_circle</span>
+                  Confirm Bank Details & Proceed to Settlement
+                </button>
+              </div>
+            }
+
+          <!-- Step 2: Confirm Settlement -->
+          } @else {
+            <div class="modal-icon">💳</div>
+            <h3>Confirm Settlement</h3>
+            <p>
+              Transfer <strong>{{ formatCurrency(claim!.approvedAmount) }}</strong> to
+              <strong>{{ claim!.accountHolderName || claim!.customerName }}</strong>?
+            </p>
+            <div class="modal-bank-info" style="background:#f0fdf4;border:1px solid #86efac">
+              <span class="material-icons" style="color:#16a34a;font-size:16px;vertical-align:middle">verified</span>
+              <strong style="margin-left:6px">Bank Verified:</strong>
+              {{ ifscBankInfo?.bank }} · {{ claim!.accountNumber }}
+              <div style="font-size:12px;color:#64748b;margin-top:4px">{{ ifscBankInfo?.branch }} · {{ ifscInput }}</div>
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-outline" (click)="closeSettlementModal()">Cancel</button>
+              <button class="btn btn-success" (click)="settleClaim()" [disabled]="settling">
+                @if (settling) {
+                  <div class="spinner" style="width:14px;height:14px;display:inline-block;margin-right:6px"></div> Processing...
+                } @else {
+                  Confirm & Settle
                 }
               </button>
             </div>
           }
 
-          <!-- ── Already Settled Badge ── -->
-          @if (claim.claimStatus === 'SETTLED') {
-            <div class="settled-badge">
-              <span class="material-icons" style="color:#16a34a">
-                check_circle
-              </span>
-              Settlement of
-              {{ formatCurrency(claim.settlementAmount) }}
-              processed on
-              {{ claim.settlementDate | date: 'mediumDate' }}
-            </div>
-          }
         </div>
-      }
+      </div>
+    }
 
+
+  } @else {
+    <div class="loading-page">
+      <div class="spinner"></div>
+      <p>Loading claim details...</p>
     </div>
   }
 </div>

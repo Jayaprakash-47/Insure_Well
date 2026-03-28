@@ -47,5 +47,13 @@ public class PolicyResponse {
     private Long originalPolicyId;
 
     private String underwriterRemarks;
+
+    private String extractedConditions;   // "Diabetes, Hypertension"
+    private Boolean aiAnalysisDone;       // true after Claude finishes
+
+    // ── KYC ──
+    private String kycStatus;
+
+
 }
 

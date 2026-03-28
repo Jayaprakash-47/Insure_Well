@@ -1,618 +1,392 @@
-<div class="page-wrapper">
-  <!-- Welcome Banner -->
-
-
-  <div class="welcome-banner">
-    <div class="welcome-content">
-      <h1>Admin Dashboard</h1>
-      <p>Overview of InsureWell operations &amp; platform health</p>
-    </div>
-    <a routerLink="/admin/profile" class="btn btn-outline-profile">
-      <span class="material-icons" style="font-size:17px;vertical-align:middle">
-        account_circle
-      </span>
-      My Profile
-    </a>
-  </div>
+<!-- FILE: admin-dashboard.component.html -->
+<div class="page">
 
   @if (loading) {
-    <div class="loading-page">
-      <div class="spinner"></div>
-      <p>Loading dashboard...</p>
+    <div class="loader-wrap">
+      <div class="spin"></div>
+      <p>Loading...</p>
     </div>
   } @else if (stats) {
-    <!-- ── NEW: Tab Navigation ── -->
-    <div class="tab-nav">
-      <button
-        class="tab-btn"
-        [class.active]="activeTab === 'overview'"
-        (click)="activeTab = 'overview'"
-      >
-        <span class="material-icons" style="font-size: 16px; vertical-align: middle">
-          dashboard
-        </span>
-        Overview
+
+    <!-- ══ HERO ══ -->
+    <div class="hero">
+      <div class="hero-left">
+        <p class="hero-eyebrow">InsureWell Admin</p>
+        <h1 class="hero-title">Welcome back, Admin! 👋</h1>
+        <p class="hero-sub">Here's your platform overview for today</p>
+      </div>
+      <a routerLink="/admin/profile" class="hero-profile">
+        <div class="hp-avatar">A</div>
+        <div class="hp-info">
+          <span class="hp-name">Admin</span>
+          <span class="hp-role">Administrator</span>
+        </div>
+        <span class="material-icons hp-arrow">arrow_forward</span>
+      </a>
+    </div>
+
+    <!-- ══ TABS ══ -->
+    <div class="tabs">
+      <button class="tab" [class.tab-on]="activeTab==='overview'" (click)="activeTab='overview'">
+        <span class="material-icons">dashboard</span>Overview
       </button>
-      <button
-        class="tab-btn"
-        [class.active]="activeTab === 'charts'"
-        (click)="activeTab = 'charts'"
-      >
-        <span class="material-icons" style="font-size: 16px; vertical-align: middle">
-          bar_chart
-        </span>
-        Analytics
+      <button class="tab" [class.tab-on]="activeTab==='charts'" (click)="activeTab='charts'">
+        <span class="material-icons">bar_chart</span>Analytics
       </button>
-      <button class="tab-btn" [class.active]="activeTab === 'audit'" (click)="activeTab = 'audit'">
-        <span class="material-icons" style="font-size: 16px; vertical-align: middle">
-          manage_search
-        </span>
-        Audit Trail
+      <button class="tab" [class.tab-on]="activeTab==='audit'" (click)="activeTab='audit'">
+        <span class="material-icons">manage_search</span>Audit Trail
       </button>
     </div>
 
-    <!-- ════════════════════════════════════════ -->
-    <!-- TAB 1: OVERVIEW (existing content)       -->
-    <!-- ════════════════════════════════════════ -->
+    <!-- ══════════════ OVERVIEW ══════════════ -->
     @if (activeTab === 'overview') {
-      <h2 style="margin-top: 10px; margin-bottom: 20px">Policy Pipeline</h2>
-      <div class="stats-grid">
-        <div class="stat-card" style="border-top: 4px solid #f59e0b">
-          <div class="stat-info">
-            <p>Pending Applications</p>
-            <h3 style="color: #f59e0b">{{ stats.totalPendingPolicies }}</h3>
-          </div>
-          <div class="stat-icon yellow">
-            <span class="material-icons">pending</span>
-          </div>
-        </div>
-        <div class="stat-card" style="border-top: 4px solid #3b82f6">
-          <div class="stat-info">
-            <p>Under Evaluation</p>
-            <h3 style="color: #3b82f6">{{ stats.totalAssignedPolicies }}</h3>
-          </div>
-          <div class="stat-icon blue">
-            <span class="material-icons">assignment</span>
+
+      <!-- KPI Strip -->
+      <div class="kpi-strip">
+        <div class="kpi-tile kpi-green">
+          <span class="kpi-tile-icon"><span class="material-icons">trending_up</span></span>
+          <div>
+            <div class="kpi-tile-val">{{ formatCurrency(animatedStats['totalRevenue'] || 0) }}</div>
+            <div class="kpi-tile-lbl">Total Premium</div>
           </div>
         </div>
-        <div class="stat-card" style="border-top: 4px solid #8b5cf6">
-          <div class="stat-info">
-            <p>Quotes Sent</p>
-            <h3 style="color: #8b5cf6">{{ stats.totalQuoteSentPolicies }}</h3>
-          </div>
-          <div class="stat-icon purple">
-            <span class="material-icons">request_quote</span>
+        <div class="kpi-tile kpi-rose">
+          <span class="kpi-tile-icon"><span class="material-icons">payments</span></span>
+          <div>
+            <div class="kpi-tile-val">{{ formatCurrency(animatedStats['totalClaimsPaidOut'] || 0) }}</div>
+            <div class="kpi-tile-lbl">Claims Paid Out</div>
           </div>
         </div>
-        <div class="stat-card" style="border-top: 4px solid #10b981">
-          <div class="stat-info">
-            <p>Active Policies</p>
-            <h3 style="color: #10b981">{{ stats.totalActivePolicies }}</h3>
-          </div>
-          <div class="stat-icon green">
-            <span class="material-icons">verified_user</span>
+        <div class="kpi-tile kpi-blue">
+          <span class="kpi-tile-icon"><span class="material-icons">people</span></span>
+          <div>
+            <div class="kpi-tile-val">{{ animatedStats['totalCustomers'] || stats.totalCustomers || 0 }}</div>
+            <div class="kpi-tile-lbl">Total Customers</div>
           </div>
         </div>
-        <div class="stat-card" style="border-top: 4px solid #64748b">
-          <div class="stat-info">
-            <p>Expired</p>
-            <h3 style="color: #64748b">{{ stats.totalExpiredPolicies }}</h3>
+        <div class="kpi-tile kpi-purple">
+          <span class="kpi-tile-icon"><span class="material-icons">admin_panel_settings</span></span>
+          <div>
+            <div class="kpi-tile-val">{{ stats.totalUnderwriters || 0 }}</div>
+            <div class="kpi-tile-lbl">Underwriters</div>
           </div>
-          <div class="stat-icon grey">
-            <span class="material-icons">history</span>
+        </div>
+        <div class="kpi-tile kpi-teal">
+          <span class="kpi-tile-icon"><span class="material-icons">verified_user</span></span>
+          <div>
+            <div class="kpi-tile-val">{{ animatedStats['totalActivePolicies'] || stats.totalActivePolicies || 0 }}</div>
+            <div class="kpi-tile-lbl">Active Policies</div>
           </div>
         </div>
       </div>
 
-      <!-- Claims Pipeline (unchanged) -->
-      <h2 style="margin-top: 36px; margin-bottom: 20px">Claims Pipeline</h2>
-      <div class="table-container" style="margin-bottom: 36px">
-        <table class="pipeline-table">
-          <thead>
-            <tr>
-              <th>Stage</th>
-              <th>Status</th>
-              <th>Count</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td><span class="badge badge-submitted">SUBMITTED</span></td>
-              <td>
-                <strong>{{ stats.totalPendingClaims }}</strong>
-              </td>
-              <td>Awaiting Claims Officer Assignment</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td><span class="badge badge-info">UNDER_REVIEW</span></td>
-              <td>
-                <strong>{{ stats.totalUnderReviewClaims }}</strong>
-              </td>
-              <td>Currently being investigated</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td><span class="badge badge-approved">APPROVED/PARTIAL</span></td>
-              <td>
-                <strong>{{ stats.totalApprovedClaims }}</strong>
-              </td>
-              <td>Approved but awaiting settlement</td>
-            </tr>
-            <tr>
-              <td>4</td>
-              <td><span class="badge badge-success">SETTLED</span></td>
-              <td>
-                <strong>{{ stats.totalSettledClaims }}</strong>
-              </td>
-              <td>Payout completed and claim closed</td>
-            </tr>
-            <tr>
-              <td>-</td>
-              <td><span class="badge badge-rejected">REJECTED</span></td>
-              <td>
-                <strong>{{ stats.totalRejectedClaims }}</strong>
-              </td>
-              <td>Claims denied during evaluation</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Policy Pipeline -->
+      <div class="card">
+        <div class="card-hdr">
+          <h2 class="card-title">Policy Pipeline</h2>
+          <a routerLink="/admin/policies" class="card-link">View all →</a>
+        </div>
+        <div class="pipeline">
+          <div class="pl pl-amber">
+            <div class="pl-n">{{ stats.totalPendingPolicies || 0 }}</div>
+            <div class="pl-label">Pending</div>
+            <div class="pl-hint">Awaiting assignment</div>
+          </div>
+          <div class="pl-sep">›</div>
+          <div class="pl pl-blue">
+            <div class="pl-n">{{ stats.totalAssignedPolicies || 0 }}</div>
+            <div class="pl-label">Assigned</div>
+            <div class="pl-hint">Under evaluation</div>
+          </div>
+          <div class="pl-sep">›</div>
+          <div class="pl pl-violet">
+            <div class="pl-n">{{ stats.totalQuoteSentPolicies || 0 }}</div>
+            <div class="pl-label">Quote Sent</div>
+            <div class="pl-hint">Awaiting payment</div>
+          </div>
+          <div class="pl-sep">›</div>
+          <div class="pl pl-green">
+            <div class="pl-n">{{ stats.totalActivePolicies || 0 }}</div>
+            <div class="pl-label">Active</div>
+            <div class="pl-hint">In coverage</div>
+          </div>
+          <div class="pl-sep">›</div>
+          <div class="pl pl-slate">
+            <div class="pl-n">{{ stats.totalExpiredPolicies || 0 }}</div>
+            <div class="pl-label">Expired</div>
+            <div class="pl-hint">Renewal due</div>
+          </div>
+        </div>
       </div>
 
-      <!-- Quick Actions (unchanged) -->
-      <div class="quick-actions">
-        <h2>Quick Actions</h2>
-        <div class="actions-grid">
-          <a routerLink="/admin/customers" class="action-card">
-            <span class="action-icon">
-              <span class="material-icons">people</span>
-            </span>
-            <span class="action-label">Customers</span>
-            <span class="action-desc">Manage users</span>
-          </a>
-          <a routerLink="/admin/underwriters" class="action-card">
-            <span class="action-icon">
-              <span class="material-icons">admin_panel_settings</span>
-            </span>
-            <span class="action-label">Underwriters</span>
-            <span class="action-desc">Manage underwriters</span>
-          </a>
-          <a routerLink="/admin/assign-underwriter" class="action-card">
-            <span class="action-icon">
-              <span class="material-icons">pending_actions</span>
-            </span>
-            <span class="action-label">Assign Underwriter</span>
-            <span class="action-desc">Policy quoting workflow</span>
-            @if (stats.totalPendingPolicies > 0) {
-              <span class="action-badge">{{ stats.totalPendingPolicies }}</span>
+      <!-- Claims Pipeline -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-hdr">
+          <h2 class="card-title">Claims Pipeline</h2>
+          <a routerLink="/admin/claims" class="card-link">View all →</a>
+        </div>
+        <div class="claims-strip">
+          <div class="cl cl-amber">
+            <div class="cl-n">{{ stats.totalPendingClaims || 0 }}</div>
+            <div class="cl-s">Submitted</div>
+            <div class="cl-d">Awaiting officer</div>
+          </div>
+          <div class="cl cl-blue">
+            <div class="cl-n">{{ stats.totalUnderReviewClaims || 0 }}</div>
+            <div class="cl-s">Under Review</div>
+            <div class="cl-d">Being investigated</div>
+          </div>
+          <div class="cl cl-teal">
+            <div class="cl-n">{{ stats.totalApprovedClaims || 0 }}</div>
+            <div class="cl-s">Approved</div>
+            <div class="cl-d">Awaiting settlement</div>
+          </div>
+          <div class="cl cl-green">
+            <div class="cl-n">{{ stats.totalSettledClaims || 0 }}</div>
+            <div class="cl-s">Settled ✓</div>
+            <div class="cl-d">Payout completed</div>
+          </div>
+          <div class="cl cl-red">
+            <div class="cl-n">{{ stats.totalRejectedClaims || 0 }}</div>
+            <div class="cl-s">Rejected</div>
+            <div class="cl-d">Denied in review</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions — full width BELOW claims -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-hdr">
+          <h2 class="card-title">Quick Actions</h2>
+        </div>
+        <div class="qa-grid">
+          <a routerLink="/admin/assign-underwriter" class="qa qa-highlight">
+            <span class="material-icons">pending_actions</span>
+            <span class="qa-lbl">Assign Underwriter</span>
+            <span class="qa-sub">{{ stats.totalPendingPolicies || 0 }} pending</span>
+            @if ((stats.totalPendingPolicies || 0) > 0) {
+              <span class="qa-badge">{{ stats.totalPendingPolicies }}</span>
             }
           </a>
-          <a routerLink="/admin/claims-officers" class="action-card">
-            <span class="action-icon">
-              <span class="material-icons">gavel</span>
-            </span>
-            <span class="action-label">Officers</span>
-            <span class="action-desc">Claims officers</span>
+          <a routerLink="/admin/assign-claims-officer" class="qa">
+            <span class="material-icons">assignment_ind</span>
+            <span class="qa-lbl">Assign Officer</span>
+            <span class="qa-sub">Claims workflow</span>
           </a>
-          <a routerLink="/admin/plans" class="action-card">
-            <span class="action-icon">
-              <span class="material-icons">health_and_safety</span>
-            </span>
-            <span class="action-label">Plans</span>
-            <span class="action-desc">Insurance plans</span>
+          <a routerLink="/admin/customers" class="qa">
+            <span class="material-icons">people</span>
+            <span class="qa-lbl">Customers</span>
+            <span class="qa-sub">{{ stats.totalCustomers || 0 }} registered</span>
           </a>
-          <a routerLink="/admin/assign-claims-officer" class="action-card">
-            <span class="action-icon">
-              <span class="material-icons">assignment_ind</span>
-            </span>
-            <span class="action-label">Assign Officer</span>
-            <span class="action-desc">Claims assignment</span>
+          <a routerLink="/admin/underwriters" class="qa">
+            <span class="material-icons">admin_panel_settings</span>
+            <span class="qa-lbl">Underwriters</span>
+            <span class="qa-sub">{{ stats.totalUnderwriters || 0 }} active</span>
           </a>
-          <a routerLink="/admin/policies" class="action-card">
-            <span class="action-icon">
-              <span class="material-icons">policy</span>
-            </span>
-            <span class="action-label">Policies</span>
-            <span class="action-desc">View all policies</span>
+          <a routerLink="/admin/plans" class="qa">
+            <span class="material-icons">health_and_safety</span>
+            <span class="qa-lbl">Plans</span>
+            <span class="qa-sub">{{ stats.totalActivePlans || 0 }} active</span>
+          </a>
+          <a routerLink="/admin/claims-officers" class="qa">
+            <span class="material-icons">gavel</span>
+            <span class="qa-lbl">Officers</span>
+            <span class="qa-sub">Claims team</span>
+          </a>
+          <a routerLink="/admin/policies" class="qa">
+            <span class="material-icons">policy</span>
+            <span class="qa-lbl">All Policies</span>
+            <span class="qa-sub">View &amp; manage</span>
+          </a>
+          <a routerLink="/admin/claims" class="qa">
+            <span class="material-icons">medical_services</span>
+            <span class="qa-lbl">All Claims</span>
+            <span class="qa-sub">View &amp; manage</span>
           </a>
         </div>
       </div>
 
-      <!-- Policy History (unchanged) -->
-      @if (recentPolicies.length > 0) {
-        <div class="overview-section">
-          <div class="overview-header">
-            <h2>
-              <span class="material-icons" style="vertical-align: middle; margin-right: 8px">
-                history
-              </span>
-              Policy History
-            </h2>
-            <a routerLink="/admin/policies" class="btn btn-sm btn-secondary">View All</a>
+      <!-- Recent Activity -->
+      @if (recentPolicies.length > 0 || recentClaims.length > 0) {
+        <div class="card" style="margin-top:20px">
+          <div class="card-hdr">
+            <h2 class="card-title">Recent Activity</h2>
           </div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Policy #</th>
-                  <th>Customer</th>
-                  <th>Plan</th>
-                  <th>Premium</th>
-                  <th>Status</th>
-                  <th>Start Date</th>
-                </tr>
-              </thead>
+          <div class="act-tabrow">
+            <button class="atab" [class.atab-on]="activityTab==='policies'" (click)="activityTab='policies'">Policies</button>
+            <button class="atab" [class.atab-on]="activityTab==='claims'" (click)="activityTab='claims'">Claims</button>
+          </div>
+          @if (activityTab === 'policies') {
+            <table class="tbl">
+              <thead><tr><th>Policy #</th><th>Customer</th><th>Plan</th><th>Status</th></tr></thead>
               <tbody>
                 @for (p of recentPolicies; track p.policyId) {
                   <tr>
-                    <td>
-                      <strong>{{ p.policyNumber }}</strong>
-                    </td>
+                    <td class="tc">{{ p.policyNumber }}</td>
                     <td>{{ p.customerName }}</td>
-                    <td>{{ p.planName }}</td>
-                    <td>{{ formatCurrency(p.premiumAmount) }}</td>
-                    <td>
-                      <span class="badge" [ngClass]="getStatusClass(p.policyStatus)">
-                        {{ p.policyStatus }}
-                      </span>
-                    </td>
-                    <td>{{ p.startDate | date: 'dd MMM yyyy' }}</td>
+                    <td class="tm">{{ p.planName }}</td>
+                    <td><span class="badge" [ngClass]="getStatusClass(p.policyStatus)">{{ p.policyStatus }}</span></td>
                   </tr>
                 }
               </tbody>
             </table>
-          </div>
-        </div>
-      }
-
-      <!-- Claim History (unchanged) -->
-      @if (recentClaims.length > 0) {
-        <div class="overview-section">
-          <div class="overview-header">
-            <h2>
-              <span class="material-icons" style="vertical-align: middle; margin-right: 8px">
-                history_edu
-              </span>
-              Claim History
-            </h2>
-            <a routerLink="/admin/claims" class="btn btn-sm btn-secondary">View All</a>
-          </div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Claim #</th>
-                  <th>Customer</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Filed On</th>
-                </tr>
-              </thead>
+          }
+          @if (activityTab === 'claims') {
+            <table class="tbl">
+              <thead><tr><th>Claim #</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
               <tbody>
                 @for (c of recentClaims; track c.claimId) {
                   <tr>
-                    <td>
-                      <strong>{{ c.claimNumber }}</strong>
-                    </td>
+                    <td class="tc">{{ c.claimNumber }}</td>
                     <td>{{ c.customerName }}</td>
-                    <td>{{ formatCurrency(c.claimAmount) }}</td>
-                    <td>
-                      <span class="badge" [ngClass]="getStatusClass(c.claimStatus)">
-                        {{ c.claimStatus }}
-                      </span>
-                    </td>
-                    <td>{{ c.createdAt | date: 'dd MMM yyyy' }}</td>
+                    <td class="tc">{{ formatCurrency(c.claimAmount) }}</td>
+                    <td><span class="badge" [ngClass]="getStatusClass(c.claimStatus)">{{ c.claimStatus }}</span></td>
                   </tr>
                 }
               </tbody>
             </table>
-          </div>
+          }
         </div>
       }
     }
 
-    <!-- ════════════════════════════════════════ -->
-    <!-- TAB 2: ANALYTICS CHARTS                  -->
-    <!-- ════════════════════════════════════════ -->
+    <!-- ══════════════ ANALYTICS ══════════════ -->
     @if (activeTab === 'charts') {
-      <div class="charts-grid">
-        <!-- Policy Status Chart -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3>
-              <span
-                class="material-icons"
-                style="vertical-align: middle; font-size: 18px; margin-right: 6px"
-              >
-                description
-              </span>
-              Policy Distribution
-            </h3>
-            <span class="chart-total">
-              Total:
-              {{
-                stats.totalPendingPolicies +
-                  stats.totalAssignedPolicies +
-                  stats.totalQuoteSentPolicies +
-                  stats.totalActivePolicies +
-                  stats.totalExpiredPolicies
-              }}
-            </span>
-          </div>
+      <div class="kpi-strip">
+        <div class="kpi-tile kpi-green"><span class="kpi-tile-icon"><span class="material-icons">verified_user</span></span><div><div class="kpi-tile-val">{{ stats.totalActivePolicies }}</div><div class="kpi-tile-lbl">Active Policies</div></div></div>
+        <div class="kpi-tile kpi-blue"><span class="kpi-tile-icon"><span class="material-icons">people</span></span><div><div class="kpi-tile-val">{{ stats.totalCustomers||0 }}</div><div class="kpi-tile-lbl">Customers</div></div></div>
+        <div class="kpi-tile kpi-purple"><span class="kpi-tile-icon"><span class="material-icons">admin_panel_settings</span></span><div><div class="kpi-tile-val">{{ stats.totalUnderwriters||0 }}</div><div class="kpi-tile-lbl">Underwriters</div></div></div>
+        <div class="kpi-tile kpi-amber"><span class="kpi-tile-icon"><span class="material-icons">medical_services</span></span><div><div class="kpi-tile-val">{{ totalClaimsCount() }}</div><div class="kpi-tile-lbl">Total Claims</div></div></div>
+        <div class="kpi-tile kpi-rose"><span class="kpi-tile-icon"><span class="material-icons">trending_up</span></span><div><div class="kpi-tile-val">{{ formatCurrency(+(stats.totalRevenue||0)) }}</div><div class="kpi-tile-lbl">Total Revenue</div></div></div>
+      </div>
 
-          <!-- Horizontal bar chart -->
-          <div class="bar-chart">
-            @for (bar of policyChartBars; track bar.label) {
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hdr"><h2 class="card-title">Policy Distribution</h2><span class="card-badge">{{ totalPoliciesCount() }} total</span></div>
+          <div class="bars">
+            @for (b of policyChartBars; track b.label) {
               <div class="bar-row">
-                <div class="bar-label">{{ bar.label }}</div>
-                <div class="bar-track">
-                  <div
-                    class="bar-fill"
-                    [style.width]="bar.pct + '%'"
-                    [style.background]="bar.color"
-                  ></div>
-                </div>
-                <div class="bar-value">
-                  <strong>{{ bar.value }}</strong>
-                  <span style="color: #94a3b8; font-size: 11px"> ({{ bar.pct }}%) </span>
-                </div>
-              </div>
-            }
-          </div>
-
-          <!-- Donut-style legend -->
-          <div class="chart-legend">
-            @for (bar of policyChartBars; track bar.label) {
-              <div class="legend-item">
-                <span class="legend-dot" [style.background]="bar.color"> </span>
-                {{ bar.label }}: {{ bar.value }}
+                <div class="bar-lbl">{{ b.label }}</div>
+                <div class="bar-track"><div class="bar-fill" [style.width]="b.pct+'%'" [style.background]="b.color"></div></div>
+                <div class="bar-right"><b>{{ b.value }}</b><span>{{ b.pct }}%</span></div>
               </div>
             }
           </div>
         </div>
-
-        <!-- Claims Status Chart -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3>
-              <span
-                class="material-icons"
-                style="vertical-align: middle; font-size: 18px; margin-right: 6px"
-              >
-                medical_services
-              </span>
-              Claims Distribution
-            </h3>
-            <span class="chart-total">
-              Total:
-              {{
-                stats.totalPendingClaims +
-                  stats.totalUnderReviewClaims +
-                  stats.totalApprovedClaims +
-                  stats.totalSettledClaims +
-                  stats.totalRejectedClaims
-              }}
-            </span>
-          </div>
-
-          <div class="bar-chart">
-            @for (bar of claimChartBars; track bar.label) {
+        <div class="card">
+          <div class="card-hdr"><h2 class="card-title">Claims Distribution</h2><span class="card-badge">{{ totalClaimsCount() }} total</span></div>
+          <div class="bars">
+            @for (b of claimChartBars; track b.label) {
               <div class="bar-row">
-                <div class="bar-label">{{ bar.label }}</div>
-                <div class="bar-track">
-                  <div
-                    class="bar-fill"
-                    [style.width]="bar.pct + '%'"
-                    [style.background]="bar.color"
-                  ></div>
-                </div>
-                <div class="bar-value">
-                  <strong>{{ bar.value }}</strong>
-                  <span style="color: #94a3b8; font-size: 11px"> ({{ bar.pct }}%) </span>
-                </div>
-              </div>
-            }
-          </div>
-
-          <div class="chart-legend">
-            @for (bar of claimChartBars; track bar.label) {
-              <div class="legend-item">
-                <span class="legend-dot" [style.background]="bar.color"> </span>
-                {{ bar.label }}: {{ bar.value }}
+                <div class="bar-lbl">{{ b.label }}</div>
+                <div class="bar-track"><div class="bar-fill" [style.width]="b.pct+'%'" [style.background]="b.color"></div></div>
+                <div class="bar-right"><b>{{ b.value }}</b><span>{{ b.pct }}%</span></div>
               </div>
             }
           </div>
         </div>
+      </div>
 
-        <!-- KPI Summary Cards -->
-        <div class="chart-card kpi-card">
-          <div class="chart-header">
-            <h3>
-              <span
-                class="material-icons"
-                style="vertical-align: middle; font-size: 18px; margin-right: 6px"
-              >
-                insights
-              </span>
-              Key Metrics
-            </h3>
-          </div>
-          <div class="kpi-grid">
-            <div class="kpi-item">
-              <div class="kpi-value" style="color: #10b981">
-                {{ stats.totalActivePolicies }}
-              </div>
-              <div class="kpi-label">Active Policies</div>
-            </div>
-            <div class="kpi-item">
-              <div class="kpi-value" style="color: #3b82f6">
-                {{ stats.totalCustomers || 0 }}
-              </div>
-              <div class="kpi-label">Total Customers</div>
-            </div>
-            <div class="kpi-item">
-              <div class="kpi-value" style="color: #8b5cf6">
-                {{ stats.totalUnderwriters || 0 }}
-              </div>
-              <div class="kpi-label">Underwriters</div>
-            </div>
-            <div class="kpi-item">
-              <div class="kpi-value" style="color: #f59e0b">
-                {{ stats.totalPendingClaims || 0 }}
-              </div>
-              <div class="kpi-label">Pending Claims</div>
-            </div>
-            <div class="kpi-item">
-              <div class="kpi-value" style="color: #16a34a">
-                {{ formatCurrency(stats.totalRevenue || 0) }}
-              </div>
-              <div class="kpi-label">Total Premium</div>
-            </div>
-            <div class="kpi-item">
-              <div class="kpi-value" style="color: #dc2626">
-                {{ formatCurrency(stats.totalClaimsPaidOut || 0) }}
-              </div>
-              <div class="kpi-label">Total Claims</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Approval rate gauge -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3>
-              <span
-                class="material-icons"
-                style="vertical-align: middle; font-size: 18px; margin-right: 6px"
-              >
-                speed
-              </span>
-              Claim Resolution Rate
-            </h3>
-          </div>
+      <div class="two-col" style="margin-top:20px">
+        <div class="card">
+          <div class="card-hdr"><h2 class="card-title">Claim Settlement Rate</h2></div>
           <div class="gauge-wrap">
-            <div class="gauge-ring">
-              <svg viewBox="0 0 100 100" style="width: 140px; height: 140px">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#f1f5f9" stroke-width="10" />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  fill="none"
-                  stroke="#10b981"
-                  stroke-width="10"
-                  stroke-dasharray="251.2"
-                  [attr.stroke-dashoffset]="getSettledPct()"
-                  stroke-linecap="round"
-                  transform="rotate(-90 50 50)"
-                />
+            <div class="gauge-svg">
+              <svg viewBox="0 0 120 120" width="130" height="130">
+                <circle cx="60" cy="60" r="48" fill="none" stroke="#fde8ec" stroke-width="12"/>
+                <circle cx="60" cy="60" r="48" fill="none" stroke="#16a34a" stroke-width="12"
+                        stroke-dasharray="301.6" [attr.stroke-dashoffset]="301.6-(301.6*getSettledPctNum()/100)"
+                        stroke-linecap="round" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1.4s ease"/>
               </svg>
-              <div class="gauge-label">
-                <strong style="font-size: 22px; color: #10b981"> {{ getSettledPctNum() }}% </strong>
-                <span style="font-size: 11px; color: #64748b">Settled</span>
+              <div class="gauge-inner">
+                <span class="gauge-pct" style="color:#16a34a">{{ getSettledPctNum() }}%</span>
+                <span class="gauge-lbl">Settled</span>
               </div>
             </div>
             <div class="gauge-legend">
-              <div class="gauge-row">
-                <span class="legend-dot" style="background: #10b981"></span>
-                Settled: {{ stats.totalSettledClaims || 0 }}
-              </div>
-              <div class="gauge-row">
-                <span class="legend-dot" style="background: #3b82f6"></span>
-                Approved: {{ stats.totalApprovedClaims || 0 }}
-              </div>
-              <div class="gauge-row">
-                <span class="legend-dot" style="background: #ef4444"></span>
-                Rejected: {{ stats.totalRejectedClaims || 0 }}
-              </div>
+              <div class="gl-row"><span class="gl-dot" style="background:#16a34a"></span>Settled<b>{{ stats.totalSettledClaims||0 }}</b></div>
+              <div class="gl-row"><span class="gl-dot" style="background:#3b82f6"></span>Approved<b>{{ stats.totalApprovedClaims||0 }}</b></div>
+              <div class="gl-row"><span class="gl-dot" style="background:#f59e0b"></span>Pending<b>{{ stats.totalPendingClaims||0 }}</b></div>
+              <div class="gl-row"><span class="gl-dot" style="background:#be123c"></span>Rejected<b>{{ stats.totalRejectedClaims||0 }}</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><h2 class="card-title">Loss Ratio</h2></div>
+          <div class="lr">
+            <div class="lr-top">
+              <span class="lr-pct" [style.color]="lossRatioColor">{{ lossRatio }}%</span>
+              <span class="lr-chip" [style.background]="lossRatioColor+'18'" [style.color]="lossRatioColor">
+              @if(lossRatio<40){Healthy}@else if(lossRatio<70){Monitor}@else{High Risk}
+            </span>
+            </div>
+            <div class="lr-track"><div class="lr-fill" [style.width.%]="lossRatio" [style.background]="lossRatioColor"></div></div>
+            <div class="lr-items">
+              <div class="lr-item"><span class="lr-lbl">Premium Revenue</span><span class="lr-val" style="color:#16a34a">{{ formatCurrency(+(stats.totalRevenue||0)) }}</span></div>
+              <div class="lr-item"><span class="lr-lbl">Claims Paid Out</span><span class="lr-val" style="color:#be123c">{{ formatCurrency(+(stats.totalClaimsPaidOut||0)) }}</span></div>
             </div>
           </div>
         </div>
       </div>
-    }
 
-    <!-- ════════════════════════════════════════ -->
-    <!-- TAB 3: AUDIT TRAIL                       -->
-    <!-- ════════════════════════════════════════ -->
-    @if (activeTab === 'audit') {
-      <div class="audit-container">
-        <!-- Filter row -->
-        <div class="audit-filters">
-          <span style="font-size: 13px; font-weight: 600; color: #374151"> Filter by role: </span>
-          @for (role of auditRoles; track role) {
-            <button
-              class="audit-filter-btn"
-              [class.active]="selectedAuditRole === role"
-              (click)="filterAudit(role)"
-              [style.border-color]="
-                selectedAuditRole === role ? getRoleBadgeColor(role) : '#e2e8f0'
-              "
-              [style.color]="selectedAuditRole === role ? getRoleBadgeColor(role) : '#64748b'"
-            >
-              {{ role }}
-            </button>
-          }
-          <button class="audit-refresh-btn" (click)="loadAuditLogs()">
-            <span class="material-icons" style="font-size: 16px"> refresh </span>
-          </button>
-        </div>
-
-        @if (auditLoading) {
-          <div style="text-align: center; padding: 40px; color: #64748b">
-            <div class="spinner"></div>
-            <p>Loading audit trail...</p>
-          </div>
-        } @else if (filteredAuditLogs.length === 0) {
-          <div style="text-align: center; padding: 40px; color: #94a3b8">
-            <span
-              class="material-icons"
-              style="font-size: 48px; display: block; margin-bottom: 12px"
-            >
-              manage_search
-            </span>
-            No audit logs found
+      <div class="card" style="margin-top:20px">
+        <div class="card-hdr"><h2 class="card-title">Underwriter Leaderboard</h2><span class="card-badge">Top performers</span></div>
+        @if (underwriterPerformance.length > 0) {
+          <div class="lb">
+            @for (u of underwriterPerformance; track u.underwriterId; let i=$index) {
+              <div class="lb-row">
+                <span class="lb-medal">{{ i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1) }}</span>
+                <div class="lb-av">{{ (u.underwriterName||'U').charAt(0).toUpperCase() }}</div>
+                <div class="lb-info"><div class="lb-nm">{{ u.underwriterName }}</div><div class="lb-sub">{{ u.totalQuotesSent||0 }} quotes</div></div>
+                <div class="lb-bar"><div [style.width.%]="commissionBarPct(u)" [style.background]="i===0?'#d97706':i===1?'#94a3b8':'#7c3aed'"></div></div>
+                <div class="lb-amt">{{ formatCurrency(u.totalCommissionEarned||0) }}</div>
+              </div>
+            }
           </div>
         } @else {
-          <div class="audit-timeline">
-            @for (log of filteredAuditLogs; track log.id) {
-              <div class="audit-entry">
-                <!-- Icon -->
-                <div
-                  class="audit-icon"
-                  [style.background]="getAuditColor(log.action) + '20'"
-                  [style.color]="getAuditColor(log.action)"
-                >
-                  <span class="material-icons" style="font-size: 18px">
-                    {{ getAuditIcon(log.action) }}
-                  </span>
-                </div>
+          <div class="lb-empty">No performance data yet</div>
+        }
+      </div>
+    }
 
-                <!-- Content -->
-                <div class="audit-content">
-                  <div class="audit-top">
-                    <span class="audit-action">
-                      {{ log.action.replace('_', ' ') }}
-                    </span>
-                    <span
-                      class="audit-role-badge"
-                      [style.background]="getRoleBadgeColor(log.performedBy) + '20'"
-                      [style.color]="getRoleBadgeColor(log.performedBy)"
-                    >
-                      {{ log.performedBy }}
-                    </span>
-                    <span class="audit-time">
-                      {{ log.timestamp | date: 'dd MMM yyyy, h:mm a' }}
-                    </span>
+    <!-- ══════════════ AUDIT ══════════════ -->
+    @if (activeTab === 'audit') {
+      <div class="card">
+        <div class="audit-toolbar">
+          <div class="audit-search">
+            <span class="material-icons">search</span>
+            <input type="text" [(ngModel)]="auditSearch" placeholder="Search actions, users, details..." />
+          </div>
+          <div class="audit-roles">
+            @for (r of auditRoles; track r) {
+              <button class="arole" [class.arole-on]="selectedAuditRole===r"
+                      (click)="filterAudit(r)" [style.--rc]="getRoleBadgeColor(r)">{{ r }}</button>
+            }
+            <button class="arole-refresh" (click)="loadAuditLogs()">
+              <span class="material-icons">refresh</span>
+            </button>
+          </div>
+        </div>
+        <div class="audit-count">{{ filteredAuditLogs.length }} events</div>
+        @if (auditLoading) {
+          <div class="audit-spinner"><div class="spin"></div><p>Loading...</p></div>
+        } @else if (filteredAuditLogs.length === 0) {
+          <div class="audit-empty"><span class="material-icons">manage_search</span><p>No logs found</p></div>
+        } @else {
+          <div class="audit-list">
+            @for (log of filteredAuditLogs; track log.id) {
+              <div class="al">
+                <div class="al-icon" [style.background]="getAuditColor(log.action)+'12'" [style.color]="getAuditColor(log.action)">
+                  <span class="material-icons">{{ getAuditIcon(log.action) }}</span>
+                </div>
+                <div class="al-body">
+                  <div class="al-top">
+                    <span class="al-action">{{ log.action?.replace(/_/g,' ') }}</span>
+                    <span class="al-role" [style.background]="getRoleBadgeColor(log.performedBy)+'12'" [style.color]="getRoleBadgeColor(log.performedBy)">{{ log.performedBy }}</span>
+                    <span class="al-time">{{ log.timestamp | date:'dd MMM, h:mm a' }}</span>
                   </div>
-                  <div class="audit-details">{{ log.details }}</div>
-                  <div class="audit-user">
-                    <span class="material-icons" style="font-size: 12px; vertical-align: middle">
-                      person
-                    </span>
-                    {{ log.userEmail }}
-                  </div>
+                  <div class="al-detail">{{ log.details }}</div>
+                  <div class="al-user">{{ log.userEmail }}</div>
                 </div>
               </div>
             }
@@ -620,5 +394,6 @@
         }
       </div>
     }
+
   }
 </div>

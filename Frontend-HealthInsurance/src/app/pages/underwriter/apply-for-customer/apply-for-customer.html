@@ -1,0 +1,436 @@
+<!-- FILE: src/app/pages/underwriter/apply-for-customer/apply-for-customer.component.html -->
+
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="wizard-header">
+    <a routerLink="/underwriter/dashboard" class="back-link"><span class="material-icons" style="font-size:16px;vertical-align:middle">arrow_back</span> Back</a>
+    <div>
+      <h1>
+        <span class="material-icons" style="vertical-align:middle;margin-right:8px;color:#800020">
+          support_agent
+        </span>
+        Apply for Customer
+      </h1>
+      <p>Submit a policy application on behalf of a customer</p>
+    </div>
+  </div>
+
+  <!-- Agent Request Banner -->
+  @if (agentRequest) {
+    <div class="request-banner">
+      <span class="material-icons" style="color:#3b82f6">assignment</span>
+      <div>
+        <strong>Processing request from {{ agentRequest.customerName }}</strong>
+        <span>Interested in {{ agentRequest.planTypeInterest }} plan</span>
+        @if (agentRequest.message) {
+          <span class="req-message">"{{ agentRequest.message }}"</span>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Progress Steps -->
+  <div class="progress-steps">
+    @for (s of [
+      {n:1, label:'Select Customer'},
+      {n:2, label:'Choose Plan'},
+      {n:3, label:'Policy Details'},
+      {n:4, label:'Review & Submit'}
+    ]; track s.n) {
+      <div class="progress-step" [class.active]="step === s.n"
+           [class.done]="step > s.n">
+        <div class="step-circle">
+          @if (step > s.n) {
+            <span class="material-icons" style="font-size:16px">check</span>
+          } @else {
+            {{ s.n }}
+          }
+        </div>
+        <span class="step-label">{{ s.label }}</span>
+      </div>
+      @if (s.n < 4) {
+        <div class="step-connector" [class.done]="step > s.n"></div>
+      }
+    }
+  </div>
+
+  <!-- ══════════════════════════════════════
+       STEP 1: SELECT CUSTOMER
+  ══════════════════════════════════════ -->
+  @if (step === 1) {
+    <div class="wizard-card">
+      <h2>Select Customer</h2>
+      <p class="step-desc">Search for the customer you're assisting</p>
+
+      <input type="text" class="form-control search-input"
+             placeholder="Search by name, email or phone..."
+             [(ngModel)]="customerSearch" />
+
+      @if (loadingCustomers) {
+        <div class="loading-page"><div class="spinner"></div></div>
+      } @else {
+        <div class="customer-list">
+          @for (c of filteredCustomerList; track c.userId) {
+            <div class="customer-row"
+                 [class.selected]="selectedCustomer?.userId === c.userId"
+                 (click)="selectCustomer(c)">
+              <div class="customer-avatar">
+                {{ c.name.charAt(0).toUpperCase() }}
+              </div>
+              <div class="customer-info">
+                <div class="customer-name">{{ c.name }}</div>
+                <div class="customer-meta">
+                  {{ c.email }}
+                  @if (c.phone) { · {{ c.phone }} }
+                  @if (c.city) { · {{ c.city }} }
+                </div>
+              </div>
+              <div class="customer-policies">
+                <span class="policies-count">{{ c.totalPolicies }}</span>
+                <span class="policies-label">policies</span>
+              </div>
+              @if (selectedCustomer?.userId === c.userId) {
+                <span class="material-icons selected-tick">check_circle</span>
+              }
+            </div>
+          }
+          @if (filteredCustomerList.length === 0) {
+            <div class="empty-state">
+              <h3>No customers found</h3>
+              <p>Try a different search term</p>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="wizard-actions">
+        <div></div>
+        <button class="btn btn-primary" (click)="nextStep()"
+                [disabled]="!selectedCustomer">
+          Next: Choose Plan <span class="material-icons" style="font-size:14px;vertical-align:middle">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════
+       STEP 2: CHOOSE PLAN
+  ══════════════════════════════════════ -->
+  @if (step === 2) {
+    <div class="wizard-card">
+      <div class="step-header-row">
+        <div>
+          <h2>Choose Plan</h2>
+          <p class="step-desc">
+            Applying for:
+            <strong>{{ selectedCustomer?.name }}</strong>
+          </p>
+        </div>
+      </div>
+
+      <input type="text" class="form-control search-input"
+             placeholder="Search plans..."
+             [(ngModel)]="planSearch" />
+
+      <div class="plans-grid-wizard">
+        @for (plan of filteredPlanList; track plan.planId) {
+          <div class="plan-card-wizard"
+               [class.selected]="selectedPlan?.planId === plan.planId"
+               (click)="selectPlan(plan)">
+
+            @if (selectedPlan?.planId === plan.planId) {
+              <span class="material-icons plan-selected-tick">check_circle</span>
+            }
+
+            <div class="plan-badge-wizard">{{ plan.planType }}</div>
+            <h3 class="plan-name-wizard">{{ plan.planName }}</h3>
+
+            <div class="plan-highlights-wizard">
+              <div class="ph-item">
+                <span class="ph-label">Coverage</span>
+                <span class="ph-val">₹{{ formatCoverage(plan.coverageAmount) }}</span>
+              </div>
+              <div class="ph-item">
+                <span class="ph-label">Premium/yr</span>
+                <span class="ph-val">₹{{ formatCoverage(plan.basePremiumAmount) }}</span>
+              </div>
+              <div class="ph-item">
+                <span class="ph-label">Age</span>
+                <span class="ph-val">{{ plan.minAgeLimit }}–{{ plan.maxAgeLimit }}</span>
+              </div>
+              <div class="ph-item">
+                <span class="ph-label">Waiting</span>
+                <span class="ph-val">{{ plan.waitingPeriodMonths }} mo</span>
+              </div>
+            </div>
+
+            <div class="plan-tags-wizard">
+              <span [class.tag-yes]="plan.maternityCover"
+                    [class.tag-no]="!plan.maternityCover">
+                <span class="material-icons" style="font-size:13px;vertical-align:middle" [style.color]="plan.maternityCover ? '#10b981' : '#ef4444'">{{ plan.maternityCover ? 'check_circle' : 'cancel' }}</span> Maternity
+              </span>
+              <span [class.tag-yes]="plan.preExistingDiseaseCover"
+                    [class.tag-no]="!plan.preExistingDiseaseCover">
+                <span class="material-icons" style="font-size:13px;vertical-align:middle" [style.color]="plan.preExistingDiseaseCover ? '#10b981' : '#ef4444'">{{ plan.preExistingDiseaseCover ? 'check_circle' : 'cancel' }}</span> Pre-existing
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="wizard-actions">
+        <button class="btn btn-secondary" (click)="prevStep()"><span class="material-icons" style="font-size:16px;vertical-align:middle">arrow_back</span> Back</button>
+        <button class="btn btn-primary" (click)="nextStep()"
+                [disabled]="!selectedPlan">
+          Next: Policy Details <span class="material-icons" style="font-size:14px;vertical-align:middle">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════
+       STEP 3: POLICY DETAILS
+  ══════════════════════════════════════ -->
+  @if (step === 3) {
+    <div class="wizard-card">
+      <h2>Policy Details</h2>
+      <p class="step-desc">
+        Fill in nominee and member details for
+        <strong>{{ selectedCustomer?.name }}</strong>
+      </p>
+
+      <!-- Nominee -->
+      <div class="form-section">
+        <h3 class="form-section-title">Nominee Details</h3>
+        <div class="form-row-wizard">
+          <div class="form-group">
+            <label>Nominee Name <span class="req">*</span></label>
+            <input type="text" class="form-control"
+                   [(ngModel)]="form.nomineeName"
+                   placeholder="e.g. Priya Sharma"
+                   [class.error]="errors.nomineeName" />
+            @if (errors.nomineeName) {
+              <span class="field-error">{{ errors.nomineeName }}</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Relationship <span class="req">*</span></label>
+            <select class="form-control"
+                    [(ngModel)]="form.nomineeRelationship"
+                    [class.error]="errors.nomineeRelationship">
+              <option value="">— Select —</option>
+              <option>Spouse</option>
+              <option>Father</option>
+              <option>Mother</option>
+              <option>Son</option>
+              <option>Daughter</option>
+              <option>Sibling</option>
+              <option>Other</option>
+            </select>
+            @if (errors.nomineeRelationship) {
+              <span class="field-error">{{ errors.nomineeRelationship }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Members -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <h3 class="form-section-title">Members to Insure</h3>
+          @if (!isIndividualPlan) {
+            <button class="btn-add-sm" (click)="addMember()">
+              + Add Member
+            </button>
+          } @else {
+            <span class="individual-tag">Individual Plan — 1 member only</span>
+          }
+        </div>
+
+        @for (m of form.members; track m; let i = $index) {
+          <div class="member-card-wizard">
+            <div class="member-header-wizard">
+              <strong>{{ isIndividualPlan ? 'Primary Insured' : 'Member ' + (i + 1) }}</strong>
+              @if (!isIndividualPlan && form.members.length > 1) {
+                <button class="btn-remove-sm" (click)="removeMember(i)">
+                  <span class="material-icons" style="font-size:13px;vertical-align:middle">close</span> Remove
+                </button>
+              }
+            </div>
+            <div class="form-row-wizard">
+              <div class="form-group">
+                <label>Full Name <span class="req">*</span></label>
+                <input type="text" class="form-control"
+                       [(ngModel)]="m.memberName"
+                       placeholder="Full name"
+                       [class.error]="errors['m' + i + '_name']" />
+                @if (errors['m' + i + '_name']) {
+                  <span class="field-error">Required</span>
+                }
+              </div>
+              <div class="form-group">
+                <label>Relationship</label>
+                <select class="form-control" [(ngModel)]="m.relationship">
+                  <option value="SELF">Self</option>
+                  @if (!isIndividualPlan) {
+                    <option value="SPOUSE">Spouse</option>
+                    <option value="PARENT">Parent</option>
+                    <option value="CHILD">Child</option>
+                    <option value="SIBLING">Sibling</option>
+                    <option value="OTHER">Other</option>
+                  }
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date of Birth <span class="req">*</span></label>
+                <input type="date" class="form-control"
+                       [(ngModel)]="m.dateOfBirth"
+                       [max]="today"
+                       [min]="getMinDob()"
+                       [class.error]="errors['m' + i + '_dob']" />
+                @if (m.dateOfBirth) {
+                  <span class="age-hint">Age: {{ calcAge(m.dateOfBirth) }} yrs</span>
+                }
+                @if (errors['m' + i + '_dob']) {
+                  <span class="field-error">Required</span>
+                }
+              </div>
+              <div class="form-group">
+                <label>Gender <span class="req">*</span></label>
+                <select class="form-control" [(ngModel)]="m.gender"
+                        [class.error]="errors['m' + i + '_gender']">
+                  <option value="">— Select —</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                  <option value="OTHER">Other</option>
+                </select>
+                @if (errors['m' + i + '_gender']) {
+                  <span class="field-error">Required</span>
+                }
+              </div>
+              <div class="form-group wide">
+                <label>Pre-existing Diseases</label>
+                <input type="text" class="form-control"
+                       [(ngModel)]="m.preExistingDiseases"
+                       placeholder="e.g. Diabetes, None" />
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="wizard-actions">
+        <button class="btn btn-secondary" (click)="prevStep()"><span class="material-icons" style="font-size:16px;vertical-align:middle">arrow_back</span> Back</button>
+        <button class="btn btn-primary" (click)="nextStep()">
+          Review & Submit <span class="material-icons" style="font-size:14px;vertical-align:middle">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════
+       STEP 4: REVIEW & SUBMIT
+  ══════════════════════════════════════ -->
+  @if (step === 4 && !submitted) {
+    <div class="wizard-card">
+      <h2>Review & Submit</h2>
+      <p class="step-desc">
+        Please review all details before submitting the policy
+      </p>
+
+      <!-- Summary -->
+      <div class="review-grid">
+
+        <div class="review-section">
+          <div class="review-label">Customer</div>
+          <div class="review-value">{{ selectedCustomer?.name }}</div>
+          <div class="review-sub">{{ selectedCustomer?.email }}</div>
+        </div>
+
+        <div class="review-section">
+          <div class="review-label">Plan</div>
+          <div class="review-value">{{ selectedPlan?.planName }}</div>
+          <div class="review-sub">
+            ₹{{ formatCoverage(selectedPlan?.coverageAmount) }} coverage ·
+            ₹{{ formatCoverage(selectedPlan?.basePremiumAmount) }}/yr base
+          </div>
+        </div>
+
+        <div class="review-section">
+          <div class="review-label">Nominee</div>
+          <div class="review-value">{{ form.nomineeName }}</div>
+          <div class="review-sub">{{ form.nomineeRelationship }}</div>
+        </div>
+
+        <div class="review-section">
+          <div class="review-label">Members</div>
+          @for (m of form.members; track m; let i = $index) {
+            <div class="review-value">
+              {{ m.memberName }}
+              <span class="review-sub">
+                ({{ m.relationship }}, Age {{ calcAge(m.dateOfBirth) }})
+              </span>
+            </div>
+          }
+        </div>
+
+      </div>
+
+      <div class="review-note">
+        <span class="material-icons" style="color:#f59e0b;font-size:18px">
+          info
+        </span>
+        <span>
+          This policy will be submitted under
+          <strong>{{ selectedCustomer?.name }}</strong>'s account.
+          They will receive a notification and can view it in their My Policies.
+        </span>
+      </div>
+
+      <div class="wizard-actions">
+        <button class="btn btn-secondary" (click)="prevStep()"
+                [disabled]="submitting">
+          <span class="material-icons" style="font-size:16px;vertical-align:middle">arrow_back</span> Back
+        </button>
+        <button class="btn btn-primary" (click)="submitPolicy()"
+                [disabled]="submitting">
+          @if (submitting) {
+            <span class="spinner"></span> Submitting…
+          } @else {
+            <span class="material-icons">send</span>
+            Submit Policy
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════
+       SUCCESS
+  ══════════════════════════════════════ -->
+  @if (submitted && resultPolicy) {
+    <div class="wizard-card success-card-wizard">
+      <span class="material-icons success-icon-big">check_circle</span>
+      <h2>Policy Submitted Successfully!</h2>
+      <p>
+        Policy <strong>{{ resultPolicy.policyNumber }}</strong> has been
+        submitted under <strong>{{ selectedCustomer?.name }}</strong>'s account.
+      </p>
+      <p class="success-sub">
+        The customer has been notified and can see this policy in their dashboard.
+        It will be assigned to an underwriter for quoting.
+      </p>
+      <div class="success-actions">
+        <button class="btn btn-secondary"
+                (click)="router.navigate(['/underwriter/assisted-applications'])">
+          View All Requests
+        </button>
+        <button class="btn btn-primary" (click)="goToDashboard()">
+          Back to Dashboard
+        </button>
+      </div>
+    </div>
+  }
+
+</div>

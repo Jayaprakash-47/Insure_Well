@@ -34,6 +34,12 @@ public class ClaimResponse {
     private LocalDateTime createdAt;
     private List<ClaimDocumentResponse> documents;
 
+    // AI Extraction Report
+    private BigDecimal extractedAmount;
+    private Boolean isSuspicious;
+    private Boolean isAmountMatch;
+    private String extractionFlags;
+
     // Claims Officer info
     private Long assignedOfficerId;
     private String assignedOfficerName;
@@ -52,4 +58,10 @@ public class ClaimResponse {
     // Settlement info
     private LocalDate settlementDate;
     private String tpaReferenceNumber;
+
+    // Customer Bank Details
+    private String accountNumber;
+    private String ifscCode;
+    private String accountHolderName;
+    private String bankName;
 }

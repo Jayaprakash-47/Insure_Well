@@ -1,8 +1,11 @@
+// FILE: src/app/pages/underwriter/dashboard/underwriter-dashboard.component.ts
+
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { UnderwriterDashboardResponse, PolicyResponse } from '../../../core/models/models';
 
 @Component({
@@ -17,17 +20,24 @@ export class UnderwriterDashboardComponent implements OnInit {
   policies: PolicyResponse[] = [];
   userName = '';
 
-  // ── NEW: active tab ──
-  activeTab: 'overview' | 'analytics' = 'overview';
+  activeTab: 'overview' | 'analytics' | 'assisted' = 'overview';
+
+  // ── Assisted Applications ────────────────────────────────────────────
+  pendingRequests: any[] = [];
+  myAcceptedRequests: any[] = [];
+  loadingRequests = false;
+  acceptingId: number | null = null;
 
   constructor(
     private api: ApiService,
     private auth: AuthService,
+    private toast: ToastService,
     private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
     this.userName = this.auth.getUserName();
+
     this.api.getUnderwriterDashboard().subscribe({
       next: (data) => {
         this.profile = data;
@@ -35,7 +45,7 @@ export class UnderwriterDashboardComponent implements OnInit {
       },
       error: (err) => console.error('Failed to load dashboard', err),
     });
-    // ── NEW: load policies for analytics ──
+
     this.api.getUnderwriterPolicies().subscribe({
       next: (data) => {
         this.policies = data;
@@ -43,35 +53,84 @@ export class UnderwriterDashboardComponent implements OnInit {
       },
       error: () => {},
     });
+
+    this.loadAssistedRequests();
   }
 
-  // ── NEW: Policy status breakdown ──
+  // ── Load all agent requests ──────────────────────────────────────────
+  loadAssistedRequests(): void {
+    this.loadingRequests = true;
+
+    this.api.getPendingAgentRequests().subscribe({
+      next: (data) => {
+        this.pendingRequests = data;
+        this.loadingRequests = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.loadingRequests = false; }
+    });
+
+    this.api.getMyAcceptedAgentRequests().subscribe({
+      next: (data) => {
+        this.myAcceptedRequests = data;
+        this.cdr.detectChanges();
+      },
+      error: () => {}
+    });
+  }
+
+  // ── How many pending requests (for tab badge) ─────────────────────────
+  get pendingRequestCount(): number {
+    return this.pendingRequests.length;
+  }
+
+  // ── Accept request and navigate to wizard ────────────────────────────
+  acceptAndApply(req: any): void {
+    this.acceptingId = req.id;
+    this.api.acceptAgentRequest(req.id).subscribe({
+      next: () => {
+        this.acceptingId = null;
+        this.toast.success(`Accepted request from ${req.customerName}`);
+        // Navigate to apply wizard with requestId
+        window.location.href =
+          `/underwriter/apply-for-customer?requestId=${req.id}`;
+      },
+      error: (err) => {
+        this.acceptingId = null;
+        this.toast.error(err?.error?.message || 'Failed to accept request');
+      }
+    });
+  }
+
+  // ── Analytics getters (unchanged from original) ──────────────────────
   get policyStatusBars(): StatusBar[] {
     const statuses = [
-      { key: 'ASSIGNED', label: 'Assigned', color: '#f59e0b' },
+      { key: 'ASSIGNED',   label: 'Assigned',   color: '#f59e0b' },
       { key: 'QUOTE_SENT', label: 'Quote Sent', color: '#8b5cf6' },
-      { key: 'ACTIVE', label: 'Active', color: '#10b981' },
-      { key: 'EXPIRED', label: 'Expired', color: '#94a3b8' },
-      { key: 'CANCELLED', label: 'Cancelled', color: '#ef4444' },
+      { key: 'ACTIVE',     label: 'Active',     color: '#10b981' },
+      { key: 'EXPIRED',    label: 'Expired',    color: '#94a3b8' },
+      { key: 'CANCELLED',  label: 'Cancelled',  color: '#ef4444' },
     ];
     const total = this.policies.length || 1;
     return statuses
       .map((s) => ({
         ...s,
-        count: this.policies.filter((p) => p.policyStatus === s.key).length,
+        count: this.policies.filter(
+          (p) => p.policyStatus === s.key).length,
         pct: Math.round(
-          (this.policies.filter((p) => p.policyStatus === s.key).length / total) * 100,
+          (this.policies.filter(
+            (p) => p.policyStatus === s.key).length / total) * 100,
         ),
       }))
       .filter((s) => s.count > 0);
   }
 
-  // ── NEW: Monthly premium (last 6 months simulated from data) ──
   get recentActivePolicies(): PolicyResponse[] {
-    return this.policies.filter((p) => p.policyStatus === 'ACTIVE').slice(0, 5);
+    return this.policies
+      .filter((p) => p.policyStatus === 'ACTIVE')
+      .slice(0, 5);
   }
 
-  // ── NEW: Conversion rate (active / total quoted) ──
   get conversionRate(): number {
     const quoted = this.policies.filter(p =>
       ['QUOTE_SENT', 'ACTIVE', 'EXPIRED', 'RENEWED',
@@ -82,22 +141,19 @@ export class UnderwriterDashboardComponent implements OnInit {
     return Math.round((converted / quoted) * 100);
   }
 
-// Add this getter to show pending quotes
   get pendingQuoteCount(): number {
-    return this.policies.filter(p =>
-      p.policyStatus === 'QUOTE_SENT').length;
+    return this.policies.filter(p => p.policyStatus === 'QUOTE_SENT').length;
   }
 
-  // ── NEW: Average premium ──
   get averagePremium(): number {
     const withPremium = this.policies.filter((p) => p.premiumAmount);
     if (!withPremium.length) return 0;
     return Math.round(
-      withPremium.reduce((s, p) => s + (p.premiumAmount || 0), 0) / withPremium.length,
+      withPremium.reduce(
+        (s, p) => s + (p.premiumAmount || 0), 0) / withPremium.length,
     );
   }
 
-  // ── NEW: Top 3 plans by count ──
   get topPlans(): PlanStat[] {
     const planMap: Record<string, number> = {};
     this.policies.forEach((p) => {
@@ -112,7 +168,7 @@ export class UnderwriterDashboardComponent implements OnInit {
   formatAmount(val?: number): string {
     if (!val) return '₹0';
     if (val >= 100000) return '₹' + (val / 100000).toFixed(1) + 'L';
-    if (val >= 1000) return '₹' + (val / 1000).toFixed(1) + 'K';
+    if (val >= 1000)   return '₹' + (val / 1000).toFixed(1) + 'K';
     return '₹' + val;
   }
 
@@ -122,14 +178,10 @@ export class UnderwriterDashboardComponent implements OnInit {
 }
 
 export interface StatusBar {
-  key: string;
-  label: string;
-  color: string;
-  count: number;
-  pct: number;
+  key: string; label: string; color: string;
+  count: number; pct: number;
 }
 
 export interface PlanStat {
-  name: string;
-  count: number;
+  name: string; count: number;
 }

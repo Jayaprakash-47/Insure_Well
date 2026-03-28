@@ -355,6 +355,39 @@ public class ClaimsOfficerService {
         return mapToResponse(claim);
     }
 
+    // =================== SETTLEMENT (Feature 2) ===================
+
+    @Transactional
+    public ClaimResponse settleClaim(Long officerId, Long claimId) {
+        ClaimsOfficer officer = claimsOfficerRepository.findById(officerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Claims Officer not found"));
+
+        Claim claim = claimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim not found with id: " + claimId));
+
+        if (claim.getAssignedOfficer() == null || !claim.getAssignedOfficer().getUserId().equals(officerId)) {
+            throw new UnauthorizedException("This claim is not assigned to you");
+        }
+
+        if (claim.getClaimStatus() != ClaimStatus.APPROVED && claim.getClaimStatus() != ClaimStatus.PARTIALLY_APPROVED) {
+            throw new BadRequestException("Only approved claims can be settled.");
+        }
+
+        claim.setClaimStatus(ClaimStatus.TRANSFER_INITIATED);
+        claim.setSettlementDate(LocalDate.now());
+        claim.setTpaReferenceNumber("TPA-" + LocalDateTime.now().getYear() + "-" + claim.getClaimNumber());
+
+        String accNo = "Unknown";
+        if (claim.getUser() instanceof com.healthshield.entity.Customer customer) {
+            accNo = customer.getAccountNumber();
+        }
+        log.info("Simulating Razorpay Payouts API for Claim ID: {} to Account: {}", claimId, accNo);
+        log.info("Razorpay Transfer Initiated. Status marked as TRANSFER_INITIATED.");
+
+        Claim saved = claimRepository.save(claim);
+        return mapToResponse(saved);
+    }
+
     // =================== MAPPER ===================
 
     private ClaimResponse mapToResponse(Claim claim) {
@@ -381,6 +414,13 @@ public class ClaimsOfficerService {
                 .reviewerRemarks(claim.getReviewerRemarks())
                 .settlementDate(claim.getSettlementDate())
                 .tpaReferenceNumber(claim.getTpaReferenceNumber());
+
+        if (claim.getUser() instanceof com.healthshield.entity.Customer customer) {
+            builder.accountNumber(customer.getAccountNumber())
+                   .ifscCode(customer.getIfscCode())
+                   .accountHolderName(customer.getAccountHolderName())
+                   .bankName(customer.getBankName());
+        }
 
         if (claim.getAssignedOfficer() != null) {
             builder.assignedOfficerId(claim.getAssignedOfficer().getUserId())

@@ -1,7 +1,8 @@
+// FILE: file-claim.component.ts
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { PolicyResponse } from '../../../core/models/models';
@@ -9,7 +10,7 @@ import { PolicyResponse } from '../../../core/models/models';
 @Component({
   selector: 'app-file-claim',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, RouterLink],
   templateUrl: './file-claim.component.html',
   styleUrl: './file-claim.component.css',
 })
@@ -17,8 +18,8 @@ export class FileClaimComponent implements OnInit {
   policies: PolicyResponse[] = [];
   filing = false;
   selectedFiles: File[] = [];
-
-  // ✅ Use local date (not UTC) — fixes IST timezone offset issue
+  bankDetailsFilled = true; // Default to true while loading
+  // Today in local timezone — used as [max] for admission date only
   today = this.toLocalDateString(new Date());
 
   form = {
@@ -42,6 +43,12 @@ export class FileClaimComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.api.getProfile().subscribe({
+      next: (p) => {
+        this.bankDetailsFilled = !!(p.accountNumber && p.ifscCode);
+      }
+    });
+
     this.api.getMyPolicies().subscribe({
       next: (d) => {
         this.policies = d.filter((p) => p.policyStatus === 'ACTIVE');
@@ -52,7 +59,7 @@ export class FileClaimComponent implements OnInit {
     });
   }
 
-  // ✅ Converts any Date to "yyyy-MM-dd" in LOCAL time (not UTC)
+  // Converts a Date to "yyyy-MM-dd" in LOCAL time (avoids UTC shift)
   toLocalDateString(date: Date): string {
     const yyyy = date.getFullYear();
     const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -64,7 +71,6 @@ export class FileClaimComponent implements OnInit {
     return this.policies.find(p => p.policyId === +this.form.policyId);
   }
 
-  // ✅ Returns policy start date as "yyyy-MM-dd" safe for [min] binding in template
   getPolicyStartDateString(): string {
     const policy = this.getSelectedPolicy();
     if (!policy?.startDate) return '';
@@ -86,7 +92,7 @@ export class FileClaimComponent implements OnInit {
   }
 
   validateField(field: string): void {
-    // ✅ Single today, normalized to midnight local time
+    // Today at midnight local time — for admission date validation only
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -128,10 +134,11 @@ export class FileClaimComponent implements OnInit {
         if (!this.form.admissionDate) {
           this.errors.admissionDate = 'Admission date is required';
         } else {
-          // ✅ Parse date parts directly — avoids UTC-to-local shift
+          // Parse directly to avoid UTC-to-local shift
           const [ay, am, ad] = this.form.admissionDate.split('-').map(Number);
           const admission = new Date(ay, am - 1, ad);
 
+          // Admission must NOT be in the future
           if (admission > today) {
             this.errors.admissionDate = 'Admission date cannot be a future date';
           } else {
@@ -153,7 +160,7 @@ export class FileClaimComponent implements OnInit {
             }
           }
         }
-
+        // Re-validate discharge date whenever admission changes
         if (!this.errors.admissionDate && this.form.dischargeDate) {
           this.validateField('dischargeDate');
         }
@@ -164,13 +171,12 @@ export class FileClaimComponent implements OnInit {
         if (!this.form.dischargeDate) {
           this.errors.dischargeDate = 'Discharge date is required';
         } else {
-          // ✅ Parse date parts directly — avoids UTC-to-local shift
           const [dy, dm, dd] = this.form.dischargeDate.split('-').map(Number);
           const discharge = new Date(dy, dm - 1, dd);
 
-          if (discharge > today) {
-            this.errors.dischargeDate = 'Discharge date cannot be a future date';
-          } else if (this.form.admissionDate) {
+          // FIX 6: Discharge date CAN be today or in the future
+          // (patient may still be admitted — only block before admission date)
+          if (this.form.admissionDate) {
             const [ay, am, ad] = this.form.admissionDate.split('-').map(Number);
             const admission = new Date(ay, am - 1, ad);
 
@@ -181,6 +187,7 @@ export class FileClaimComponent implements OnInit {
               delete this.errors.dischargeDate;
             }
           } else {
+            // No admission date set yet — just accept it
             delete this.errors.dischargeDate;
           }
         }
@@ -210,8 +217,8 @@ export class FileClaimComponent implements OnInit {
       documents: true,
     };
 
-    ['policyId', 'hospitalName', 'claimAmount', 'admissionDate', 'dischargeDate', 'diagnosis']
-      .forEach(f => this.validateField(f));
+    ['policyId', 'hospitalName', 'claimAmount', 'admissionDate',
+      'dischargeDate', 'diagnosis'].forEach(f => this.validateField(f));
 
     if (this.selectedFiles.length === 0) {
       this.errors.documents =

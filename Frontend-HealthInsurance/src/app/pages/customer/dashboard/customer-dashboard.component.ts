@@ -9,18 +9,22 @@ import {
   ClaimResponse,
   PaymentResponse
 } from '../../../core/models/models';
+import {ChatbotComponent} from '../../../shared/chatbot/chatbot';
+
 
 @Component({
   selector: 'app-customer-dashboard',
   standalone: true,
-  imports: [RouterLink, CommonModule, FormsModule],
+  imports: [RouterLink, CommonModule, FormsModule, ChatbotComponent],
   templateUrl: './customer-dashboard.component.html',
   styleUrl: './customer-dashboard.component.css'
 })
 export class CustomerDashboardComponent implements OnInit {
+  activeTab: 'OVERVIEW' | 'ANALYTICS' = 'OVERVIEW';
   policies: PolicyResponse[] = [];
   claims: ClaimResponse[] = [];
   payments: PaymentResponse[] = [];
+  profile: any = null;
   loading = true;
 
   // ── NEW: Payment filters ──
@@ -49,6 +53,11 @@ export class CustomerDashboardComponent implements OnInit {
     // ── NEW: Load payments ──
     this.api.getMyPayments().subscribe({
       next: (d) => { this.payments = d; this.cdr.detectChanges(); },
+      error: () => {}
+    });
+
+    this.api.getProfile().subscribe({
+      next: (d) => { this.profile = d; this.cdr.detectChanges(); },
       error: () => {}
     });
   }
@@ -149,6 +158,10 @@ export class CustomerDashboardComponent implements OnInit {
       .reduce((s, p) => s + (p.amount || 0), 0);
   }
 
+  get totalSuccessfulPayments(): number {
+    return this.payments.filter(p => p.paymentStatus === 'SUCCESS').length;
+  }
+
   get uniquePolicyNumbers(): string[] {
     return [...new Set(this.payments.map(p => p.policyNumber))];
   }
@@ -229,5 +242,21 @@ export class CustomerDashboardComponent implements OnInit {
 
   formatCurrency(n: number): string {
     return '₹' + (n || 0).toLocaleString('en-IN');
+  }
+
+  // ── Claims totals for template ──
+  get totalClaimedAmount(): number {
+    return this.claims.reduce((sum, c) => sum + (c.claimAmount || 0), 0);
+  }
+  get totalApprovedAmount(): number {
+    return this.claims.reduce((sum, c) => sum + (c.approvedAmount || 0), 0);
+  }
+  get totalSettledAmount(): number {
+    return this.claims.reduce((sum, c) => sum + (c.settlementAmount || 0), 0);
+  }
+
+  // ── Concern policies for alert banner ──
+  get concernPolicies(): PolicyResponse[] {
+    return this.policies.filter(p => p.policyStatus === 'CONCERN_RAISED');
   }
 }

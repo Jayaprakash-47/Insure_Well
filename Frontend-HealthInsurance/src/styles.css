@@ -1330,3 +1330,661 @@ body.dark-mode .btn-add:hover { background: #2e3347 !important; }
 body.dark-mode .info-box          { background: #2d1520 !important; border-color: #3d1a28 !important; }
 body.dark-mode .info-box strong   { color: #e05577   !important; }
 body.dark-mode .info-box p        { color: #f9a8c0   !important; }
+/* =====================================================================
+   RESPONSIVE — MOBILE FIRST
+   Append this entire block to the END of styles.css
+   Covers: all dashboards, plans, forms, tables, modals, navbar
+   ===================================================================== */
+
+/* ── Base mobile resets ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Page wrapper padding */
+  .page-wrapper {
+    padding: 16px 14px 48px !important;
+  }
+
+  /* ── Welcome Banner ── */
+  .welcome-banner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+    padding: 20px 18px !important;
+    border-radius: 14px !important;
+  }
+
+  .welcome-banner h1 {
+    font-size: 20px !important;
+    line-height: 1.3 !important;
+  }
+
+  .welcome-banner p {
+    font-size: 13px !important;
+  }
+
+  .welcome-banner > div:last-child,
+  .welcome-banner > a:last-child {
+    align-self: flex-start;
+  }
+
+  /* ── Stats Grid ── */
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .stat-card {
+    padding: 14px 12px !important;
+    gap: 10px !important;
+  }
+
+  .stat-icon {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 18px !important;
+  }
+
+  .stat-info h3 {
+    font-size: 20px !important;
+  }
+
+  .stat-info p {
+    font-size: 11px !important;
+  }
+
+  /* ── Tab Nav ── */
+  .tab-nav {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px !important;
+  }
+
+  .tab-btn {
+    flex: 1 1 auto;
+    min-width: 100px;
+    font-size: 12px !important;
+    padding: 8px 10px !important;
+    white-space: nowrap;
+  }
+
+  .tab-badge {
+    font-size: 9px !important;
+    min-width: 15px !important;
+    height: 15px !important;
+    padding: 0 4px !important;
+  }
+
+  /* ── Cards ── */
+  .card {
+    padding: 18px 16px !important;
+    border-radius: 14px !important;
+  }
+
+  .card-header {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .card-header h2 {
+    font-size: 16px !important;
+  }
+
+  /* ── Quick Actions Grid ── */
+  .quick-actions {
+    margin-top: 20px !important;
+  }
+
+  .actions-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .action-card {
+    padding: 14px 10px !important;
+    border-radius: 12px !important;
+  }
+
+  .action-icon {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .action-label {
+    font-size: 12px !important;
+  }
+
+  .action-desc {
+    font-size: 11px !important;
+  }
+
+  /* ── Tables — horizontal scroll ── */
+  .table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px !important;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  th, td {
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+  }
+
+  /* ── Modals ── */
+  .modal-overlay {
+    padding: 12px !important;
+    align-items: flex-end !important;
+  }
+
+  .modal {
+    padding: 24px 18px !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 92vh !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .modal-header h2 {
+    font-size: 17px !important;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 0.55rem 1rem !important;
+    font-size: 13px !important;
+  }
+
+  .btn-lg {
+    padding: 0.65rem 1.2rem !important;
+    font-size: 14px !important;
+  }
+
+  /* ── Form rows ── */
+  .form-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-control {
+    font-size: 16px !important; /* prevents iOS zoom */
+  }
+
+  /* ── Alert banners ── */
+  .alert-banner,
+  .pending-alert {
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 12px 14px !important;
+    font-size: 13px !important;
+    border-radius: 10px !important;
+  }
+
+  .alert-cta, .alert-link {
+    align-self: flex-start;
+  }
+
+  /* ── Analytics row ── */
+  .analytics-row {
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+
+  .analytics-card {
+    width: 100% !important;
+  }
+
+  /* ── Coverage bar ── */
+  .coverage-labels {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  /* ── Payment KPI row ── */
+  .payment-kpi-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .payment-kpi {
+    padding: 12px !important;
+  }
+
+  .payment-kpi-val {
+    font-size: 18px !important;
+  }
+
+  /* ── Payment table ── */
+  .payment-table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .payment-table {
+    min-width: 580px;
+  }
+
+  /* ── Filter bar ── */
+  .filter-sort-bar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    padding: 12px 14px !important;
+  }
+
+  .filter-divider {
+    width: 100% !important;
+    height: 1px !important;
+    margin: 0 !important;
+  }
+
+  .coverage-group {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+  }
+
+  .coverage-input {
+    width: 100px !important;
+  }
+
+  .coverage-label {
+    font-size: 13px !important;
+  }
+
+  .sort-group {
+    width: 100% !important;
+  }
+
+  .sort-select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* ── Filter bar (pill buttons) ── */
+  .filter-bar {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .filter-btn {
+    padding: 6px 14px !important;
+    font-size: 12px !important;
+  }
+
+  /* ── Plans grid ── */
+  .plans-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .plan-card {
+    padding: 18px 16px !important;
+    border-radius: 14px !important;
+  }
+
+  .plan-highlights {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .plan-card h3 {
+    font-size: 17px !important;
+  }
+
+  /* ── Comparison banner ── */
+  .comparison-banner {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .comparison-banner-right {
+    width: 100%;
+    justify-content: flex-start !important;
+  }
+
+  /* ── Comparison modal ── */
+  .comparison-modal {
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+  }
+
+  .comparison-table-wrap {
+    overflow-x: auto !important;
+    padding: 16px !important;
+  }
+
+  .comparison-table {
+    min-width: 420px;
+  }
+
+  /* ── Policy tracker ── */
+  .policy-steps {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .pstep {
+    flex: 0 0 auto;
+  }
+
+  .pstep-line {
+    display: none !important;
+  }
+
+  /* ── Section cards ── */
+  .section-card {
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+  }
+
+  /* ── Charts / Analytics grid ── */
+  .analytics-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .uw-card {
+    padding: 16px !important;
+  }
+
+  .kpi-row {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  .kpi-box {
+    flex: 1 1 140px !important;
+    min-width: 130px !important;
+    padding: 12px !important;
+  }
+
+  .kpi-val {
+    font-size: 20px !important;
+  }
+
+  /* ── Underwriter active policies list ── */
+  .ap-row {
+    flex-direction: column !important;
+    gap: 4px !important;
+    padding: 12px !important;
+  }
+
+  /* ── Apply for customer wizard ── */
+  .wizard-card {
+    padding: 20px 16px !important;
+  }
+
+  .progress-steps {
+    overflow-x: auto;
+    padding-bottom: 4px;
+    gap: 0 !important;
+  }
+
+  .step-circle {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 12px !important;
+  }
+
+  .step-label {
+    font-size: 10px !important;
+  }
+
+  .step-connector {
+    min-width: 20px !important;
+  }
+
+  .review-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .plans-grid-wizard {
+    grid-template-columns: 1fr !important;
+  }
+
+  .wizard-actions {
+    flex-direction: column-reverse !important;
+    gap: 10px !important;
+  }
+
+  .wizard-actions .btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* ── Customer list in wizard ── */
+  .customer-list {
+    max-height: 280px !important;
+  }
+
+  .customer-row {
+    flex-wrap: wrap !important;
+  }
+
+  /* ── Request agent page ── */
+  .steps-row {
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+
+  .step-arrow {
+    display: none !important;
+  }
+
+  .how-step {
+    flex-direction: row !important;
+    text-align: left !important;
+    align-items: flex-start !important;
+  }
+
+  .plan-type-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .request-card {
+    flex-direction: column !important;
+  }
+
+  .request-card-right {
+    align-items: flex-start !important;
+  }
+
+  /* ── Eligibility badges ── */
+  .eligibility-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .eligibility-badge {
+    width: 100% !important;
+    font-size: 12px !important;
+  }
+
+  /* ── Form card in policy application ── */
+  .form-card {
+    padding: 18px 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .member-card {
+    padding: 14px !important;
+  }
+
+  .section-header {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* ── KYC Upload area ── */
+  .file-upload-label {
+    padding: 18px !important;
+  }
+
+  /* ── Profile page ── */
+  .profile-hero {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 24px 16px !important;
+    gap: 14px !important;
+  }
+
+  .hero-email {
+    justify-content: center !important;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .info-item.full-width {
+    grid-column: 1 !important;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse !important;
+    gap: 8px !important;
+  }
+
+  .form-actions .btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* ── Assisted applications table ── */
+  .requests-table-wrap {
+    overflow-x: auto !important;
+  }
+
+  .requests-table {
+    min-width: 560px;
+  }
+
+  /* ── Page headers ── */
+  .page-header h1,
+  .page-header-row h1 {
+    font-size: 20px !important;
+  }
+
+  .page-header-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .page-header-row > .btn {
+    align-self: flex-start;
+  }
+
+  /* ── Officer profile grid ── */
+  .profile-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* ── Pipeline table ── */
+  .pipeline-table {
+    min-width: 420px;
+  }
+
+  /* ── Overview section ── */
+  .overview-header {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    padding: 40px 20px !important;
+  }
+
+  .empty-state h3 {
+    font-size: 16px !important;
+  }
+
+  /* ── Comparison banner comp tags ── */
+  .comp-tag {
+    font-size: 11px !important;
+    padding: 2px 8px !important;
+  }
+}
+
+/* ── Very small screens (< 400px) ───────────────────────────────── */
+@media (max-width: 400px) {
+
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .actions-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .plan-highlights {
+    grid-template-columns: 1fr !important;
+  }
+
+  .payment-kpi-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .kpi-box {
+    flex: 1 1 100% !important;
+  }
+
+  .tab-btn {
+    font-size: 11px !important;
+    padding: 7px 8px !important;
+  }
+
+  .welcome-banner h1 {
+    font-size: 18px !important;
+  }
+
+  .plan-type-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Tablet (769px – 1024px) ─────────────────────────────────────── */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  .page-wrapper {
+    padding: 24px 20px 48px !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .plans-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .kpi-row {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+
+  .kpi-box {
+    flex: 1 1 160px !important;
+  }
+
+  .actions-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .review-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}

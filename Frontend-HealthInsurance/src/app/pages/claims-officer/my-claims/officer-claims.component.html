@@ -58,6 +58,11 @@
                   <span class="badge" [ngClass]="getStatusClass(claim.claimStatus)">{{
                     claim.claimStatus
                   }}</span>
+                  @if (claim.isSuspicious) {
+                    <span class="badge badge-rejected" style="margin-left:5px" title="AI Document Auditor detected an amount mismatch!">
+                      <span class="material-icons" style="font-size:12px;vertical-align:middle">warning</span> AI Mismatch
+                    </span>
+                  }
                 </td>
                 <td>{{ claim.createdAt | date: 'mediumDate' }}</td>
                 <td>

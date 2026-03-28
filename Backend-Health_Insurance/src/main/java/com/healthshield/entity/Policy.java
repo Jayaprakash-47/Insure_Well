@@ -1,5 +1,6 @@
 package com.healthshield.entity;
 
+import com.healthshield.enums.KycStatus;
 import com.healthshield.enums.PolicyStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,25 +34,19 @@ public class Policy {
     @JoinColumn(name = "plan_id")
     private InsurancePlan plan;
 
-    /** The underwriter assigned by admin to calculate the quote */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "underwriter_id")
     private Underwriter assignedUnderwriter;
 
-    /** When admin assigned the underwriter */
     private LocalDateTime assignedAt;
 
-    /** Premium quote amount sent by underwriter */
     private BigDecimal quoteAmount;
-
     private BigDecimal premiumAmount;
     private BigDecimal coverageAmount;
 
-    /** Total amount already claimed from this policy */
     @Column(columnDefinition = "decimal(15,2) default 0")
     private BigDecimal totalClaimedAmount = BigDecimal.ZERO;
 
-    /** Remaining coverage = coverageAmount - totalClaimedAmount (settled claims) */
     @Column(columnDefinition = "decimal(15,2) default 0")
     private BigDecimal remainingCoverage = BigDecimal.ZERO;
 
@@ -67,22 +62,44 @@ public class Policy {
     @Column(columnDefinition = "TEXT")
     private String underwriterRemarks;
 
-    // =================== RENEWAL TRACKING ===================
+    // ── KYC ─────────────────────────────────────────────────────────────
+    /** Path to the uploaded Aadhaar document */
+    @Column(name = "aadhaar_document_path")
+    private String aadhaarDocumentPath;
 
-    /** Number of times this policy has been renewed */
+    /** KYC verification status set by underwriter */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kyc_status")
+    @Builder.Default
+    private KycStatus kycStatus = KycStatus.PENDING;
+
+    // ── AI Health Report Analysis ────────────────────────────────────────
+    /**
+     * Medical conditions extracted from health report PDF by Claude AI.
+     * Comma-separated: "Diabetes, Hypertension, Obesity"
+     * Populated asynchronously after health report upload.
+     */
+    @Column(name = "extracted_conditions", columnDefinition = "TEXT")
+    private String extractedConditions;
+
+    /**
+     * Whether AI analysis has been completed for this policy's health report.
+     */
+    @Column(name = "ai_analysis_done")
+    @Builder.Default
+    private Boolean aiAnalysisDone = false;
+
+    // ── Renewal Tracking ─────────────────────────────────────────────────
     @Column(columnDefinition = "integer default 0")
     private Integer renewalCount = 0;
 
-    /** Reference to the original policy if this is a renewal */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "original_policy_id")
     private Policy originalPolicy;
 
-    /** No-claim bonus percentage earned (increases each year without claims) */
     @Column(columnDefinition = "decimal(5,2) default 0")
     private BigDecimal noClaimBonus = BigDecimal.ZERO;
 
-    /** Commission amount paid to the underwriter for this policy */
     private BigDecimal commissionAmount;
 
     @CreationTimestamp
@@ -96,5 +113,13 @@ public class Policy {
 
     @OneToMany(mappedBy = "policy", cascade = CascadeType.ALL)
     private List<Payment> payments;
-}
 
+    @Column(name = "risk_score")
+    private Integer riskScore;        // 0–100
+
+    @Column(name = "risk_level")
+    private String riskLevel;         // LOW | MEDIUM | HIGH | CRITICAL
+
+    @Column(name = "risk_summary", columnDefinition = "TEXT")
+    private String riskSummary;
+}

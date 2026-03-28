@@ -48,6 +48,7 @@ public class ClaimService {
     private final NotificationService notificationService;
     private final EmailService emailService;
     private final AuditLogService auditLogService;
+    private final PdfExtractionService pdfExtractionService;
 
     @Value("${file.upload.dir:uploads/claims}")
     private String uploadDir;
@@ -56,6 +57,14 @@ public class ClaimService {
     public ClaimResponse fileClaim(Long userId, ClaimRequest request, List<MultipartFile> documents) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        // ── ENFORCE BANK DETAILS FOR SETTLEMENT ──
+        if (user instanceof com.healthshield.entity.Customer customer) {
+            if (customer.getAccountNumber() == null || customer.getAccountNumber().isBlank() ||
+                customer.getIfscCode() == null || customer.getIfscCode().isBlank()) {
+                throw new BadRequestException("Bank details are required to file a claim. Please update your profile with account details for settlement.");
+            }
+        }
 
         Policy policy = policyRepository.findById(request.getPolicyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Policy not found with id: " + request.getPolicyId()));
@@ -112,6 +121,9 @@ public class ClaimService {
 
         Claim saved = claimRepository.save(claim);
 
+        BigDecimal highestExtracted = BigDecimal.ZERO;
+        boolean pdfFound = false;
+
         if (documents != null && !documents.isEmpty()) {
             String claimUploadDir = uploadDir + "/" + claimNumber;
             Path uploadPath = Paths.get(claimUploadDir);
@@ -135,11 +147,49 @@ public class ClaimService {
                             .build();
                     claimDocumentRepository.save(doc);
                     saved.getDocuments().add(doc);
+
+                    // ── PDF Extraction Logic ──
+                    if (fileName.toLowerCase().endsWith(".pdf")) {
+                        BigDecimal extracted = pdfExtractionService.extractHighestAmount(filePath);
+                        if (extracted != null) {
+                            pdfFound = true;
+                            if (extracted.compareTo(highestExtracted) > 0) {
+                                highestExtracted = extracted;
+                            }
+                        }
+                    }
                 }
             } catch (IOException e) {
                 throw new BadRequestException("Could not store documents: " + e.getMessage());
             }
         }
+
+        // ── AI Verification logic ──
+        if (pdfFound) {
+            saved.setExtractedAmount(highestExtracted);
+            boolean match = (highestExtracted.compareTo(request.getClaimAmount()) == 0);
+            saved.setIsAmountMatch(match);
+            
+            if (highestExtracted.compareTo(request.getClaimAmount()) < 0) {
+                saved.setIsSuspicious(true);
+                saved.setExtractionFlags("Suspicious: Extracted bill amount (₹" + highestExtracted + 
+                                         ") is lower than claimed amount (₹" + request.getClaimAmount() + "). Possible over-claiming.");
+            } else if (match) {
+                saved.setIsSuspicious(false);
+                saved.setExtractionFlags("Amount matches bill: ₹" + highestExtracted + ". Recommended for Auto-Approval.");
+            } else {
+                // Extracted > Claimed (Partial claim case)
+                saved.setIsSuspicious(false);
+                saved.setExtractionFlags("Partial Claim: Extracted bill amount (₹" + highestExtracted + 
+                                         ") is higher than claimed amount (₹" + request.getClaimAmount() + "). Check if co-pay applies.");
+            }
+        } else {
+            saved.setExtractionFlags("No parseable PDF bill found for automatic verification.");
+            saved.setIsAmountMatch(false);
+            saved.setIsSuspicious(false);
+        }
+        
+        saved = claimRepository.save(saved);
 
         notificationService.sendNotification(
                 user.getEmail(),
@@ -147,6 +197,17 @@ public class ClaimService {
                         + " has been submitted successfully.",
                 NotificationType.CLAIM_SUBMITTED
         );
+
+        // Notify Admins
+        List<User> admins = userRepository.findAllAdmins();
+        for (User admin : admins) {
+            notificationService.sendNotification(
+                    admin.getEmail(),
+                    "New Claim Filed: " + claimNumber + " by " + user.getFirstName() + " for ₹" + request.getClaimAmount(),
+                    NotificationType.CLAIM_SUBMITTED
+            );
+        }
+
         auditLogService.log("CLAIM_SUBMITTED", "CUSTOMER", user.getEmail(),
                 "Claim " + claimNumber + " filed for policy "
                         + policy.getPolicyNumber());
@@ -320,7 +381,7 @@ public class ClaimService {
         // ── NEW: Notify customer on settlement ──
         notificationService.sendNotification(
                 claim.getUser().getEmail(),
-                "💰 Your claim " + claim.getClaimNumber() + " has been settled. "
+                "Your claim " + claim.getClaimNumber() + " has been settled. "
                         + "Amount ₹" + settlementAmount + " will be credited within 3-5 business days.",
                 NotificationType.CLAIM_APPROVED
         );
@@ -399,11 +460,22 @@ public class ClaimService {
                 .rejectionReason(claim.getRejectionReason())
                 .createdAt(claim.getCreatedAt())
                 .documents(docResponses)
+                .extractedAmount(claim.getExtractedAmount())
+                .isAmountMatch(claim.getIsAmountMatch())
+                .isSuspicious(claim.getIsSuspicious())
+                .extractionFlags(claim.getExtractionFlags())
                 .reviewStartedAt(claim.getReviewStartedAt())
                 .reviewedAt(claim.getReviewedAt())
                 .reviewerRemarks(claim.getReviewerRemarks())
                 .settlementDate(claim.getSettlementDate())
                 .tpaReferenceNumber(claim.getTpaReferenceNumber());
+
+        if (claim.getUser() instanceof com.healthshield.entity.Customer customer) {
+            builder.accountNumber(customer.getAccountNumber())
+                   .ifscCode(customer.getIfscCode())
+                   .accountHolderName(customer.getAccountHolderName())
+                   .bankName(customer.getBankName());
+        }
 
         if (claim.getAssignedOfficer() != null) {
             builder.assignedOfficerId(claim.getAssignedOfficer().getUserId())

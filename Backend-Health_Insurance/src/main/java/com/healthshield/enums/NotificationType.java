@@ -10,5 +10,6 @@ public enum NotificationType {
     CLAIM_APPROVED,
     CLAIM_REJECTED,
     QUOTE_RECEIVED,
-    GENERAL
-}
+    GENERAL,
+    RISK_SCORE_READY
+    }

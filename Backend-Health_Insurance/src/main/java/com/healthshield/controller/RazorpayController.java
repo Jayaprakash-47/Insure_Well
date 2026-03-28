@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/razorpay")   // ← different URL to avoid conflict
+@RequestMapping("/api/razorpay")
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = {
@@ -65,11 +65,30 @@ public class RazorpayController {
                         .body(Map.of("error", "Unauthorized"));
             }
 
+            // ── FIX 4: Use premiumAmount if set, fall back to quoteAmount ──
+            BigDecimal amount = policy.getPremiumAmount() != null
+                    ? policy.getPremiumAmount()
+                    : policy.getQuoteAmount();
+
+            if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+                log.error("No valid amount found for policy {}", policy.getPolicyNumber());
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error",
+                                "Premium amount not set for this policy. "
+                                        + "Please contact support."));
+            }
+
+            log.info("Creating Razorpay order for policy {} — amount ₹{}",
+                    policy.getPolicyNumber(), amount);
+
             RazorpayClient client = new RazorpayClient(keyId, keySecret);
             JSONObject options = new JSONObject();
-            int amountInPaise = policy.getPremiumAmount()
+
+            // ── FIX 4: Safe long conversion — prevents int overflow ──
+            long amountInPaise = amount
                     .multiply(BigDecimal.valueOf(100))
-                    .intValue();
+                    .longValue();
+
             options.put("amount", amountInPaise);
             options.put("currency", "INR");
             options.put("receipt", "policy_" + policy.getPolicyNumber());
@@ -92,12 +111,12 @@ public class RazorpayController {
                     policy.getUser().getPhone() != null
                             ? policy.getUser().getPhone() : "");
 
-            log.info("Razorpay order created for policy {}",
-                    policy.getPolicyNumber());
+            log.info("Razorpay order created: {} for policy {} — ₹{} ({} paise)",
+                    order.get("id"), policy.getPolicyNumber(), amount, amountInPaise);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("Razorpay order creation failed: {}", e.getMessage());
+            log.error("Razorpay order creation failed: {}", e.getMessage(), e);
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }
@@ -129,27 +148,28 @@ public class RazorpayController {
             Policy policy = policyRepository.findById(policyId)
                     .orElseThrow(() -> new RuntimeException("Policy not found"));
 
-            // ── NEW: Save payment record to DB ──
+            // ── FIX 4: Use same null-safe amount for payment record ──
+            BigDecimal amount = policy.getPremiumAmount() != null
+                    ? policy.getPremiumAmount()
+                    : policy.getQuoteAmount();
 
             Payment payment = Payment.builder()
                     .policy(policy)
                     .user(policy.getUser())
-                    .amount(policy.getPremiumAmount())
+                    .amount(amount)
                     .paymentMethod(PaymentMethod.RAZORPAY)
                     .transactionId(razorpayPaymentId)
                     .paymentStatus(PaymentStatus.SUCCESS)
                     .build();
             paymentRepository.save(payment);
-            log.info("Payment saved: {} for policy {}",
-                    razorpayPaymentId, policy.getPolicyNumber());
+            log.info("Payment saved: {} for policy {}", razorpayPaymentId, policy.getPolicyNumber());
 
             // Activate policy — sends welcome email + notification
             policyService.activatePolicy(policy);
 
-            // ── NEW: Additional payment success notification ──
             notificationService.sendNotification(
                     policy.getUser().getEmail(),
-                    "💳 Payment of ₹" + policy.getPremiumAmount()
+                    "💳 Payment of ₹" + amount
                             + " received for policy "
                             + policy.getPolicyNumber()
                             + ". Transaction ID: " + razorpayPaymentId,
@@ -159,8 +179,7 @@ public class RazorpayController {
             auditLogService.log("PAYMENT_SUCCESS", "CUSTOMER",
                     policy.getUser().getEmail(),
                     "Razorpay payment " + razorpayPaymentId
-                            + " verified. Amount: ₹"
-                            + policy.getPremiumAmount()
+                            + " verified. Amount: ₹" + amount
                             + " for policy " + policy.getPolicyNumber());
 
             return ResponseEntity.ok(Map.of(
@@ -170,7 +189,7 @@ public class RazorpayController {
             ));
 
         } catch (Exception e) {
-            log.error("Payment verification failed: {}", e.getMessage());
+            log.error("Payment verification failed: {}", e.getMessage(), e);
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }

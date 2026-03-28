@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   DashboardResponse,
@@ -133,7 +134,8 @@ export class ApiService {
   }
 
   getMyQuotes(): Observable<PremiumQuoteResponse[]> {
-    return this.http.get<PremiumQuoteResponse[]>(`${this.api}/premium/my-quotes`);
+    return this.http.get<PremiumQuoteResponse[]>(
+      `${this.api}/premium/my-quotes`);
   }
 
   // ====== POLICIES ======
@@ -173,10 +175,38 @@ export class ApiService {
       `${this.api}/policies/${policyId}/reapply`, formData);
   }
 
+  /**
+   * FIX 1: Health report — observe full response to read Content-Type header.
+   * This ensures PDFs open as PDF and images open as images.
+   */
   getPolicyDocument(policyId: number): Observable<Blob> {
     return this.http.get(
       `${this.api}/policies/${policyId}/document/download`,
-      { responseType: 'blob' });
+      { responseType: 'blob', observe: 'response' }
+    ).pipe(
+      map(response => {
+        const contentType =
+          response.headers.get('Content-Type') || 'application/pdf';
+        return new Blob([response.body!], { type: contentType });
+      })
+    );
+  }
+
+  /**
+   * FIX 1: Aadhaar — observe full response to read Content-Type header.
+   * Aadhaar may be uploaded as JPEG/PNG — must not force application/pdf.
+   */
+  getAadhaarDocument(policyId: number): Observable<Blob> {
+    return this.http.get(
+      `${this.api}/policies/${policyId}/aadhaar/download`,
+      { responseType: 'blob', observe: 'response' }
+    ).pipe(
+      map(response => {
+        const contentType =
+          response.headers.get('Content-Type') || 'application/pdf';
+        return new Blob([response.body!], { type: contentType });
+      })
+    );
   }
 
   // ====== CLAIMS ======
@@ -213,12 +243,14 @@ export class ApiService {
   }
 
   getMyPayments(): Observable<PaymentResponse[]> {
-    return this.http.get<PaymentResponse[]>(`${this.api}/payments/my-payments`);
+    return this.http.get<PaymentResponse[]>(
+      `${this.api}/payments/my-payments`);
   }
 
   // ====== RAZORPAY ======
   createPaymentOrder(policyId: number): Observable<any> {
-    return this.http.post(`${this.api}/razorpay/create-order`, { policyId });
+    return this.http.post(
+      `${this.api}/razorpay/create-order`, { policyId });
   }
 
   verifyPayment(body: {
@@ -264,7 +296,8 @@ export class ApiService {
   }
 
   getUnderwriterPolicies(): Observable<PolicyResponse[]> {
-    return this.http.get<PolicyResponse[]>(`${this.api}/underwriter/policies`);
+    return this.http.get<PolicyResponse[]>(
+      `${this.api}/underwriter/policies`);
   }
 
   sendQuote(policyId: number,
@@ -273,7 +306,8 @@ export class ApiService {
       `${this.api}/underwriter/policy/${policyId}/send-quote`, req);
   }
 
-  calculateUnderwriterQuote(policyId: number): Observable<{ quoteAmount: number }> {
+  calculateUnderwriterQuote(
+    policyId: number): Observable<{ quoteAmount: number }> {
     return this.http.get<{ quoteAmount: number }>(
       `${this.api}/underwriter/policy/${policyId}/calculate-quote`);
   }
@@ -287,6 +321,44 @@ export class ApiService {
     return this.http.post(
       `${this.api}/underwriter/policy/${policyId}/raise-concern`,
       { remarks });
+  }
+
+  aiVerifyDocuments(policyId: number): Observable<any> {
+    return this.http.post(`${this.api}/underwriter/policy/${policyId}/ai-verify`, {});
+  }
+
+  getUnderwriterCustomers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/underwriter/customers`);
+  }
+
+  getPendingAgentRequests(): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.api}/underwriter/agent-requests/pending`);
+  }
+
+  getMyAcceptedAgentRequests(): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.api}/underwriter/agent-requests/my-accepted`);
+  }
+
+  getAgentRequests(): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.api}/underwriter/agent-requests/my-accepted`);
+  }
+
+  acceptAgentRequest(id: number): Observable<any> {
+    return this.http.put(
+      `${this.api}/underwriter/agent-requests/${id}/accept`, {});
+  }
+
+  applyForCustomerViaRequest(requestId: number, data: any): Observable<any> {
+    return this.http.post(
+      `${this.api}/underwriter/agent-requests/${requestId}/apply`, data);
+  }
+
+  applyForCustomerDirect(customerId: number, data: any): Observable<any> {
+    return this.http.post(
+      `${this.api}/underwriter/apply-direct/${customerId}`, data);
   }
 
   // ====== CLAIMS OFFICER ======
@@ -321,19 +393,27 @@ export class ApiService {
       `${this.api}/claims-officer/claim/${claimId}/review`, req);
   }
 
+  settleClaimAsOfficer(claimId: number): Observable<ClaimResponse> {
+    return this.http.post<ClaimResponse>(
+      `${this.api}/claims/${claimId}/settle`, {});
+  }
+
+  /** Verify IFSC code via backend — returns bank name, branch, city, state */
+  verifyIfsc(ifscCode: string): Observable<any> {
+    return this.http.get(`${this.api}/claims-officer/ifsc/${ifscCode}`);
+  }
+
   // ====== DOCUMENTS ======
   getClaimDocuments(claimId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.api}/claims/${claimId}/documents`);
   }
 
-  // ── Download by docId (used by claims officer / admin) ──
   downloadDocumentById(claimId: number, docId: number): Observable<Blob> {
     return this.http.get(
       `${this.api}/claims/${claimId}/documents/${docId}/download`,
       { responseType: 'blob' });
   }
 
-  // ── View by fileName — opens in new tab ──
   viewDocument(claimId: number, fileName: string): void {
     const token = localStorage.getItem('hs_token');
     const url = `${this.api}/claims/${claimId}/documents/view/${encodeURIComponent(fileName)}`;
@@ -352,7 +432,11 @@ export class ApiService {
       });
   }
 
-  // ── Download by fileName — saves file ──
+  // ====== AI AUDITOR ======
+  runAiAudit(claimId: number): Observable<any> {
+    return this.http.post(`${this.api}/claims/${claimId}/ai-audit`, {});
+  }
+
   downloadDocument(claimId: number, fileName: string): void {
     const token = localStorage.getItem('hs_token');
     const url = `${this.api}/claims/${claimId}/documents/download/${encodeURIComponent(fileName)}`;
@@ -374,19 +458,7 @@ export class ApiService {
       });
   }
 
-  // ====== AUDIT ======
-  getAuditLogs(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.api}/audit`);
-  }
-
-  getAuditLogsByRole(role: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.api}/audit/role/${role}`);
-  }
-  settleClaimAsOfficer(claimId: number): Observable<ClaimResponse> {
-    return this.http.post<ClaimResponse>(
-      `${this.api}/claims/${claimId}/settle`, {});
-  }
-
+  // ====== PROFILE ======
   getProfile(): Observable<any> {
     return this.http.get(`${this.api}/profile`);
   }
@@ -395,7 +467,76 @@ export class ApiService {
     return this.http.put(`${this.api}/profile`, data);
   }
 
-  changePassword(data: { currentPassword: string; newPassword: string; confirmPassword: string }): Observable<any> {
+  changePassword(data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Observable<any> {
     return this.http.put(`${this.api}/profile/change-password`, data);
   }
+
+  // ====== AADHAAR SANDBOX VERIFICATION ======
+  verifyAadhaarSandbox(aadhaarNumber: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('aadhaarNumber', aadhaarNumber);
+    formData.append('file', file);
+    return this.http.post(`${this.api}/profile/verify-aadhaar-sandbox`, formData);
+  }
+
+  // ====== AUDIT ======
+  getAuditLogs(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/audit`);
+  }
+
+  getAuditLogsByRole(role: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/audit/role/${role}`);
+  }
+
+  // ====== CUSTOMER: AGENT REQUESTS ======
+  createAgentRequest(data: any): Observable<any> {
+    return this.http.post(`${this.api}/agent-requests`, data);
+  }
+
+  getMyAgentRequests(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/agent-requests/my-requests`);
+  }
+
+  cancelAgentRequest(id: number): Observable<any> {
+    return this.http.put(`${this.api}/agent-requests/${id}/cancel`, {});
+  }
+
+  // ── KYC actions ───────────────────────────────────────────────────────
+  verifyKyc(policyId: number): Observable<any> {
+    return this.http.patch(
+      `${this.api}/policies/${policyId}/kyc/verify`, {});
+  }
+
+  rejectKyc(policyId: number, reason: string): Observable<any> {
+    return this.http.patch(
+      `${this.api}/policies/${policyId}/kyc/reject`,
+      { reason });
+  }
+  sendChatMessage(message: string, history: any[]): Observable<any> {
+    return this.http.post(`${this.api}/chat`, { message, history });
+  }
+
+  // ── e-KYC (Self-hosted OTP via Email) ─────────────────────────────
+
+  /** Step 1: Initiate eKYC — OTP is sent to the customer's registered email */
+  initiateKyc(aadhaarNumber: string): Observable<{ transactionId: string; message: string }> {
+    return this.http.post<{ transactionId: string; message: string }>(
+      `${this.api}/kyc/initiate`, { aadhaarNumber });
+  }
+
+  /** Step 2: Verify the OTP received on email */
+  verifyKycOtp(transactionId: string, otp: string): Observable<{ verified: boolean; message: string }> {
+    return this.http.post<{ verified: boolean; message: string }>(
+      `${this.api}/kyc/verify-otp`, { transactionId, otp });
+  }
+
+  /** Check KYC session status */
+  getKycStatus(transactionId: string): Observable<{ verified: boolean }> {
+    return this.http.get<{ verified: boolean }>(`${this.api}/kyc/status/${transactionId}`);
+  }
 }
+

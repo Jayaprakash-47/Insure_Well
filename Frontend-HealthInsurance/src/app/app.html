@@ -133,3 +133,7 @@
 
 <!-- ── Dark Mode Floating Toggle ── -->
 <app-dark-mode-toggle></app-dark-mode-toggle>
+
+@if (auth.isCustomer()) {
+  <app-chatbot />
+}

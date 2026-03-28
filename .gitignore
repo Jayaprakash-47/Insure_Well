@@ -28,4 +28,13 @@ package.json
 package-lock.json
 
 
+# ── Secrets & local config (NEVER commit these) ──
+application-local.yaml
+application-local.yml
+**/application-local.yaml
+**/application-local.yml
+.env
+.env.local
+.env.*.local
+*.env
 

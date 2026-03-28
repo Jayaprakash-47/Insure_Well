@@ -263,6 +263,23 @@ export const routes: Routes = [
     canActivate: [claimsOfficerGuard],
   },
 
+  // ── Customer: Request Agent Help ──────────────────────────────────────
+  {
+    path: 'customer/request-agent',
+    loadComponent: () =>
+      import('./pages/customer/request-agent/request-agent')
+        .then(m => m.RequestAgentComponent),
+    canActivate: [customerGuard],
+  },
+
+  // ── Underwriter: Apply for Customer wizard ────────────────────────────
+  {
+    path: 'underwriter/apply-for-customer',
+    loadComponent: () =>
+      import('./pages/underwriter/apply-for-customer/apply-for-customer')
+        .then(m => m.ApplyForCustomerComponent),
+    canActivate: [underwriterGuard],
+  },
   // ── Fallback ──────────────────────────────────────────────────────────────
   { path: '**', redirectTo: '' },
 ];

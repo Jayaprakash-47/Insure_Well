@@ -1,3 +1,5 @@
+<!-- FILE: src/app/pages/underwriter/dashboard/underwriter-dashboard.component.html -->
+
 <div class="page-wrapper">
 
   <!-- Welcome Banner -->
@@ -21,8 +23,7 @@
       <button class="tab-btn"
               [class.active]="activeTab === 'overview'"
               (click)="activeTab = 'overview'">
-        <span class="material-icons"
-              style="font-size:16px;vertical-align:middle">
+        <span class="material-icons" style="font-size:16px;vertical-align:middle">
           dashboard
         </span>
         Overview
@@ -30,11 +31,22 @@
       <button class="tab-btn"
               [class.active]="activeTab === 'analytics'"
               (click)="activeTab = 'analytics'">
-        <span class="material-icons"
-              style="font-size:16px;vertical-align:middle">
+        <span class="material-icons" style="font-size:16px;vertical-align:middle">
           bar_chart
         </span>
         My Analytics
+      </button>
+      <!-- PATCH 1: Assisted Apps tab -->
+      <button class="tab-btn"
+              [class.active]="activeTab === 'assisted'"
+              (click)="activeTab = 'assisted'">
+        <span class="material-icons" style="font-size:16px;vertical-align:middle">
+          support_agent
+        </span>
+        Assisted Apps
+        @if (pendingRequestCount > 0) {
+          <span class="tab-badge">{{ pendingRequestCount }}</span>
+        }
       </button>
     </div>
 
@@ -46,15 +58,12 @@
       <!-- Pending alert -->
       @if ((profile.pendingAssignments || 0) > 0) {
         <div class="pending-alert">
-          <span class="material-icons"
-                style="color:#f59e0b;font-size:20px">
+          <span class="material-icons" style="color:#f59e0b;font-size:20px">
             pending_actions
           </span>
           <span>
             You have
-            <strong>
-              {{ profile.pendingAssignments }} pending assignment(s)
-            </strong>
+            <strong>{{ profile.pendingAssignments }} pending assignment(s)</strong>
             awaiting your quote.
           </span>
           <a routerLink="/underwriter/pending" class="alert-cta">
@@ -132,9 +141,7 @@
             <span class="action-label">Pending</span>
             <span class="action-desc">View and quote</span>
             @if ((profile.pendingAssignments || 0) > 0) {
-              <span class="action-badge">
-                {{ profile.pendingAssignments }}
-              </span>
+              <span class="action-badge">{{ profile.pendingAssignments }}</span>
             }
           </a>
           <a routerLink="/underwriter/policies" class="action-card">
@@ -151,6 +158,14 @@
             <span class="action-label">Browse Plans</span>
             <span class="action-desc">View insurance products</span>
           </a>
+          <!-- PATCH 3: Assist Customer action card -->
+          <a routerLink="/underwriter/apply-for-customer" class="action-card">
+            <span class="action-icon">
+              <span class="material-icons">support_agent</span>
+            </span>
+            <span class="action-label">Assist Customer</span>
+            <span class="action-desc">Apply on their behalf</span>
+          </a>
         </div>
       </div>
     }
@@ -161,66 +176,49 @@
     @if (activeTab === 'analytics') {
       <div class="analytics-grid">
 
-        <!-- ── KPI Row — all 5 boxes inside one card ── -->
+        <!-- KPI Row -->
         <div class="uw-card kpi-row">
-
-          <!-- Conversion Rate -->
           <div class="kpi-box">
-            <div class="kpi-icon"
-                 style="background:#eff6ff;color:#1e40af">
+            <div class="kpi-icon" style="background:#eff6ff;color:#1e40af">
               <span class="material-icons">trending_up</span>
             </div>
             <div class="kpi-val">{{ conversionRate }}%</div>
             <div class="kpi-lbl">Conversion Rate</div>
             <div class="kpi-sub">Quoted → Active</div>
           </div>
-
-          <!-- Avg Premium -->
           <div class="kpi-box">
-            <div class="kpi-icon"
-                 style="background:#f0fdf4;color:#16a34a">
+            <div class="kpi-icon" style="background:#f0fdf4;color:#16a34a">
               <span class="material-icons">payments</span>
             </div>
             <div class="kpi-val">{{ formatAmount(averagePremium) }}</div>
             <div class="kpi-lbl">Avg Premium</div>
             <div class="kpi-sub">Per policy</div>
           </div>
-
-          <!-- Commission Rate -->
           <div class="kpi-box">
-            <div class="kpi-icon"
-                 style="background:#fdf4ff;color:#7c3aed">
+            <div class="kpi-icon" style="background:#fdf4ff;color:#7c3aed">
               <span class="material-icons">percent</span>
             </div>
             <div class="kpi-val">{{ profile.commissionPercentage }}%</div>
             <div class="kpi-lbl">Commission Rate</div>
             <div class="kpi-sub">Per policy</div>
           </div>
-
-          <!-- Total Assigned -->
           <div class="kpi-box">
-            <div class="kpi-icon"
-                 style="background:#fff7ed;color:#ea580c">
+            <div class="kpi-icon" style="background:#fff7ed;color:#ea580c">
               <span class="material-icons">folder_special</span>
             </div>
             <div class="kpi-val">{{ policies.length }}</div>
             <div class="kpi-lbl">Total Assigned</div>
             <div class="kpi-sub">All time</div>
           </div>
-
-          <!-- Awaiting Payment — INSIDE kpi-row ✅ -->
           <div class="kpi-box">
-            <div class="kpi-icon"
-                 style="background:#fef3c7;color:#d97706">
+            <div class="kpi-icon" style="background:#fef3c7;color:#d97706">
               <span class="material-icons">pending</span>
             </div>
             <div class="kpi-val">{{ pendingQuoteCount }}</div>
             <div class="kpi-lbl">Awaiting Payment</div>
             <div class="kpi-sub">Quote sent</div>
           </div>
-
         </div>
-        <!-- ── end kpi-row ── -->
 
         <!-- Policy Status Chart -->
         <div class="uw-card">
@@ -231,14 +229,11 @@
             </span>
             Policy Status Breakdown
           </h3>
-
           @if (policyStatusBars.length > 0) {
             <div class="status-bars">
               @for (bar of policyStatusBars; track bar.key) {
                 <div class="sbar-row">
-                  <div class="sbar-dot"
-                       [style.background]="bar.color">
-                  </div>
+                  <div class="sbar-dot" [style.background]="bar.color"></div>
                   <div class="sbar-label">{{ bar.label }}</div>
                   <div class="sbar-track">
                     <div class="sbar-fill"
@@ -246,32 +241,25 @@
                          [style.background]="bar.color">
                     </div>
                   </div>
-                  <div class="sbar-count"
-                       [style.color]="bar.color">
+                  <div class="sbar-count" [style.color]="bar.color">
                     {{ bar.count }}
                   </div>
                   <div class="sbar-pct">{{ bar.pct }}%</div>
                 </div>
               }
             </div>
-
-            <!-- Status pills -->
             <div class="status-pills">
               @for (bar of policyStatusBars; track bar.key) {
                 <div class="status-pill"
                      [style.background]="bar.color + '15'"
                      [style.border-color]="bar.color + '40'">
-                  <span [style.color]="bar.color"
-                        style="font-weight:700">
+                  <span [style.color]="bar.color" style="font-weight:700">
                     {{ bar.count }}
                   </span>
-                  <span style="font-size:11px;color:#64748b">
-                    {{ bar.label }}
-                  </span>
+                  <span style="font-size:11px;color:#64748b">{{ bar.label }}</span>
                 </div>
               }
             </div>
-
           } @else {
             <div class="empty-chart">No policy data yet</div>
           }
@@ -286,23 +274,19 @@
             </span>
             Top Plans by Volume
           </h3>
-
           @if (topPlans.length > 0) {
             <div class="top-plans">
               @for (plan of topPlans; track plan.name; let i = $index) {
                 <div class="plan-row">
                   <div class="plan-rank"
-                       [style.background]="i === 0 ? '#fef3c7'
-                           : i === 1 ? '#f1f5f9' : '#fff7ed'"
-                       [style.color]="i === 0 ? '#d97706'
-                           : i === 1 ? '#64748b' : '#ea580c'">
+                       [style.background]="i === 0 ? '#fef3c7' : i === 1 ? '#f1f5f9' : '#fff7ed'"
+                       [style.color]="i === 0 ? '#d97706' : i === 1 ? '#64748b' : '#ea580c'">
                     {{ i + 1 }}
                   </div>
                   <div class="plan-name">{{ plan.name }}</div>
                   <div class="plan-bar-wrap">
                     <div class="plan-bar-fill"
-                         [style.width]="(plan.count /
-                             (topPlans[0]?.count || 1)) * 100 + '%'">
+                         [style.width]="(plan.count / (topPlans[0]?.count || 1)) * 100 + '%'">
                     </div>
                   </div>
                   <div class="plan-count">{{ plan.count }}</div>
@@ -323,7 +307,6 @@
             </span>
             Recent Active Policies
           </h3>
-
           @if (recentActivePolicies.length > 0) {
             <div class="active-policies-list">
               @for (p of recentActivePolicies; track p.policyId) {
@@ -331,16 +314,12 @@
                   <div class="ap-num">{{ p.policyNumber }}</div>
                   <div class="ap-customer">{{ p.customerName }}</div>
                   <div class="ap-plan">{{ p.planName }}</div>
-                  <div class="ap-premium">
-                    {{ formatCurrency(p.premiumAmount) }}/yr
-                  </div>
+                  <div class="ap-premium">{{ formatCurrency(p.premiumAmount) }}/yr</div>
                   <div class="ap-commission">
                     <span style="color:#16a34a;font-weight:600">
                       +{{ formatCurrency(p.commissionAmount || 0) }}
                     </span>
-                    <span style="font-size:10px;color:#94a3b8">
-                      commission
-                    </span>
+                    <span style="font-size:10px;color:#94a3b8">commission</span>
                   </div>
                   <div class="ap-expiry">
                     Expires: {{ p.endDate | date:'dd MMM yyyy' }}
@@ -352,6 +331,185 @@
             <div class="empty-chart">No active policies yet</div>
           }
         </div>
+
+      </div>
+    }
+
+    <!-- ══════════════════════════════════════ -->
+      <!-- TAB 3: ASSISTED APPLICATIONS  (PATCH 2) -->
+      <!-- ══════════════════════════════════════ -->
+    @if (activeTab === 'assisted') {
+      <div class="assisted-container">
+
+        <!-- Action buttons row -->
+        <div class="assisted-actions-row">
+          <div>
+            <h2 style="margin:0 0 4px">Assisted Applications</h2>
+            <p style="margin:0;color:var(--text-secondary);font-size:14px">
+              Help customers apply for policies on their behalf
+            </p>
+          </div>
+          <a routerLink="/underwriter/apply-for-customer" class="btn btn-primary">
+            <span class="material-icons" style="font-size:17px">add</span>
+            Apply for Customer
+          </a>
+        </div>
+
+        <!-- Pending requests from customers -->
+        <div class="uw-card" style="margin-top:20px">
+          <h3 class="card-title">
+            <span class="material-icons"
+                  style="vertical-align:middle;font-size:17px;margin-right:6px">
+              pending_actions
+            </span>
+            Pending Customer Requests
+            @if (pendingRequests.length > 0) {
+              <span class="req-count-badge">{{ pendingRequests.length }}</span>
+            }
+          </h3>
+
+          @if (loadingRequests) {
+            <div class="loading-page" style="padding:32px">
+              <div class="spinner"></div>
+            </div>
+          } @else if (pendingRequests.length === 0) {
+            <div class="empty-chart">
+              <span class="material-icons"
+                    style="font-size:36px;color:var(--text-muted);display:block;margin-bottom:8px">
+                inbox
+              </span>
+              No pending requests from customers
+            </div>
+          } @else {
+            <div class="requests-table-wrap">
+              <table class="requests-table">
+                <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Plan Interest</th>
+                  <th>Preferred Time</th>
+                  <th>Message</th>
+                  <th>Requested</th>
+                  <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                  @for (req of pendingRequests; track req.id) {
+                    <tr>
+                      <td>
+                        <div style="font-weight:700;font-size:13px">
+                          {{ req.customerName }}
+                        </div>
+                        <div style="font-size:11px;color:var(--text-muted)">
+                          {{ req.customerEmail }}
+                        </div>
+                        @if (req.customerPhone) {
+                          <div style="font-size:11px;color:var(--text-muted)">
+                            {{ req.customerPhone }}
+                          </div>
+                        }
+                      </td>
+                      <td>
+                        <span class="plan-interest-badge">
+                          {{ req.planTypeInterest }}
+                        </span>
+                      </td>
+                      <td style="font-size:12px;color:var(--text-secondary)">
+                        {{ req.preferredTime || '—' }}
+                      </td>
+                      <td style="font-size:12px;color:var(--text-secondary);
+                                 max-width:160px;font-style:italic">
+                        {{ req.message || '—' }}
+                      </td>
+                      <td style="font-size:12px;white-space:nowrap">
+                        {{ req.createdAt | date:'dd MMM, h:mm a' }}
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-primary"
+                                (click)="acceptAndApply(req)"
+                                [disabled]="acceptingId === req.id">
+                          @if (acceptingId === req.id) {
+                            <span class="spinner"></span>
+                          } @else {
+                            Accept & Apply
+                          }
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <!-- My accepted requests -->
+        @if (myAcceptedRequests.length > 0) {
+          <div class="uw-card" style="margin-top:20px">
+            <h3 class="card-title">
+              <span class="material-icons"
+                    style="vertical-align:middle;font-size:17px;margin-right:6px">
+                assignment_turned_in
+              </span>
+              My Accepted Requests
+            </h3>
+            <div class="requests-table-wrap">
+              <table class="requests-table">
+                <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Plan Interest</th>
+                  <th>Status</th>
+                  <th>Accepted</th>
+                  <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                  @for (req of myAcceptedRequests; track req.id) {
+                    <tr>
+                      <td>
+                        <div style="font-weight:700;font-size:13px">
+                          {{ req.customerName }}
+                        </div>
+                        <div style="font-size:11px;color:var(--text-muted)">
+                          {{ req.customerEmail }}
+                        </div>
+                      </td>
+                      <td>
+                        <span class="plan-interest-badge">
+                          {{ req.planTypeInterest }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge"
+                              [ngClass]="req.status === 'COMPLETED'
+                                ? 'badge-approved' : 'badge-info'">
+                          {{ req.status }}
+                        </span>
+                      </td>
+                      <td style="font-size:12px;white-space:nowrap">
+                        {{ req.acceptedAt | date:'dd MMM' }}
+                      </td>
+                      <td>
+                        @if (req.status === 'ACCEPTED') {
+                          <a [routerLink]="['/underwriter/apply-for-customer']"
+                             [queryParams]="{requestId: req.id}"
+                             class="btn btn-sm btn-secondary">
+                            Apply Now
+                          </a>
+                        } @else {
+                          <span style="color:#10b981;font-size:12px;font-weight:600">
+                            ✓ {{ req.resultingPolicyNumber || 'Done' }}
+                          </span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
 
       </div>
     }

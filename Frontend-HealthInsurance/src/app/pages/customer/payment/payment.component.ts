@@ -76,8 +76,12 @@ export class PaymentComponent implements OnInit {
       error: (err: any) => {
         this.paying = false;
         // Show specific backend error messages
-        const backendError =
+        let backendError =
           err?.error?.error || err?.error?.message || err?.message || 'Failed to initiate payment';
+        // Add more context for common issues
+        if (backendError.includes('key') || backendError.includes('Razorpay')) {
+          backendError += ' (Check Razorpay API key and backend configuration)';
+        }
         this.toast.error(backendError);
         this.cdr.detectChanges();
       },
@@ -177,7 +181,7 @@ export class PaymentComponent implements OnInit {
       .subscribe({
         next: (res: any) => {
           this.paying = false;
-          this.toast.success('🎉 Payment successful! Your policy is now ACTIVE.');
+          this.toast.success('Payment successful! Your policy is now ACTIVE.');
           this.router.navigate(['/customer/policies']);
         },
         error: (err: any) => {

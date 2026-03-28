@@ -57,6 +57,14 @@ public class Claim {
     @Column(columnDefinition = "TEXT")
     private String rejectionReason;
 
+    // =================== AI EXTRACTION REPORT ===================
+    private BigDecimal extractedAmount;
+    private Boolean isSuspicious;
+    private Boolean isAmountMatch;
+    
+    @Column(columnDefinition = "TEXT")
+    private String extractionFlags;
+
     // =================== CLAIMS OFFICER FIELDS ===================
 
     /** The officer assigned to review this claim */

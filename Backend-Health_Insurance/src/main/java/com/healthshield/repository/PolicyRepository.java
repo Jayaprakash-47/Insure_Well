@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PolicyRepository extends JpaRepository<Policy, Long> {
@@ -35,5 +36,10 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
 
     /** Original policy reference for renewals */
     List<Policy> findByOriginalPolicyPolicyId(Long originalPolicyId);
+
+    Optional<Policy> findByPolicyNumber(String policyNumber);
+
+    @Query("SELECT p FROM Policy p JOIN FETCH p.user WHERE p.policyStatus = :status")
+    List<Policy> findActiveWithUsers(@Param("status") PolicyStatus status);
 }
 

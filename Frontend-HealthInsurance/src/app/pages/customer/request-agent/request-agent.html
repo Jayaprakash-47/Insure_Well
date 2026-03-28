@@ -1,0 +1,237 @@
+<div class="page-wrapper">
+
+  <div class="page-header-row">
+    <div>
+      <a routerLink="/customer/dashboard" class="back-link">
+        ← Back to Dashboard
+      </a>
+      <h1>Request Agent Help</h1>
+      <p>Can't navigate the app? An insurance agent will assist you
+        in applying for a policy on your behalf.</p>
+    </div>
+    @if (!showForm) {
+      <button class="btn btn-primary" (click)="showForm = true">
+        <span class="material-icons">support_agent</span>
+        Request Help
+      </button>
+    }
+  </div>
+
+  <div class="how-it-works">
+    <h3>How it works</h3>
+    <div class="steps-row">
+      <div class="how-step">
+        <div class="step-num">1</div>
+        <div class="step-icon">
+          <span class="material-icons">edit_note</span>
+        </div>
+        <div class="step-text">
+          <strong>Submit Request</strong>
+          <p>Tell us what plan you're interested in and your preferred time</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="how-step">
+        <div class="step-num">2</div>
+        <div class="step-icon">
+          <span class="material-icons">person_search</span>
+        </div>
+        <div class="step-text">
+          <strong>Agent Contacts You</strong>
+          <p>An underwriter accepts your request and contacts you at your preferred time</p>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="how-step">
+        <div class="step-num">3</div>
+        <div class="step-icon">
+          <span class="material-icons">assignment_turned_in</span>
+        </div>
+        <div class="step-text">
+          <strong>Policy Applied</strong>
+          <p>The agent applies for the policy on your behalf — you'll see it in My Policies</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (showForm) {
+    <div class="card request-form-card">
+      <div class="card-header">
+        <div>
+          <h2>New Request</h2>
+          <p class="card-sub">Fill in your details — an agent will reach out to you</p>
+        </div>
+        <button class="modal-close" (click)="showForm = false">✕</button>
+      </div>
+
+      <div class="form-body">
+        <form (ngSubmit)="submitRequest()">
+
+          <div class="form-group">
+            <label>Plan Type Interest <span class="req">*</span></label>
+            <div class="plan-type-grid">
+              @for (type of planTypes; track type) {
+                <button type="button"
+                        class="plan-type-btn"
+                        [class.selected]="form.planTypeInterest === type"
+                        (click)="form.planTypeInterest = type">
+                  <span class="material-icons plan-type-icon">
+                    @if (type === 'INDIVIDUAL') { person }
+                    @else if (type === 'FAMILY') { family_restroom }
+                    @else if (type === 'SENIOR_CITIZEN') { elderly }
+                    @else { help_outline }
+                  </span>
+                  {{ formatPlanType(type) }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="preferredTime">Preferred Time to be Contacted</label>
+            <input id="preferredTime"
+                   name="preferredTime"
+                   type="text"
+                   [(ngModel)]="form.preferredTime"
+                   placeholder="e.g. Weekday mornings, Tomorrow after 3 PM"
+                   class="form-control" />
+            <span class="hint">We'll try to reach you at your preferred time</span>
+          </div>
+
+          <div class="form-group">
+            <label for="additionalMessage">Additional Message (Optional)</label>
+            <textarea id="additionalMessage"
+                      name="additionalMessage"
+                      [(ngModel)]="form.message"
+                      rows="3"
+                      placeholder="Any specific requirements or health conditions we should know about..."
+                      class="form-control">
+            </textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="showForm = false">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="submitting">
+              @if (submitting) {
+                <span class="spinner"></span> Submitting…
+              } @else {
+                <span class="material-icons">send</span>
+                Submit Request
+              }
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  }
+
+  <div class="section-title-row">
+    <h2>My Requests</h2>
+    <span class="badge-count">{{ myRequests.length }}</span>
+  </div>
+
+  @if (loading) {
+    <div class="loading-page">
+      <div class="spinner"></div>
+      <p>Loading your requests...</p>
+    </div>
+  } @else if (myRequests.length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">🤝</span>
+      <h3>No requests yet</h3>
+      <p>Click "Request Help" above to get assistance from one of our agents.</p>
+    </div>
+  } @else {
+    <div class="requests-list">
+      @for (req of myRequests; track req.id) {
+        <div class="request-card">
+
+          <div class="request-card-left">
+            <div class="request-status-icon"
+                 [style.background]="req.statusColor + '20'"
+                 [style.color]="req.statusColor">
+              <span class="material-icons">{{ req.statusIcon }}</span>
+            </div>
+
+            <div class="request-info">
+              <div class="request-plan-type">
+                {{ req.formattedPlanType }} Plan
+              </div>
+
+              @if (req.preferredTime) {
+                <div class="request-time">
+                  <span class="material-icons" style="font-size:13px">schedule</span>
+                  {{ req.preferredTime }}
+                </div>
+              }
+
+              @if (req.message) {
+                <div class="request-message">{{ req.message }}</div>
+              }
+
+              <div class="request-meta">
+                Requested on {{ req.createdAt | date:'dd MMM yyyy, h:mm a' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="request-card-right">
+            <span class="status-badge"
+                  [style.background]="req.statusColor + '18'"
+                  [style.color]="req.statusColor"
+                  [style.border-color]="req.statusColor + '40'">
+              {{ req.status }}
+            </span>
+
+            @if (req.status === 'ACCEPTED' && req.underwriterName) {
+              <div class="agent-assigned">
+                <span class="material-icons" style="font-size:14px">person</span>
+                Agent: {{ req.underwriterName }}
+              </div>
+            }
+
+            @if (req.status === 'COMPLETED' && req.resultingPolicyNumber) {
+              <div class="policy-created">
+                <span class="material-icons" style="font-size:14px;color:#10b981">
+                  verified_user
+                </span>
+                Policy: {{ req.resultingPolicyNumber }}
+              </div>
+            }
+
+            @if (req.status === 'PENDING') {
+
+              @if (confirmingCancelId === req.id) {
+                <!-- Inline confirm — no browser dialog -->
+                <div class="cancel-confirm-row">
+                  <span class="cancel-confirm-text">Cancel this request?</span>
+                  <button class="btn-cancel-confirm-yes"
+                          [disabled]="cancellingId === req.id"
+                          (click)="cancelRequest(req.id)">
+                    {{ cancellingId === req.id ? 'Cancelling...' : 'Yes, Cancel' }}
+                  </button>
+                  <button class="btn-cancel-confirm-no"
+                          (click)="confirmingCancelId = null">
+                    Keep
+                  </button>
+                </div>
+              } @else {
+                <button class="btn-cancel-req"
+                        (click)="confirmCancel(req.id)">
+                  Cancel
+                </button>
+              }
+
+            }
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

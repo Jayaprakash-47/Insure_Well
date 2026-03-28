@@ -89,7 +89,8 @@ public class AdminService {
         officer.setTotalClaimsProcessed(0);
         officer.setTotalClaimsApproved(0);
         officer.setTotalClaimsRejected(0);
-        officer.setApprovalLimit(request.getApprovalLimit() != null ? request.getApprovalLimit() : new BigDecimal("500000.00"));
+        officer.setApprovalLimit(request.getApprovalLimit() != null
+                ? request.getApprovalLimit() : new BigDecimal("500000.00"));
         ClaimsOfficer savedOfficer = claimsOfficerRepository.save(officer);
         String token = jwtUtil.generateToken(savedOfficer);
         log.info("New Claims Officer created: {} ({})", savedOfficer.getEmail(), savedOfficer.getEmployeeId());
@@ -110,12 +111,13 @@ public class AdminService {
                 .map(c -> c.getSettlementAmount() != null ? c.getSettlementAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        long totalClaims = claimRepository.count();
+        long totalClaims    = claimRepository.count();
         long approvedClaims = claimRepository.countByClaimStatus(ClaimStatus.APPROVED)
                 + claimRepository.countByClaimStatus(ClaimStatus.PARTIALLY_APPROVED)
                 + claimRepository.countByClaimStatus(ClaimStatus.SETTLED);
         BigDecimal settlementRatio = totalClaims > 0
-                ? BigDecimal.valueOf(approvedClaims * 100.0 / totalClaims).setScale(2, RoundingMode.HALF_UP)
+                ? BigDecimal.valueOf(approvedClaims * 100.0 / totalClaims)
+                .setScale(2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
         return DashboardResponse.builder()
@@ -154,7 +156,8 @@ public class AdminService {
             map.put("phone", c.getPhone()); map.put("isActive", c.getIsActive());
             map.put("dateOfBirth", c.getDateOfBirth()); map.put("gender", c.getGender());
             map.put("city", c.getCity()); map.put("state", c.getState());
-            map.put("createdAt", c.getCreatedAt()); return map;
+            map.put("createdAt", c.getCreatedAt());
+            return map;
         }).collect(Collectors.toList());
     }
 
@@ -164,13 +167,17 @@ public class AdminService {
             map.put("userId", u.getUserId()); map.put("firstName", u.getFirstName());
             map.put("lastName", u.getLastName()); map.put("email", u.getEmail());
             map.put("phone", u.getPhone()); map.put("isActive", u.getIsActive());
-            map.put("licenseNumber", u.getLicenseNumber()); map.put("specialization", u.getSpecialization());
+            map.put("licenseNumber", u.getLicenseNumber());
+            map.put("specialization", u.getSpecialization());
             map.put("commissionPercentage", u.getCommissionPercentage());
-            map.put("totalQuotesSent", u.getTotalQuotesSent()); map.put("createdAt", u.getCreatedAt());
-            BigDecimal totalCommission = policyRepository.findByAssignedUnderwriterUserId(u.getUserId()).stream()
+            map.put("totalQuotesSent", u.getTotalQuotesSent());
+            map.put("createdAt", u.getCreatedAt());
+            BigDecimal totalCommission = policyRepository
+                    .findByAssignedUnderwriterUserId(u.getUserId()).stream()
                     .map(p -> p.getCommissionAmount() != null ? p.getCommissionAmount() : BigDecimal.ZERO)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            map.put("totalCommissionEarned", totalCommission); return map;
+            map.put("totalCommissionEarned", totalCommission);
+            return map;
         }).collect(Collectors.toList());
     }
 
@@ -185,10 +192,12 @@ public class AdminService {
             map.put("totalClaimsProcessed", co.getTotalClaimsProcessed());
             map.put("totalClaimsApproved", co.getTotalClaimsApproved());
             map.put("totalClaimsRejected", co.getTotalClaimsRejected());
-            map.put("approvalLimit", co.getApprovalLimit()); map.put("createdAt", co.getCreatedAt());
-            int total = co.getTotalClaimsProcessed() != null ? co.getTotalClaimsProcessed() : 0;
-            int approved = co.getTotalClaimsApproved() != null ? co.getTotalClaimsApproved() : 0;
-            map.put("approvalRate", Math.round((total > 0 ? (approved * 100.0 / total) : 0.0) * 100.0) / 100.0);
+            map.put("approvalLimit", co.getApprovalLimit());
+            map.put("createdAt", co.getCreatedAt());
+            int total    = co.getTotalClaimsProcessed() != null ? co.getTotalClaimsProcessed() : 0;
+            int approved = co.getTotalClaimsApproved()  != null ? co.getTotalClaimsApproved()  : 0;
+            map.put("approvalRate",
+                    Math.round((total > 0 ? (approved * 100.0 / total) : 0.0) * 100.0) / 100.0);
             return map;
         }).collect(Collectors.toList());
     }
@@ -198,85 +207,119 @@ public class AdminService {
     public void deactivateUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
-        user.setIsActive(false); userRepository.save(user);
+        user.setIsActive(false);
+        userRepository.save(user);
         log.info("User deactivated: {} ({})", user.getEmail(), userId);
     }
 
     public void activateUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
-        user.setIsActive(true); userRepository.save(user);
+        user.setIsActive(true);
+        userRepository.save(user);
         log.info("User activated: {} ({})", user.getEmail(), userId);
     }
 
     // =================== ASSIGN UNDERWRITER TO POLICY ===================
 
     @Transactional
-    public Map<String, Object> assignUnderwriter(Long policyId, AdminAssignUnderwriterRequest request, User admin) {
+    public Map<String, Object> assignUnderwriter(Long policyId,
+                                                 AdminAssignUnderwriterRequest request,
+                                                 User admin) {
         Policy policy = policyRepository.findById(policyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Policy not found with id: " + policyId));
-        if (policy.getPolicyStatus() != PolicyStatus.PENDING && policy.getPolicyStatus() != PolicyStatus.ASSIGNED) {
-            throw new BadRequestException("Can only assign underwriter to PENDING or ASSIGNED policies. Current: " + policy.getPolicyStatus());
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Policy not found with id: " + policyId));
+
+        if (policy.getPolicyStatus() != PolicyStatus.PENDING
+                && policy.getPolicyStatus() != PolicyStatus.ASSIGNED) {
+            throw new BadRequestException(
+                    "Can only assign underwriter to PENDING or ASSIGNED policies. Current: "
+                            + policy.getPolicyStatus());
         }
+
         Underwriter underwriter = underwriterRepository.findById(request.getUnderwriterId())
-                .orElseThrow(() -> new ResourceNotFoundException("Underwriter not found with id: " + request.getUnderwriterId()));
-        if (!Boolean.TRUE.equals(underwriter.getIsActive())) {
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Underwriter not found with id: " + request.getUnderwriterId()));
+
+        if (!Boolean.TRUE.equals(underwriter.getIsActive()))
             throw new BadRequestException("Cannot assign to an inactive underwriter");
-        }
-        
+
         boolean isReassignment = policy.getAssignedUnderwriter() != null;
-        
+
         policy.setAssignedUnderwriter(underwriter);
         policy.setAssignedAt(LocalDateTime.now());
-        
-        if (!isReassignment) {
-            policy.setPolicyStatus(PolicyStatus.ASSIGNED);
-        }
+        if (!isReassignment) policy.setPolicyStatus(PolicyStatus.ASSIGNED);
+
         notificationService.sendNotification(
                 underwriter.getEmail(),
-                "New policy " + policy.getPolicyNumber()
-                        + " assigned to you for review.",
-                NotificationType.GENERAL
-        );
+                "New policy " + policy.getPolicyNumber() + " assigned to you for review.",
+                NotificationType.GENERAL);
 
         policyRepository.save(policy);
         log.info("Policy {} assigned to underwriter {}", policy.getPolicyNumber(), underwriter.getUserId());
-        return Map.of("message", "Underwriter assigned successfully", "policyId", policyId,
-                "policyNumber", policy.getPolicyNumber(), "underwriterId", underwriter.getUserId(),
-                "underwriterName", underwriter.getFirstName() + " " + underwriter.getLastName(),
-                "policyStatus", PolicyStatus.ASSIGNED.name());
 
+        return Map.of("message",         "Underwriter assigned successfully",
+                "policyId",        policyId,
+                "policyNumber",    policy.getPolicyNumber(),
+                "underwriterId",   underwriter.getUserId(),
+                "underwriterName", underwriter.getFirstName() + " " + underwriter.getLastName(),
+                "policyStatus",    PolicyStatus.ASSIGNED.name());
     }
 
     // =================== ASSIGN CLAIMS OFFICER TO CLAIM ===================
 
     @Transactional
-    public Map<String, Object> assignClaimsOfficer(Long claimId, AdminAssignClaimsOfficerRequest request, User admin) {
+    public Map<String, Object> assignClaimsOfficer(Long claimId,
+                                                   AdminAssignClaimsOfficerRequest request,
+                                                   User admin) {
         Claim claim = claimRepository.findById(claimId)
-                .orElseThrow(() -> new ResourceNotFoundException("Claim not found with id: " + claimId));
-        if (claim.getClaimStatus() != ClaimStatus.SUBMITTED && claim.getClaimStatus() != ClaimStatus.UNDER_REVIEW) {
-            throw new BadRequestException("Can only assign officer to SUBMITTED or UNDER_REVIEW claims. Current: " + claim.getClaimStatus());
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Claim not found with id: " + claimId));
+
+        if (claim.getClaimStatus() != ClaimStatus.SUBMITTED
+                && claim.getClaimStatus() != ClaimStatus.UNDER_REVIEW) {
+            throw new BadRequestException(
+                    "Can only assign officer to SUBMITTED or UNDER_REVIEW claims. Current: "
+                            + claim.getClaimStatus());
         }
+
         ClaimsOfficer officer = claimsOfficerRepository.findById(request.getClaimsOfficerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Claims Officer not found with id: " + request.getClaimsOfficerId()));
-        if (!Boolean.TRUE.equals(officer.getIsActive())) {
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Claims Officer not found with id: " + request.getClaimsOfficerId()));
+
+        if (!Boolean.TRUE.equals(officer.getIsActive()))
             throw new BadRequestException("Cannot assign to an inactive Claims Officer");
-        }
-        
+
         boolean isReassignment = claim.getAssignedOfficer() != null;
-        
+
         claim.setAssignedOfficer(officer);
         if (!isReassignment) {
             claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
             claim.setReviewStartedAt(LocalDateTime.now());
         }
-        
+
         claimRepository.save(claim);
-        log.info("Claim {} assigned to officer {}", claim.getClaimNumber(), officer.getEmployeeId());
-        return Map.of("message", "Claims Officer assigned successfully", "claimId", claimId,
-                "claimNumber", claim.getClaimNumber(), "officerId", officer.getUserId(),
-                "officerName", officer.getFirstName() + " " + officer.getLastName(),
-                "claimStatus", ClaimStatus.UNDER_REVIEW.name());
+
+        // ── FIX 5: Send SSE notification directly here (officer entity is in scope) ──
+        notificationService.sendNotification(
+                officer.getEmail(),
+                "📋 New claim assigned to you: " + claim.getClaimNumber()
+                        + " from " + claim.getUser().getFirstName()
+                        + " " + claim.getUser().getLastName()
+                        + ". Claim amount: ₹" + claim.getClaimAmount()
+                        + ". Please log in to begin your review.",
+                NotificationType.CLAIM_SUBMITTED);
+
+        log.info("Claim {} assigned to officer {} — notification sent to {}",
+                claim.getClaimNumber(), officer.getEmployeeId(), officer.getEmail());
+
+        return Map.of("message",      "Claims Officer assigned successfully",
+                "claimId",      claimId,
+                "claimNumber",  claim.getClaimNumber(),
+                "officerId",    officer.getUserId(),
+                "officerName",  officer.getFirstName() + " " + officer.getLastName(),
+                "officerEmail", officer.getEmail(),
+                "claimStatus",  ClaimStatus.UNDER_REVIEW.name());
     }
 
     // =================== PENDING POLICY APPLICATIONS ===================
@@ -284,73 +327,87 @@ public class AdminService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getPendingPolicyApplications() {
         return policyRepository.findAll().stream()
-                .filter(p -> p.getPolicyStatus() == PolicyStatus.PENDING || p.getPolicyStatus() == PolicyStatus.ASSIGNED || p.getPolicyStatus() == PolicyStatus.CONCERN_RAISED)
+                .filter(p -> p.getPolicyStatus() == PolicyStatus.PENDING
+                        || p.getPolicyStatus() == PolicyStatus.ASSIGNED
+                        || p.getPolicyStatus() == PolicyStatus.CONCERN_RAISED)
                 .map(p -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("policyId", p.getPolicyId()); map.put("policyNumber", p.getPolicyNumber());
-            map.put("customerId", p.getUser().getUserId());
-            map.put("customerName", p.getUser().getFirstName() + " " + p.getUser().getLastName());
-            map.put("customerEmail", p.getUser().getEmail()); map.put("planName", p.getPlan().getPlanName());
-            map.put("planType", p.getPlan().getPlanType().name()); map.put("coverageAmount", p.getCoverageAmount());
-            map.put("policyStatus", p.getPolicyStatus().name()); map.put("createdAt", p.getCreatedAt());
-            map.put("memberCount", p.getMembers() != null ? p.getMembers().size() : 0);
-            
-            if (p.getAssignedUnderwriter() != null) {
-                map.put("assignedUnderwriterId", p.getAssignedUnderwriter().getUserId());
-                map.put("assignedUnderwriterName", p.getAssignedUnderwriter().getFirstName() + " " + p.getAssignedUnderwriter().getLastName());
-            }
-            
-            return map;
-        }).collect(Collectors.toList());
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("policyId", p.getPolicyId());
+                    map.put("policyNumber", p.getPolicyNumber());
+                    map.put("customerId", p.getUser().getUserId());
+                    map.put("customerName", p.getUser().getFirstName() + " " + p.getUser().getLastName());
+                    map.put("customerEmail", p.getUser().getEmail());
+                    map.put("planName", p.getPlan().getPlanName());
+                    map.put("planType", p.getPlan().getPlanType().name());
+                    map.put("coverageAmount", p.getCoverageAmount());
+                    map.put("policyStatus", p.getPolicyStatus().name());
+                    map.put("createdAt", p.getCreatedAt());
+                    map.put("memberCount", p.getMembers() != null ? p.getMembers().size() : 0);
+                    if (p.getAssignedUnderwriter() != null) {
+                        map.put("assignedUnderwriterId", p.getAssignedUnderwriter().getUserId());
+                        map.put("assignedUnderwriterName",
+                                p.getAssignedUnderwriter().getFirstName() + " "
+                                        + p.getAssignedUnderwriter().getLastName());
+                    }
+                    return map;
+                }).collect(Collectors.toList());
     }
 
-    // =================== SUBMITTED CLAIMS (UNASSIGNED) ===================
+    // =================== SUBMITTED CLAIMS ===================
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getSubmittedClaims() {
         return claimRepository.findAll().stream()
-                .filter(c -> c.getClaimStatus() == ClaimStatus.SUBMITTED || c.getClaimStatus() == ClaimStatus.UNDER_REVIEW)
+                .filter(c -> c.getClaimStatus() == ClaimStatus.SUBMITTED
+                        || c.getClaimStatus() == ClaimStatus.UNDER_REVIEW)
                 .map(c -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("claimId", c.getClaimId()); map.put("claimNumber", c.getClaimNumber());
-            map.put("customerName", c.getUser().getFirstName() + " " + c.getUser().getLastName());
-            map.put("customerEmail", c.getUser().getEmail());
-            map.put("policyNumber", c.getPolicy().getPolicyNumber()); map.put("claimAmount", c.getClaimAmount());
-            map.put("claimType", c.getClaimType().name()); map.put("hospitalName", c.getHospitalName());
-            map.put("diagnosis", c.getDiagnosis()); map.put("claimStatus", c.getClaimStatus().name());
-            map.put("createdAt", c.getCreatedAt());
-            
-            if (c.getAssignedOfficer() != null) {
-                map.put("assignedOfficerId", c.getAssignedOfficer().getUserId());
-                map.put("assignedOfficerName", c.getAssignedOfficer().getFirstName() + " " + c.getAssignedOfficer().getLastName());
-            }
-            
-            return map;
-        }).collect(Collectors.toList());
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("claimId", c.getClaimId());
+                    map.put("claimNumber", c.getClaimNumber());
+                    map.put("customerName",
+                            c.getUser().getFirstName() + " " + c.getUser().getLastName());
+                    map.put("customerEmail", c.getUser().getEmail());
+                    map.put("policyNumber", c.getPolicy().getPolicyNumber());
+                    map.put("claimAmount", c.getClaimAmount());
+                    map.put("claimType", c.getClaimType().name());
+                    map.put("hospitalName", c.getHospitalName());
+                    map.put("diagnosis", c.getDiagnosis());
+                    map.put("claimStatus", c.getClaimStatus().name());
+                    map.put("createdAt", c.getCreatedAt());
+                    if (c.getAssignedOfficer() != null) {
+                        map.put("assignedOfficerId", c.getAssignedOfficer().getUserId());
+                        map.put("assignedOfficerName",
+                                c.getAssignedOfficer().getFirstName() + " "
+                                        + c.getAssignedOfficer().getLastName());
+                    }
+                    return map;
+                }).collect(Collectors.toList());
     }
-
 
     // =================== UNDERWRITER PERFORMANCE ===================
 
     public List<Map<String, Object>> getUnderwriterPerformance() {
         return underwriterRepository.findAll().stream().map(u -> {
-            Map<String, Object> perf = new HashMap<>();
-            perf.put("underwriterId", u.getUserId());
-            perf.put("underwriterName", u.getFirstName() + " " + u.getLastName());
-            perf.put("specialization", u.getSpecialization());
-            List<Policy> policies = policyRepository.findByAssignedUnderwriterUserId(u.getUserId());
-            perf.put("totalQuotesSent", u.getTotalQuotesSent()); perf.put("totalPoliciesHandled", policies.size());
-            BigDecimal totalPremium = policies.stream()
-                    .map(p -> p.getPremiumAmount() != null ? p.getPremiumAmount() : BigDecimal.ZERO)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            perf.put("totalPremiumGenerated", totalPremium);
-            BigDecimal totalCommission = policies.stream()
-                    .map(p -> p.getCommissionAmount() != null ? p.getCommissionAmount() : BigDecimal.ZERO)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            perf.put("totalCommissionEarned", totalCommission);
-            perf.put("activePolicies", policies.stream().filter(p -> p.getPolicyStatus() == PolicyStatus.ACTIVE).count());
-            return perf;
-        }).sorted((a, b) -> ((BigDecimal) b.get("totalPremiumGenerated")).compareTo((BigDecimal) a.get("totalPremiumGenerated")))
+                    Map<String, Object> perf = new HashMap<>();
+                    perf.put("underwriterId",   u.getUserId());
+                    perf.put("underwriterName", u.getFirstName() + " " + u.getLastName());
+                    perf.put("specialization",  u.getSpecialization());
+                    List<Policy> policies = policyRepository.findByAssignedUnderwriterUserId(u.getUserId());
+                    perf.put("totalQuotesSent",     u.getTotalQuotesSent());
+                    perf.put("totalPoliciesHandled", policies.size());
+                    BigDecimal totalPremium = policies.stream()
+                            .map(p -> p.getPremiumAmount() != null ? p.getPremiumAmount() : BigDecimal.ZERO)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    perf.put("totalPremiumGenerated", totalPremium);
+                    BigDecimal totalCommission = policies.stream()
+                            .map(p -> p.getCommissionAmount() != null ? p.getCommissionAmount() : BigDecimal.ZERO)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    perf.put("totalCommissionEarned", totalCommission);
+                    perf.put("activePolicies",
+                            policies.stream().filter(p -> p.getPolicyStatus() == PolicyStatus.ACTIVE).count());
+                    return perf;
+                }).sorted((a, b) -> ((BigDecimal) b.get("totalPremiumGenerated"))
+                        .compareTo((BigDecimal) a.get("totalPremiumGenerated")))
                 .collect(Collectors.toList());
     }
 }

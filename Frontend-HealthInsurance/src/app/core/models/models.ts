@@ -153,6 +153,14 @@ export interface PolicyResponse {
   originalPolicyId?: number;
 
   underwriterRemarks?: string;
+  extractedConditions?: string;   // "Diabetes, Hypertension"
+  aiAnalysisDone?: boolean;       // true after Claude finishes
+  kycStatus?: string;
+
+  // PENDING | VERIFIED | REJECTED
+  riskScore?:   number;
+  riskLevel?:   string;
+  riskSummary?: string;
 }
 
 export interface PolicyMemberResponse {
@@ -200,6 +208,13 @@ export interface ClaimResponse {
   rejectionReason: string;
   createdAt: string;
   documents: any[];
+
+  // AI Extraction Report
+  extractedAmount?: number;
+  isSuspicious?: boolean;
+  isAmountMatch?: boolean;
+  extractionFlags?: string;
+
   assignedOfficerId: number;
   assignedOfficerName: string;
   reviewStartedAt: string;
@@ -208,6 +223,10 @@ export interface ClaimResponse {
   adminRemarks: string;
   settlementDate: string;
   tpaReferenceNumber: string;
+  accountNumber?: string;
+  ifscCode?: string;
+  accountHolderName?: string;
+  bankName?: string;
 }
 
 export interface ClaimStatusUpdateRequest {

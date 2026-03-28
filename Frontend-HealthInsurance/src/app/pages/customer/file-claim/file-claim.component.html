@@ -1,3 +1,4 @@
+<!-- FILE: file-claim.component.html -->
 <div class="page-wrapper">
   <div class="page-header">
     <h1>File a Claim</h1>
@@ -6,7 +7,16 @@
 
   <div class="card" style="max-width:600px">
 
-    @if (policies.length === 0) {
+    @if (!bankDetailsFilled) {
+      <div class="bank-warning-alert" style="background:#fff7ed; border:1px solid #ffedd5; border-radius:12px; padding:20px; display:flex; gap:16px; margin-bottom:20px; align-items:center">
+        <span class="material-icons" style="color:#f97316; font-size:32px">account_balance</span>
+        <div style="flex:1">
+          <strong style="color:#9a3412; display:block; margin-bottom:4px">Bank Details Required</strong>
+          <p style="color:#c2410c; margin:0 0 12px; font-size:14px">Please update your bank account details in the profile section before filing a claim. This is required for payouts.</p>
+          <a routerLink="/customer/profile" class="btn btn-sm" style="background:#f97316; color:#fff">Update Profile Now <span class="material-icons" style="font-size:13px;vertical-align:middle">arrow_forward</span></a>
+        </div>
+      </div>
+    } @else if (policies.length === 0) {
       <div class="empty-state">
         <h3>No active policies</h3>
         <p>You need an active policy to file a claim</p>
@@ -101,7 +111,7 @@
         <!-- ── Dates Row ── -->
         <div class="form-row">
 
-          <!-- Admission Date -->
+          <!-- Admission Date — must be past or today, after policy start -->
           <div class="form-group">
             <label>Admission Date <span class="required">*</span></label>
             <input class="form-control"
@@ -118,19 +128,19 @@
             }
             @if (form.admissionDate && !errors.admissionDate) {
               <small style="color:#16a34a;font-size:11px;font-weight:600">
-                ✓ Valid admission date
+              <span class="material-icons" style="font-size:12px;vertical-align:middle;color:#16a34a">check_circle</span> Valid admission date
               </small>
             }
           </div>
 
-          <!-- Discharge Date -->
+          <!-- ── FIX 6: Discharge Date — NO [max] so future dates are allowed
+               Patient may still be admitted. Only [min] = admission date.     -->
           <div class="form-group">
             <label>Discharge Date <span class="required">*</span></label>
             <input class="form-control"
                    [(ngModel)]="form.dischargeDate"
                    name="dd"
                    type="date"
-                   [max]="today"
                    [min]="form.admissionDate || getPolicyStartDateString()"
                    [class.error]="errors.dischargeDate"
                    (blur)="onBlur('dischargeDate')"
@@ -140,7 +150,7 @@
             }
             @if (form.dischargeDate && !errors.dischargeDate) {
               <small style="color:#16a34a;font-size:11px;font-weight:600">
-                ✓ Valid discharge date
+              <span class="material-icons" style="font-size:12px;vertical-align:middle;color:#16a34a">check_circle</span> Valid discharge date
               </small>
             }
           </div>

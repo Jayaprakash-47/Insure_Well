@@ -18,7 +18,7 @@ export class ClaimReviewComponent implements OnInit {
   submitting = false;
   settling = false;
 
-  // ── NEW: modal flag ──
+  // ── Modal state ──
   showSettlementModal = false;
 
   decision = '';
@@ -26,6 +26,18 @@ export class ClaimReviewComponent implements OnInit {
   reviewerRemarks = '';
   rejectionReason = '';
   additionalDocumentsRequired = '';
+
+  // ── AI Audit state ──
+  auditResult: any = null;
+  auditLoading = false;
+  auditError = '';
+
+  // ── IFSC Verification state ──
+  ifscInput = '';
+  ifscVerified = false;
+  ifscVerifying = false;
+  ifscBankInfo: any = null;
+  ifscVerifyError = '';
 
   constructor(
     private api: ApiService,
@@ -40,6 +52,14 @@ export class ClaimReviewComponent implements OnInit {
     this.api.getOfficerClaimDetail(id).subscribe({
       next: (data) => {
         this.claim = data;
+        
+        // Alert the claims officer immediately about AI mismatch
+        if (this.claim.isSuspicious && (this.claim.claimStatus === 'SUBMITTED' || this.claim.claimStatus === 'UNDER_REVIEW' || this.claim.claimStatus === 'DOCUMENT_PENDING')) {
+          setTimeout(() => {
+            this.toast.error('AI AUDITOR ALERT: Significant amount mismatch detected! Please review the AI Panel before approving.');
+          }, 300);
+        }
+
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -58,13 +78,71 @@ export class ClaimReviewComponent implements OnInit {
     );
   }
 
-  // ── Open settlement modal (replaces confirm()) ──
+  // ── AI Audit logic ──
+  runAiAudit(): void {
+    if (!this.claim) return;
+    this.auditLoading = true;
+    this.auditError = '';
+    this.api.runAiAudit(this.claim.claimId).subscribe({
+      next: (result) => {
+        this.auditResult = result;
+        this.auditLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.auditError = 'AI extraction failed. Review manually.';
+        this.auditLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ── Open settlement modal — resets IFSC state each time ──
   openSettlementModal(): void {
     this.showSettlementModal = true;
+    this.ifscVerified = false;
+    this.ifscBankInfo = null;
+    this.ifscVerifyError = '';
+    // Pre-fill IFSC from claim data if available
+    this.ifscInput = this.claim?.ifscCode || '';
   }
 
   closeSettlementModal(): void {
     this.showSettlementModal = false;
+    this.ifscVerified = false;
+    this.ifscBankInfo = null;
+    this.ifscVerifyError = '';
+  }
+
+  // ── IFSC Verification via backend proxy ──
+  verifyIfsc(): void {
+    const ifsc = this.ifscInput.trim().toUpperCase();
+    if (!ifsc || ifsc.length < 11) {
+      this.ifscVerifyError = 'Please enter a valid 11-character IFSC code';
+      return;
+    }
+    this.ifscVerifying = true;
+    this.ifscVerifyError = '';
+    this.ifscBankInfo = null;
+
+    this.api.verifyIfsc(ifsc).subscribe({
+      next: (res: any) => {
+        this.ifscVerifying = false;
+        if (res.valid) {
+          this.ifscBankInfo = res;
+        } else {
+          this.ifscVerifyError = res.message || 'IFSC code not found. Please check and try again.';
+        }
+      },
+      error: () => {
+        this.ifscVerifying = false;
+        this.ifscVerifyError = 'IFSC verification service unavailable. Please try again.';
+      }
+    });
+  }
+
+  confirmIfscAndProceed(): void {
+    this.ifscVerified = true;
   }
 
   // ── FIXED: No confirm(), uses officer endpoint ──
@@ -83,7 +161,7 @@ export class ClaimReviewComponent implements OnInit {
         this.toast.success(
           'Settlement of '
           + this.formatCurrency(updated.settlementAmount)
-          + ' processed successfully! 🎉'
+          + ' processed successfully.'
         );
         this.cdr.detectChanges();
       },
@@ -201,6 +279,7 @@ export class ClaimReviewComponent implements OnInit {
       REJECTED:            'badge-rejected',
       DOCUMENT_PENDING:    'badge-pending',
       PARTIALLY_APPROVED:  'badge-info',
+      TRANSFER_INITIATED:  'badge-success',
       SETTLED:             'badge-success',
     };
     return map[status] || 'badge-info';

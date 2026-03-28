@@ -27,24 +27,27 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
 
     @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        return uri != null && uri.endsWith("/api/notifications/subscribe");
-    }
-
-    @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
+        String token = null;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        // 1. Try Header
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+        } 
+        // 2. Try Query Parameter (fallback for SSE/EventSource)
+        else {
+            token = request.getParameter("token");
+        }
+
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            String token = authHeader.substring(7);
             String email = jwtUtil.extractEmail(token);
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {

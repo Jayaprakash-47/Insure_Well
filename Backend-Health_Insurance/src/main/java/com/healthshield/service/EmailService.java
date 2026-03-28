@@ -1,11 +1,7 @@
 package com.healthshield.service;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -17,24 +13,20 @@ import java.time.LocalDate;
 @Slf4j
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private final N8nEmailService n8nEmailService;
 
-    @Value("${spring.mail.username}")
-    private String fromEmail;
+    // @Value("${spring.mail.username}")
+    // private String fromEmail;
 
     @Async
     public void sendStatusChangeEmail(String toEmail, String recipientName,
                                       String policyNumber, String newStatus) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromEmail);
-            helper.setTo(toEmail);
-            helper.setSubject("Policy Status Update — " + policyNumber);
-            helper.setText(buildStatusHtml(recipientName, policyNumber, newStatus), true);
-            mailSender.send(message);
+            String subject = "Policy Status Update — " + policyNumber;
+            String body = buildStatusHtml(recipientName, policyNumber, newStatus);
+            n8nEmailService.sendEmail(toEmail, subject, body);
             log.info("Status email sent to {}", toEmail);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send status email to {}: {}", toEmail, e.getMessage());
         }
     }
@@ -43,15 +35,11 @@ public class EmailService {
     public void sendRenewalReminderEmail(String toEmail, String recipientName,
                                          String policyNumber, LocalDate expiryDate) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromEmail);
-            helper.setTo(toEmail);
-            helper.setSubject("Policy Renewal Reminder — " + policyNumber);
-            helper.setText(buildRenewalHtml(recipientName, policyNumber, expiryDate), true);
-            mailSender.send(message);
+            String subject = "Policy Renewal Reminder — " + policyNumber;
+            String body = buildRenewalHtml(recipientName, policyNumber, expiryDate);
+            n8nEmailService.sendEmail(toEmail, subject, body);
             log.info("Renewal reminder sent to {}", toEmail);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send renewal email to {}: {}", toEmail, e.getMessage());
         }
     }
@@ -59,15 +47,11 @@ public class EmailService {
     @Async
     public void sendOtpEmail(String toEmail, String otp) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromEmail);
-            helper.setTo(toEmail);
-            helper.setSubject("Password Reset OTP — HealthShield");
-            helper.setText(buildOtpHtml(otp), true);
-            mailSender.send(message);
+            String subject = "Password Reset OTP — HealthShield";
+            String body = buildOtpHtml(otp);
+            n8nEmailService.sendEmail(toEmail, subject, body);
             log.info("OTP email sent to {}", toEmail);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send OTP email to {}: {}", toEmail, e.getMessage());
         }
     }
@@ -178,16 +162,12 @@ public class EmailService {
                                           BigDecimal premiumAmount, BigDecimal coverageAmount,
                                           LocalDate startDate, LocalDate endDate) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromEmail);
-            helper.setTo(toEmail);
-            helper.setSubject("🎉 Welcome to InsureWell — Policy " + policyNumber + " is Active!");
-            helper.setText(buildActivationHtml(customerName, policyNumber, planName,
-                    premiumAmount, coverageAmount, startDate, endDate), true);
-            mailSender.send(message);
+            String subject = "🎉 Welcome to InsureWell — Policy " + policyNumber + " is Active!";
+            String body = buildActivationHtml(customerName, policyNumber, planName,
+                    premiumAmount, coverageAmount, startDate, endDate);
+            n8nEmailService.sendEmail(toEmail, subject, body);
             log.info("Activation email sent to {}", toEmail);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send activation email: {}", e.getMessage());
         }
     }

@@ -1,10 +1,14 @@
+<!-- FILE: underwriter-pending.component.html -->
+
 <div class="page">
   <div class="page-header">
     <div>
       <h1>Pending Assignments</h1>
-      <p>Policy applications assigned to you — calculate and send your premium quote.</p>
+      <p>Policy applications assigned to you — review the AI-extracted health data and customer details, then calculate and send your premium quote.</p>
     </div>
-    <a routerLink="/underwriter/dashboard" class="btn-back btn-burgundy">← Dashboard</a>
+    <a routerLink="/underwriter/dashboard" class="btn-back btn-burgundy">
+      ← Dashboard
+    </a>
   </div>
 
   @if (loading) {
@@ -13,9 +17,9 @@
 
   @if (!loading && policies.length === 0) {
     <div class="empty-state">
-      <div class="empty-icon"></div>
+      <div class="empty-icon"><span class="material-icons" style="font-size:3rem;color:#10b981">task_alt</span></div>
       <h3>No pending assignments!</h3>
-      <p>You're all caught up. The admin will assign new policy applications to you.</p>
+      <p>You're all caught up. The admin will assign new applications to you.</p>
     </div>
   }
 
@@ -23,157 +27,340 @@
     <div class="policies-list">
       @for (p of policies; track p) {
         <div class="policy-card">
+
+          <!-- ── Header ── -->
           <div class="policy-header">
-            <div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
               <span class="policy-num">{{ p.policyNumber }}</span>
               <span class="badge badge-assigned">ASSIGNED</span>
+              @if (p.aiAnalysisDone) {
+                @if (p.extractedConditions === 'SUSPICIOUS_DOCUMENT') {
+                  <span class="header-badge badge-suspicious"><span class="material-icons" style="font-size:13px;vertical-align:middle">gpp_bad</span> Suspicious Document</span>
+                } @else {
+                  <span class="header-badge badge-ai-done"><span class="material-icons" style="font-size:13px;vertical-align:middle">smart_toy</span> AI Analysed</span>
+                }
+              } @else {
+                <span class="header-badge badge-ai-pending"><span class="material-icons" style="font-size:13px;vertical-align:middle">sync</span> AI Processing...</span>
+              }
             </div>
             <div class="assigned-date">
-              Assigned: {{ p.assignedAt | date: 'dd MMM yyyy, h:mm a' }}
+              Assigned: {{ p.assignedAt | date:'dd MMM yyyy, h:mm a' }}
             </div>
           </div>
-          <div class="policy-body">
-            <div class="info-row">
-              <div class="info-item">
-                <label>Customer</label>
-                <strong>{{ p.customerName }}</strong>
+
+          <!-- ── Basic Info Bar ── -->
+          <div class="info-bar">
+            <div class="info-item">
+              <label>Customer</label>
+              <strong>{{ p.customerName }}</strong>
+            </div>
+            <div class="info-item">
+              <label>Plan</label>
+              <strong>{{ p.planName }}</strong>
+            </div>
+            <div class="info-item">
+              <label>Coverage</label>
+              <strong>₹{{ (p.coverageAmount || 0).toLocaleString() }}</strong>
+            </div>
+            <div class="info-item">
+              <label>Members</label>
+              <strong>{{ p.members.length || 1 }}</strong>
+            </div>
+          </div>
+
+          <!-- ══ SPLIT VIEW: OCR Left | Customer Details Right ══ -->
+          <div class="split-view">
+
+            <!-- ── LEFT: AI OCR Analysis ── -->
+            <div class="split-left">
+              <div class="split-section-title">
+                <span class="material-icons" style="font-size:16px;color:#7c3aed">psychology</span>
+                AI Document Analysis
               </div>
-              <div class="info-item">
-                <label>Plan</label>
-                <strong>{{ p.planName }}</strong>
-              </div>
-              <div class="info-item">
-                <label>Coverage</label>
-                <strong>₹{{ (p.coverageAmount || 0).toLocaleString() }}</strong>
-              </div>
-              <div class="info-item">
-                <label>Members</label>
-                <strong>{{ p.members.length || 1 }}</strong>
+
+              @if (p.extractedConditions === 'SUSPICIOUS_DOCUMENT') {
+                <div class="suspicious-doc-alert">
+                  <span class="material-icons suspicious-doc-icon">gpp_bad</span>
+                  <div>
+                    <strong>Suspicious Document Detected</strong>
+                    <p>
+                      The uploaded health report does not appear to be a valid
+                      medical document. The customer has been notified to re-upload
+                      a genuine health report. Premium calculation is blocked until
+                      a valid document is submitted.
+                    </p>
+                  </div>
+                </div>
+
+              } @else if (p.aiAnalysisDone && p.extractedConditions && p.extractedConditions !== 'None') {
+                <div class="ai-conditions-block">
+                  <p class="ai-sub">Conditions extracted from health report:</p>
+                  <div class="condition-tags">
+                    @for (cond of getConditionsList(p.extractedConditions); track cond) {
+                      <span class="condition-tag">
+                        <span class="material-icons" style="font-size:13px;vertical-align:middle">
+                          medical_services
+                        </span>
+                        {{ cond }}
+                      </span>
+                    }
+                  </div>
+                  <p class="ai-note"><span class="material-icons" style="font-size:13px;vertical-align:middle">bolt</span> Factored into premium calculation automatically.</p>
+                </div>
+
+              } @else if (p.aiAnalysisDone) {
+                <p class="ai-sub" style="color:#10b981;margin-bottom:12px">
+                  <span class="material-icons" style="font-size:14px;vertical-align:middle;color:#10b981">check_circle</span>
+                  No medical conditions detected in the health report.
+
+                </p>
+
+              } @else {
+                <div class="ai-pending-state">
+                  <span class="material-icons" style="font-size:28px;color:#a78bfa">hourglass_top</span>
+                  <p class="ai-sub">AI is analysing the health report in the background. Refresh to see results.</p>
+                </div>
+              }
+
+              <!-- Risk Gauge -->
+              @if (p.aiAnalysisDone && p.riskScore != null && p.extractedConditions !== 'SUSPICIOUS_DOCUMENT') {
+                <div class="risk-gauge" [style.border-left]="'4px solid ' + getRiskColor(p.riskLevel)">
+                  <div class="risk-gauge-header">
+                    <span class="material-icons" style="font-size:15px;color:#64748b">analytics</span>
+                    <strong style="font-size:13px">Risk Assessment</strong>
+                    <span class="risk-chip"
+                          [style.background]="getRiskColor(p.riskLevel) + '20'"
+                          [style.color]="getRiskColor(p.riskLevel)">
+                      {{ p.riskLevel }}
+                    </span>
+                  </div>
+                  <div class="risk-bar-row">
+                    <div class="risk-bar-track">
+                      <div class="risk-bar-fill"
+                           [style.width.%]="p.riskScore"
+                           [style.background]="getRiskColor(p.riskLevel)">
+                      </div>
+                    </div>
+                    <span class="risk-score-num" [style.color]="getRiskColor(p.riskLevel)">
+                      {{ p.riskScore }}<small>/100</small>
+                    </span>
+                  </div>
+                  @if (p.riskSummary) {
+                    <p class="risk-summary-text">
+                      <span class="material-icons" style="font-size:13px;vertical-align:middle">lightbulb</span> {{ p.riskSummary }}
+                    </p>
+                  }
+                </div>
+              }
+
+              <!-- View Health Document -->
+              <div class="doc-actions">
+                <button class="btn btn-sm btn-secondary"
+                        (click)="viewHealthReport(p.policyId)"
+                        [disabled]="docLoading[p.policyId + '_report']">
+                  <span class="material-icons" style="font-size:15px;vertical-align:middle">
+                    {{ docLoading[p.policyId + '_report'] ? 'hourglass_empty' : 'description' }}
+                  </span>
+                  {{ docLoading[p.policyId + '_report'] ? 'Opening...' : 'View Health Report' }}
+                </button>
               </div>
             </div>
-            <!-- Members List -->
-            @if (p.members && p.members.length > 0) {
-              <div class="members-table">
-                <h4>Policy Members</h4>
-                <table>
-                  <thead>
+
+            <!-- ── RIGHT: Customer Form Details ── -->
+            <div class="split-right">
+              <div class="split-section-title">
+                <span class="material-icons" style="font-size:16px;color:#1e40af">person</span>
+                Customer Application Details
+              </div>
+
+              <!-- Members Table -->
+              @if (p.members && p.members.length > 0) {
+                <div class="members-table">
+                  <h4>Insured Members</h4>
+                  <table>
+                    <thead>
                     <tr>
                       <th>Name</th>
                       <th>Relationship</th>
                       <th>DOB</th>
                       <th>Gender</th>
-                      <th>Pre-existing Conditions</th>
                     </tr>
-                  </thead>
-                  <tbody>
-                    @for (m of p.members; track m) {
-                      <tr>
-                        <td>{{ m.memberName }}</td>
-                        <td>{{ m.relationship }}</td>
-                        <td>{{ m.dateOfBirth | date: 'dd MMM yyyy' }}</td>
-                        <td>{{ m.gender }}</td>
-                        <td>{{ m.preExistingDiseases || 'None' }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            }
-
-            <!-- Document Review & Raise Concern -->
-            <div class="review-actions" style="display: flex; gap: 8px; flex-wrap: wrap">
-              <button class="btn btn-sm btn-secondary" (click)="downloadHealthReport(p.policyId)">
-                <span class="material-icons" style="font-size: 16px; vertical-align: middle"
-                  >download</span
-                >
-                Download Report
-              </button>
-              <button class="btn btn-sm btn-danger" (click)="toggleConcernForm(p.policyId)">
-                <span class="material-icons" style="font-size: 16px; vertical-align: middle"
-                  >flag</span
-                >
-                Raise Concern
-              </button>
-            </div>
-
-            @if (showConcernForm[p.policyId]) {
-              <div class="concern-form">
-                <div class="form-group">
-                  <label>Concern / Additional Documents Needed</label>
-                  <textarea
-                    class="form-control"
-                    [(ngModel)]="concernRemarks[p.policyId]"
-                    rows="2"
-                    placeholder="Describe the concern or documents required..."
-                  ></textarea>
+                    </thead>
+                    <tbody>
+                      @for (m of p.members; track m) {
+                        <tr>
+                          <td>{{ m.memberName }}</td>
+                          <td>{{ m.relationship }}</td>
+                          <td>{{ m.dateOfBirth | date:'dd MMM yyyy' }}</td>
+                          <td>{{ m.gender }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
                 </div>
-                <div style="display: flex; gap: 8px; justify-content: flex-end">
-                  <button
-                    class="btn btn-sm btn-secondary"
-                    (click)="showConcernForm[p.policyId] = false"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    class="btn btn-sm btn-primary"
-                    (click)="submitConcern(p.policyId)"
-                    [disabled]="sendingConcern[p.policyId]"
-                  >
-                    {{ sendingConcern[p.policyId] ? 'Sending...' : 'Submit Concern' }}
-                  </button>
+              } @else {
+                <div class="no-members">
+                  <span class="material-icons" style="font-size:20px;color:#94a3b8">person_off</span>
+                  <span>No additional members added</span>
                 </div>
-              </div>
-            }
-            <!-- Quote Form -->
-            <div class="quote-form">
-              <h4 style="display: flex; align-items: center; gap: 8px">
-                <span class="material-icons" style="font-size: 18px">monetization_on</span> Send
-                Premium Quote
-              </h4>
-              <div class="form-row" style="align-items: center">
-                @if (quoteAmounts[p.policyId]) {
-                  <div class="calculated-amount" style="flex: 1.5">
-                    <span style="font-size: 0.8rem; color: #64748b; display: block"
-                      >Calculated Premium</span
-                    >
-                    <strong style="font-size: 1.25rem; color: #0f1f3d"
-                      >₹{{ quoteAmounts[p.policyId].toLocaleString() }}</strong
-                    >
-                  </div>
-                  <button
-                    class="btn-send"
-                    (click)="sendQuote(p.policyId)"
-                    [disabled]="sending[p.policyId]"
-                  >
-                    {{ sending[p.policyId] ? 'Sending...' : 'Send Quote' }}
-                  </button>
-                } @else {
-                  <button
-                    class="btn btn-secondary"
-                    (click)="calculateQuote(p.policyId)"
-                    [disabled]="sending[p.policyId]"
-                    style="
-                      background: #e2e8f0;
-                      color: #333;
-                      font-weight: 600;
-                      padding: 0.65rem 1.5rem;
-                      border: none;
-                      border-radius: 8px;
-                      cursor: pointer;
-                    "
-                  >
-                    {{ sending[p.policyId] ? 'Calculating...' : 'Calculate Premium Quote' }}
-                  </button>
-                }
-              </div>
-              @if (successPolicyId === p.policyId) {
-                <div class="success-msg">Quote sent successfully!</div>
               }
-              @if (errors[p.policyId]) {
-                <div class="error-msg">{{ errors[p.policyId] }}</div>
-              }
+
+              <!-- KYC Status Info (read-only) -->
+              <div class="kyc-info-bar">
+                <span class="material-icons" style="font-size:15px">verified</span>
+                <span>KYC (e-Aadhaar): &nbsp;</span>
+                <span class="kyc-status-pill" [style.background]="getKycColor(p.kycStatus) + '15'" [style.color]="getKycColor(p.kycStatus)">
+                  {{ p.kycStatus || 'PENDING' }}
+                </span>
+              </div>
             </div>
           </div>
+          <!-- ── END SPLIT VIEW ── -->
+
+          <!-- ── Action Row ── -->
+          <div class="action-row">
+            <button class="btn btn-sm btn-danger"
+                    (click)="toggleConcernForm(p.policyId)">
+              <span class="material-icons" style="font-size:16px;vertical-align:middle">flag</span>
+              Raise Concern
+            </button>
+          </div>
+
+          <!-- Concern Form -->
+          @if (showConcernForm[p.policyId]) {
+            <div class="concern-form">
+              <div class="form-group">
+                <label>Concern / Additional Documents Needed</label>
+                <textarea class="form-control"
+                          [(ngModel)]="concernRemarks[p.policyId]"
+                          rows="2"
+                          placeholder="Describe the concern...">
+                </textarea>
+              </div>
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn btn-sm btn-secondary"
+                        (click)="showConcernForm[p.policyId] = false">
+                  Cancel
+                </button>
+                <button class="btn btn-sm btn-primary"
+                        (click)="submitConcern(p.policyId)"
+                        [disabled]="sendingConcern[p.policyId]">
+                  {{ sendingConcern[p.policyId] ? 'Sending...' : 'Submit Concern' }}
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- ── Quote Form ── -->
+          <div class="quote-form">
+            <h4 style="display:flex;align-items:center;gap:8px">
+              <span class="material-icons" style="font-size:18px">monetization_on</span>
+              Send Premium Quote
+            </h4>
+
+            @if (p.extractedConditions === 'SUSPICIOUS_DOCUMENT') {
+              <div class="kyc-warning" style="border-color:#fecaca;background:#fff5f5">
+                <span class="material-icons" style="font-size:16px;color:#ef4444">gpp_bad</span>
+                <span style="color:#7f1d1d">
+                  Premium calculation is blocked — suspicious health document detected.
+                  The customer must re-upload a valid medical report.
+                </span>
+              </div>
+            }
+
+            @if (!p.aiAnalysisDone) {
+              <div class="kyc-warning" style="border-color:#bfdbfe;background:#eff6ff">
+                <span class="material-icons" style="font-size:16px;color:#3b82f6">hourglass_top</span>
+                <span style="color:#1e3a8a">
+                  AI analysis is still in progress. Please wait before calculating the premium.
+                </span>
+              </div>
+            }
+
+            <div class="form-row" style="align-items:center">
+              @if (quoteAmounts[p.policyId]) {
+                <div class="calculated-amount" style="flex:1.5">
+                  <span style="font-size:0.8rem;color:#64748b;display:block">
+                    Calculated Premium
+                  </span>
+                  @if (p.extractedConditions
+                  && p.extractedConditions !== 'None'
+                  && p.extractedConditions !== 'SUSPICIOUS_DOCUMENT') {
+                    <span style="font-size:11px;color:#800020;display:block;margin-bottom:4px">
+                      <span class="material-icons" style="font-size:12px;vertical-align:middle">smart_toy</span> AI-adjusted for: {{ p.extractedConditions }}
+                    </span>
+                  }
+                  <strong style="font-size:1.25rem;color:#0f1f3d;display:block;margin-bottom:8px">
+                    ₹{{ quoteAmounts[p.policyId].toLocaleString() }}
+                  </strong>
+
+                  @if (quoteBreakdowns[p.policyId] && quoteBreakdowns[p.policyId].length > 0) {
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;margin-bottom:12px;margin-right:16px">
+                      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:4px">
+                        <span class="material-icons" style="font-size:12px">calculate</span>
+                        Premium Breakdown
+                      </div>
+
+                      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:12px">
+                        <span style="color:#64748b;display:flex;align-items:center;gap:4px">
+                          <span class="material-icons" style="font-size:12px;color:#3b82f6">shield</span>
+                          Base Premium <small style="color:#94a3b8">(2% × ₹{{ (p.coverageAmount||0).toLocaleString() }})</small>
+                        </span>
+                        <strong style="color:#0f1f3d">₹{{ (((p.coverageAmount||0)*0.02)).toLocaleString() }}</strong>
+                      </div>
+
+                      @for (factor of quoteBreakdowns[p.policyId]; track factor.label) {
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:12px">
+                          <span style="display:flex;align-items:center;gap:4px;color:#374151">
+                            <span class="material-icons" style="font-size:12px" [style.color]="factor.color">{{ factor.icon }}</span>
+                            {{ factor.label }}
+                          </span>
+                          <span style="display:flex;align-items:center;gap:6px">
+                            <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px"
+                                  [style.background]="factor.color+'20'"
+                                  [style.color]="factor.color">
+                              {{ factor.risk }}
+                            </span>
+                            <strong style="font-size:12px" [style.color]="factor.color">×{{ factor.multiplier.toFixed(1) }}</strong>
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <button class="btn-send"
+                        (click)="sendQuote(p.policyId)"
+                        [disabled]="sending[p.policyId]">
+                  {{ sending[p.policyId] ? 'Sending...' : 'Send Quote' }}
+                </button>
+
+              } @else {
+                <button class="btn btn-secondary"
+                        (click)="calculateQuote(p.policyId)"
+                        [disabled]="sending[p.policyId]
+                                    || !p.aiAnalysisDone
+                                    || p.extractedConditions === 'SUSPICIOUS_DOCUMENT'"
+                        [title]="!p.aiAnalysisDone
+                                 ? 'Wait for AI analysis to complete'
+                                 : p.extractedConditions === 'SUSPICIOUS_DOCUMENT'
+                                 ? 'Suspicious document — customer must re-upload'
+                                 : 'Calculate premium'"
+                        style="background:#e2e8f0;color:#333;font-weight:600;
+                               padding:0.65rem 1.5rem;border:none;
+                               border-radius:8px;cursor:pointer">
+                  {{ sending[p.policyId] ? 'Calculating...' : 'Calculate Premium Quote' }}
+                </button>
+              }
+            </div>
+
+            @if (successPolicyId === p.policyId) {
+              <div class="success-msg">Quote sent successfully!</div>
+            }
+            @if (errors[p.policyId]) {
+              <div class="error-msg">{{ errors[p.policyId] }}</div>
+            }
+          </div>
+
         </div>
       }
     </div>

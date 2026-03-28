@@ -1,3 +1,5 @@
+// FILE: src/app/pages/customer/browse-plans/browse-plans.component.ts
+
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -26,15 +28,31 @@ export class BrowsePlansComponent implements OnInit {
   sortBy = 'default';
   minCoverage: number | null = null;
   maxCoverage: number | null = null;
+  kycVerified = false;
+  bankDetailsFilled = false;
+  profileLoading = true;
 
-  // ── NEW: today string for [max] attribute ──
+  // ── e-KYC state ────────────────────────────────────────────────
+  kycStep: 'idle' | 'otp-sent' | 'done' = 'idle';
+  kycAadhaar = '';
+  kycOtp = '';
+  kycTransactionId = '';
+  kycLoading = false;
+  kycError = '';
+  kycDone = false;
+
   today = new Date().toISOString().split('T')[0];
+
+  // ── FIX 3: Plan Comparison ──────────────────────────────────────────────
+  selectedForComparison: InsurancePlan[] = [];
+  showComparison = false;
 
   form = {
     nomineeName: '',
     nomineeRelationship: '',
     members: [this.newMember()],
     healthCheckReport: null as File | null,
+    aadhaarDocument: null as File | null,   // ── FIX 2: KYC Aadhaar
   };
 
   errors: any = {};
@@ -54,6 +72,14 @@ export class BrowsePlansComponent implements OnInit {
         this.loading = false;
       },
       error: () => { this.loading = false; },
+    });
+
+    this.api.getProfile().subscribe({
+      next: (p) => {
+        // profile no longer dictates KYC verified state for browsing plans
+        this.profileLoading = false;
+      },
+      error: () => { this.profileLoading = false; }
     });
   }
 
@@ -83,11 +109,33 @@ export class BrowsePlansComponent implements OnInit {
 
   setFilter(type: string): void { this.selectedPlanType = type; }
 
+  // ── FIX 1: Individual Plan Bug ──────────────────────────────────────────
+  get isIndividualPlan(): boolean {
+    return this.selectedPlan?.planType === 'INDIVIDUAL';
+  }
+
   selectPlan(plan: InsurancePlan): void {
     this.selectedPlan = plan;
+    this.showComparison = false;
+
+    // FIX 1: Reset to exactly 1 member for INDIVIDUAL plans
+    if (plan.planType === 'INDIVIDUAL') {
+      this.form.members = [this.newMember()];
+    } else {
+      this.form.members = [this.newMember()];
+    }
+
     this.step = 2;
     window.scrollTo(0, 0);
   }
+
+  addMember(): void {
+    // FIX 1: Prevent adding more than 1 member for INDIVIDUAL plans
+    if (this.isIndividualPlan) return;
+    this.form.members.push(this.newMember());
+  }
+
+  removeMember(i: number): void { this.form.members.splice(i, 1); }
 
   newMember() {
     return {
@@ -99,8 +147,25 @@ export class BrowsePlansComponent implements OnInit {
     };
   }
 
-  addMember(): void { this.form.members.push(this.newMember()); }
-  removeMember(i: number): void { this.form.members.splice(i, 1); }
+  // ── FIX 2: KYC Aadhaar file handler ────────────────────────────────────
+  onAadhaarSelect(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        this.errors.aadhaarDocument = 'Only PDF, JPG, PNG files are allowed';
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.errors.aadhaarDocument = 'File size must be less than 5MB';
+        return;
+      }
+      this.form.aadhaarDocument = file;
+      delete this.errors.aadhaarDocument;
+    }
+  }
 
   onHealthCheckReportSelect(event: any): void {
     const file = event.target.files[0];
@@ -110,13 +175,44 @@ export class BrowsePlansComponent implements OnInit {
     }
   }
 
+  // ── FIX 3: Plan Comparison ──────────────────────────────────────────────
+  toggleComparison(plan: InsurancePlan, event: Event): void {
+    event.stopPropagation(); // prevent selectPlan from firing
+    const idx = this.selectedForComparison.findIndex(p => p.planId === plan.planId);
+    if (idx > -1) {
+      // Already selected — remove it
+      this.selectedForComparison.splice(idx, 1);
+    } else {
+      if (this.selectedForComparison.length >= 3) {
+        this.toast.error('You can compare up to 3 plans at a time');
+        return;
+      }
+      this.selectedForComparison.push(plan);
+    }
+    // Auto-show comparison when 2+ plans selected
+    if (this.selectedForComparison.length >= 2) {
+      this.showComparison = true;
+    } else {
+      this.showComparison = false;
+    }
+  }
+
+  isSelectedForComparison(plan: InsurancePlan): boolean {
+    return this.selectedForComparison.some(p => p.planId === plan.planId);
+  }
+
+  clearComparison(): void {
+    this.selectedForComparison = [];
+    this.showComparison = false;
+  }
+
+  // ── Validation ──────────────────────────────────────────────────────────
   onBlur(field: string): void {
     this.touched[field] = true;
     this.validateSingleField(field);
   }
 
-  // ── NEW: Calculate age from DOB ──
-   calcAge(dob: string): number {
+  calcAge(dob: string): number {
     const birth = new Date(dob);
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
@@ -125,7 +221,6 @@ export class BrowsePlansComponent implements OnInit {
     return age;
   }
 
-  // ── NEW: Get min DOB based on plan maxAgeLimit ──
   getMinDob(): string {
     if (!this.selectedPlan?.maxAgeLimit) return '';
     const d = new Date();
@@ -133,7 +228,6 @@ export class BrowsePlansComponent implements OnInit {
     return d.toISOString().split('T')[0];
   }
 
-  // ── NEW: Get max DOB based on plan minAgeLimit ──
   getMaxDob(): string {
     if (!this.selectedPlan?.minAgeLimit) return this.today;
     const d = new Date();
@@ -141,31 +235,18 @@ export class BrowsePlansComponent implements OnInit {
     return d.toISOString().split('T')[0];
   }
 
-  // ── NEW: Validate DOB against plan age limits ──
-   validateDob(dob: string, index: number): string | null {
+  validateDob(dob: string, index: number): string | null {
     if (!dob) return 'Date of birth is required';
-
     const selected = new Date(dob);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    // No future dates
-    if (selected > today) {
-      return 'Date of birth cannot be a future date';
-    }
-
+    if (selected > today) return 'Date of birth cannot be a future date';
     if (!this.selectedPlan) return null;
-
     const age = this.calcAge(dob);
-
-    // Check plan age limits
-    if (this.selectedPlan.minAgeLimit && age < this.selectedPlan.minAgeLimit) {
+    if (this.selectedPlan.minAgeLimit && age < this.selectedPlan.minAgeLimit)
       return `Member must be at least ${this.selectedPlan.minAgeLimit} years old for this plan`;
-    }
-    if (this.selectedPlan.maxAgeLimit && age > this.selectedPlan.maxAgeLimit) {
+    if (this.selectedPlan.maxAgeLimit && age > this.selectedPlan.maxAgeLimit)
       return `Member must be under ${this.selectedPlan.maxAgeLimit} years old for this plan`;
-    }
-
     return null;
   }
 
@@ -174,12 +255,10 @@ export class BrowsePlansComponent implements OnInit {
       if (!this.form.nomineeName?.trim())
         this.errors.nomineeName = 'Nominee name is required';
       else delete this.errors.nomineeName;
-
     } else if (field === 'nomineeRelationship') {
       if (!this.form.nomineeRelationship)
         this.errors.nomineeRelationship = 'Nominee relationship is required';
       else delete this.errors.nomineeRelationship;
-
     } else if (field.startsWith('member')) {
       const match = field.match(/^member(\d+)_(.+)$/);
       if (match) {
@@ -187,7 +266,6 @@ export class BrowsePlansComponent implements OnInit {
         const prop = match[2];
         const m = this.form.members[i];
         if (!m) return;
-
         if (prop === 'name') {
           if (!m.memberName?.trim()) this.errors[field] = 'Member name is required';
           else delete this.errors[field];
@@ -197,7 +275,6 @@ export class BrowsePlansComponent implements OnInit {
           else delete this.errors[field];
         }
         if (prop === 'dob') {
-          // ── NEW: use full DOB validation ──
           const err = this.validateDob(m.dateOfBirth, i);
           if (err) this.errors[field] = err;
           else delete this.errors[field];
@@ -242,14 +319,11 @@ export class BrowsePlansComponent implements OnInit {
         this.errors[`member${i}_relationship`] = 'Relationship is required';
         isValid = false;
       }
-
-      // ── NEW: Full DOB validation per member ──
       const dobErr = this.validateDob(m.dateOfBirth, i);
       if (dobErr) {
         this.errors[`member${i}_dob`] = dobErr;
         isValid = false;
       }
-
       if (!m.gender) {
         this.errors[`member${i}_gender`] = 'Gender is required';
         isValid = false;
@@ -270,12 +344,18 @@ export class BrowsePlansComponent implements OnInit {
     if (!this.selectedPlan) return;
     if (!this.validateForm()) return;
 
+    if (!this.kycDone) {
+      this.toast.error('Please complete Aadhaar e-KYC verification before submitting.');
+      return;
+    }
+
     this.submitting = true;
     const formData = new FormData();
     const req: any = {
       planId: this.selectedPlan.planId,
       nomineeName: this.form.nomineeName,
       nomineeRelationship: this.form.nomineeRelationship?.toUpperCase(),
+      kycTransactionId: this.kycTransactionId,
       members: this.form.members.map((m) => ({
         memberName: m.memberName,
         relationship: m.relationship?.toUpperCase(),
@@ -290,17 +370,68 @@ export class BrowsePlansComponent implements OnInit {
     if (this.form.healthCheckReport) {
       formData.append('healthCheckReport', this.form.healthCheckReport);
     }
+    if (this.form.aadhaarDocument) {
+      formData.append('aadhaarDocument', this.form.aadhaarDocument);
+    }
 
     this.api.purchasePolicyWithDocument(formData).subscribe({
       next: () => {
         this.submitting = false;
         this.submitted = true;
+        this.toast.success('Policy submitted successfully!');
         window.scrollTo(0, 0);
       },
       error: (err: any) => {
         this.submitting = false;
         this.toast.error(err?.error?.message || 'Submission failed. Please try again.');
       },
+    });
+  }
+
+  // ── e-KYC Methods ───────────────────────────────────────────────────────
+  initiateKyc(): void {
+    if (this.kycAadhaar !== null && this.kycAadhaar !== undefined) {
+      this.kycAadhaar = this.kycAadhaar.toString().trim();
+    }
+    
+    if (!this.kycAadhaar || !/^\d{12}$/.test(this.kycAadhaar)) {
+      this.kycError = 'Enter a valid 12-digit Aadhaar number';
+      return;
+    }
+    this.kycLoading = true;
+    this.kycError = '';
+    this.api.initiateKyc(this.kycAadhaar).subscribe({
+      next: (res) => {
+        this.kycTransactionId = res.transactionId;
+        this.kycStep = 'otp-sent';
+        this.kycLoading = false;
+        this.toast.success(res.message || 'OTP sent to your registered email. Please check your inbox.');
+      },
+      error: (err) => {
+        this.kycLoading = false;
+        this.kycError = err?.error?.message || 'Failed to send OTP';
+      }
+    });
+  }
+
+  verifyKycOtp(): void {
+    if (!this.kycOtp || this.kycOtp.length < 6) {
+      this.kycError = 'Enter the 6-digit OTP';
+      return;
+    }
+    this.kycLoading = true;
+    this.kycError = '';
+    this.api.verifyKycOtp(this.kycTransactionId, this.kycOtp).subscribe({
+      next: () => {
+        this.kycStep = 'done';
+        this.kycDone = true;
+        this.kycLoading = false;
+        this.toast.success('Aadhaar KYC Verified Successfully!');
+      },
+      error: (err) => {
+        this.kycLoading = false;
+        this.kycError = err?.error?.message || 'Invalid OTP. Please try again.';
+      }
     });
   }
 

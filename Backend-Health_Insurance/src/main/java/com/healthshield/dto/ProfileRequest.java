@@ -6,11 +6,10 @@ import jakarta.validation.constraints.Size;
 
 public class ProfileRequest {
 
-    @NotBlank(message = "Name is required")
-    @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
+    @Pattern(regexp = "^$|^.{1,100}$", message = "Name must be between 1 and 100 characters")
     private String name;
 
-    @Pattern(regexp = "^$|^[0-9]{10}$", message = "Phone number must be exactly 10 digits")
+    @Pattern(regexp = "^$|^[\\d\\s\\+\\-]{10,15}$", message = "Phone number is invalid")
     private String phone;
 
     private String address;
@@ -19,8 +18,13 @@ public class ProfileRequest {
 
     private String state;
 
-    @Pattern(regexp = "^$|^[0-9]{6}$", message = "Pincode must be exactly 6 digits")
+    @Pattern(regexp = "^$|^[A-Za-z0-9\\s\\-]{4,10}$", message = "Pincode is invalid")
     private String pincode;
+
+    private String accountNumber;
+    private String ifscCode;
+    private String accountHolderName;
+    private String bankName;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -39,4 +43,16 @@ public class ProfileRequest {
 
     public String getPincode() { return pincode; }
     public void setPincode(String pincode) { this.pincode = pincode; }
+
+    public String getAccountNumber() { return accountNumber; }
+    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
+
+    public String getIfscCode() { return ifscCode; }
+    public void setIfscCode(String ifscCode) { this.ifscCode = ifscCode; }
+
+    public String getAccountHolderName() { return accountHolderName; }
+    public void setAccountHolderName(String accountHolderName) { this.accountHolderName = accountHolderName; }
+
+    public String getBankName() { return bankName; }
+    public void setBankName(String bankName) { this.bankName = bankName; }
 }

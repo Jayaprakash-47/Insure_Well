@@ -11,6 +11,11 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
+  // Skip AI chat endpoint — has its own loading state inside the chatbot
+  if (req.url.includes('/chat')) {
+    return next(req);
+  }
+
   loadingService.show();
 
   return next(req).pipe(

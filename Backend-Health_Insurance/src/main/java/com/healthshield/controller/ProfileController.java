@@ -57,4 +57,18 @@ public class ProfileController {
         profileService.changePassword(userDetails.getUsername(), request);
         return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
     }
+
+    // =================== AADHAAR SANDBOX VERIFICATION ===================
+    @PostMapping(value = "/verify-aadhaar-sandbox", consumes = "multipart/form-data")
+    public ResponseEntity<Map<String, String>> verifyAadhaarSandbox(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam("aadhaarNumber") String aadhaarNumber,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        profileService.verifyAadhaarSandbox(userDetails.getUsername(), aadhaarNumber, file);
+        return ResponseEntity.ok(Map.of(
+                "status", "SUCCESS",
+                "message", "Aadhaar verified successfully via Sandbox API",
+                "kycStatus", "VERIFIED"
+        ));
+    }
 }

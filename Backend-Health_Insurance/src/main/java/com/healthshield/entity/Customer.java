@@ -20,11 +20,14 @@ public class Customer extends User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(columnDefinition = "TEXT")
-    private String address;
+    // Bank Details
+    private String accountNumber;
+    private String ifscCode;
+    private String accountHolderName;
+    private String bankName;
 
-    private String city;
-    private String state;
-    private String pincode;
+    // KYC Details
+    private String aadhaarNumber;
+    private Boolean aadhaarVerified = false;
 }
 

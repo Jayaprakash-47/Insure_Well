@@ -13,6 +13,15 @@ public class ProfileResponse {
     private String pincode;
     private String createdAt;
 
+    private String accountNumber;
+    private String ifscCode;
+    private String accountHolderName;
+    private String bankName;
+
+    // Aadhaar KYC
+    private String aadhaarNumber;
+    private Boolean aadhaarVerified;
+
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 
@@ -42,4 +51,22 @@ public class ProfileResponse {
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public String getAccountNumber() { return accountNumber; }
+    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
+
+    public String getIfscCode() { return ifscCode; }
+    public void setIfscCode(String ifscCode) { this.ifscCode = ifscCode; }
+
+    public String getAccountHolderName() { return accountHolderName; }
+    public void setAccountHolderName(String accountHolderName) { this.accountHolderName = accountHolderName; }
+
+    public String getBankName() { return bankName; }
+    public void setBankName(String bankName) { this.bankName = bankName; }
+
+    public String getAadhaarNumber() { return aadhaarNumber; }
+    public void setAadhaarNumber(String aadhaarNumber) { this.aadhaarNumber = aadhaarNumber; }
+
+    public Boolean getAadhaarVerified() { return aadhaarVerified; }
+    public void setAadhaarVerified(Boolean aadhaarVerified) { this.aadhaarVerified = aadhaarVerified; }
 }
