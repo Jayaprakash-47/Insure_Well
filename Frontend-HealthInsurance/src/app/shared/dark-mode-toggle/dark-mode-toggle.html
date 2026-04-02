@@ -6,11 +6,7 @@
   [attr.aria-label]="(isDark$ | async) ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
   (click)="toggle()"
 >
-  <span class="fab-icon">
-    @if (isDark$ | async) {
-      ☀️
-    } @else {
-      🌙
-    }
+  <span class="material-icons fab-icon">
+    {{ (isDark$ | async) ? 'light_mode' : 'dark_mode' }}
   </span>
 </button>

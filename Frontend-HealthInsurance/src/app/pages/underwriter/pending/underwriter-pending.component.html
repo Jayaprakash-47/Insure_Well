@@ -155,7 +155,7 @@
 
               <!-- View Health Document -->
               <div class="doc-actions">
-                <button class="btn btn-sm btn-secondary"
+                <button class="btn btn-report"
                         (click)="viewHealthReport(p.policyId)"
                         [disabled]="docLoading[p.policyId + '_report']">
                   <span class="material-icons" style="font-size:15px;vertical-align:middle">
@@ -335,7 +335,7 @@
                 </button>
 
               } @else {
-                <button class="btn btn-secondary"
+                <button class="btn btn-calculate"
                         (click)="calculateQuote(p.policyId)"
                         [disabled]="sending[p.policyId]
                                     || !p.aiAnalysisDone
@@ -344,10 +344,8 @@
                                  ? 'Wait for AI analysis to complete'
                                  : p.extractedConditions === 'SUSPICIOUS_DOCUMENT'
                                  ? 'Suspicious document — customer must re-upload'
-                                 : 'Calculate premium'"
-                        style="background:#e2e8f0;color:#333;font-weight:600;
-                               padding:0.65rem 1.5rem;border:none;
-                               border-radius:8px;cursor:pointer">
+                                 : 'Calculate premium'">
+                  <span class="material-icons" style="font-size:16px;vertical-align:middle">calculate</span>
                   {{ sending[p.policyId] ? 'Calculating...' : 'Calculate Premium Quote' }}
                 </button>
               }

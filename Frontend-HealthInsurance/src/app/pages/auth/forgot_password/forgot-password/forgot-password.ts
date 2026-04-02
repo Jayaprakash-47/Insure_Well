@@ -7,8 +7,9 @@ import { PasswordStrengthComponent } from '../../../../shared/password-strength/
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [FormsModule, RouterLink, PasswordStrengthComponent], // ← CommonModule removed
+  imports: [FormsModule, RouterLink, PasswordStrengthComponent],
   templateUrl: './forgot-password.html',
+  styleUrl: './forgot-password.css',
 })
 export class ForgotPasswordComponent {
   step = 1;

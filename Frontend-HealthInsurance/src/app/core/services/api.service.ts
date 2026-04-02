@@ -166,8 +166,8 @@ export class ApiService {
   }
 
   renewPolicy(policyId: number, request: any): Observable<any> {
-    return this.http.put(
-      `${this.api}/customer/policies/${policyId}/renew`, request);
+    return this.http.post(
+      `${this.api}/policies/${policyId}/renew`, request);
   }
 
   reapplyPolicy(policyId: number, formData: FormData): Observable<PolicyResponse> {
@@ -516,8 +516,10 @@ export class ApiService {
       `${this.api}/policies/${policyId}/kyc/reject`,
       { reason });
   }
-  sendChatMessage(message: string, history: any[]): Observable<any> {
-    return this.http.post(`${this.api}/chat`, { message, history });
+  sendChatMessage(message: string, history: any[], customerContext?: string): Observable<any> {
+    const body: any = { message, history };
+    if (customerContext) body['customerContext'] = customerContext;
+    return this.http.post(`${this.api}/chat`, body);
   }
 
   // ── e-KYC (Self-hosted OTP via Email) ─────────────────────────────

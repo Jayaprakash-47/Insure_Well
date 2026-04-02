@@ -53,6 +53,9 @@
 
         <!-- Right Side Actions -->
         <div class="nav-right">
+          <!-- Dark Mode Toggle -->
+          <app-dark-mode-toggle></app-dark-mode-toggle>
+          
           @if (auth.isLoggedIn()) {
             <!-- Notification Bell -->
             <app-notification-bell></app-notification-bell>
@@ -131,8 +134,6 @@
   <router-outlet />
 </main>
 
-<!-- ── Dark Mode Floating Toggle ── -->
-<app-dark-mode-toggle></app-dark-mode-toggle>
 
 @if (auth.isCustomer()) {
   <app-chatbot />

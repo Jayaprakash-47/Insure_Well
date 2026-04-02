@@ -3,6 +3,30 @@
 .page-wrapper { max-width: 860px; margin: 0 auto; padding: 28px 20px 64px; }
 
 /* ── Header ── */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  margin-bottom: 12px;
+}
+.back-link:hover {
+  background: var(--bg-hover, #f1f5f9);
+  color: var(--text-primary);
+  border-color: var(--primary);
+}
+body.dark-mode .back-link:hover {
+  background: var(--primary-light);
+}
+
 .page-header-row {
   display: flex; align-items: flex-start;
   justify-content: space-between; gap: 16px;

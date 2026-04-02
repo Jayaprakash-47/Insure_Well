@@ -62,10 +62,10 @@ export class AssignClaimsOfficerComponent implements OnInit {
       .assignClaimsOfficer(this.selectedClaim.claimId, { claimsOfficerId: this.selectedOfficerId })
       .subscribe({
         next: () => {
-          this.assigning = false;
           this.success = true;
           this.claims = this.claims.filter((c) => c.claimId !== this.selectedClaim.claimId);
           setTimeout(() => {
+            this.assigning = false;
             this.selectedClaim = null;
             this.selectedOfficerId = null;
             this.success = false;

@@ -4,6 +4,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# Local secrets - NEVER commit this
+src/main/resources/application-local.yaml
+
+
 ### STS ###
 .apt_generated
 .classpath

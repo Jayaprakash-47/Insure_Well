@@ -68,9 +68,9 @@ public class ClaimController {
         return ResponseEntity.ok(claimService.getClaimById(user, id));
     }
 
-    // ── Get all claims (Claims Officer) ──
+    // ── Get all claims (Admin + Claims Officer) ──
     @GetMapping
-    @PreAuthorize("hasAnyRole('CLAIMS_OFFICER')")
+    @PreAuthorize("hasAnyRole('CLAIMS_OFFICER', 'ADMIN')")
     public ResponseEntity<List<ClaimResponse>> getAllClaims() {
         return ResponseEntity.ok(claimService.getAllClaims());
     }

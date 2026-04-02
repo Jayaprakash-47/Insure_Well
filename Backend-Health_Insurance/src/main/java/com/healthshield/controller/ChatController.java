@@ -215,10 +215,26 @@ public class ChatController {
         List<Map<String, String>> history =
                 (List<Map<String, String>>) body.getOrDefault("history", List.of());
 
+        // Optional real-time customer data injected from the frontend
+        String customerContext = (String) body.getOrDefault("customerContext", "");
+
+        // Build the dynamic system prompt (base + optional customer context)
+        String dynamicPrompt = SYSTEM_PROMPT;
+        if (customerContext != null && !customerContext.isBlank()) {
+            dynamicPrompt += "\n\n" +
+                "══════════════════════════════════════\n" +
+                "CURRENT CUSTOMER CONTEXT (Live Data)\n" +
+                "══════════════════════════════════════\n" +
+                "The customer is currently logged in. Use the following real data to give personalised answers.\n" +
+                "When the customer asks about their policies, claims, payments, coverage, or profile — refer to this data directly.\n\n" +
+                customerContext + "\n\n" +
+                "If the customer's data shows no policies, claims, or payments, acknowledge that and guide them on how to get started.\n" +
+                "Always use the customer's first name when greeting or addressing them personally.\n";
+        }
+
         // Build Gemini contents array from history + current message
         List<Map<String, Object>> contents = new ArrayList<>();
 
-        // Add system instruction as first user turn (Gemini REST API style)
         for (Map<String, String> msg : history) {
             String role = "user".equals(msg.get("role")) ? "user" : "model";
             contents.add(Map.of(
@@ -235,7 +251,7 @@ public class ChatController {
 
         Map<String, Object> requestBody = Map.of(
                 "system_instruction", Map.of(
-                        "parts", List.of(Map.of("text", SYSTEM_PROMPT))
+                        "parts", List.of(Map.of("text", dynamicPrompt))
                 ),
                 "contents", contents,
                 "generationConfig", Map.of(

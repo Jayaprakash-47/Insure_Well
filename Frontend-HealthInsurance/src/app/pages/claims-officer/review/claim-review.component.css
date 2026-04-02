@@ -18,11 +18,27 @@
 }
 
 .back-link {
-  font-size: 13px; color: #64748b; text-decoration: none;
-  display: inline-flex; align-items: center; gap: 4px;
-  font-weight: 500; transition: color 0.2s;
+  font-size: 13px;
+  color: #800020;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  padding: 7px 16px 7px 10px;
+  border: 1.5px solid #800020;
+  border-radius: 20px;
+  background: transparent;
+  transition: all 0.2s;
+  letter-spacing: 0.01em;
+  margin-bottom: 14px;
 }
-.back-link:hover { color: #800020; }
+.back-link:hover {
+  background: #800020;
+  color: white;
+  box-shadow: 0 3px 10px rgba(128,0,32,0.22);
+  transform: translateX(-2px);
+}
 
 /* ══════════════════════════════
    SPLIT VIEW

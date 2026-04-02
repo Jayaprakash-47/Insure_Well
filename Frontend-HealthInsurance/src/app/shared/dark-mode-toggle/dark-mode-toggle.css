@@ -1,3 +1,72 @@
 :host {
-  display: contents; /* renders the button directly, no wrapper div */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark-mode-fab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  position: relative;
+  z-index: 10;
+  padding: 0;
+}
+
+.dark-mode-fab:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.dark-mode-fab:active {
+  transform: translateY(0);
+}
+
+.fab-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* Tooltip */
+.dark-mode-fab::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a0208;
+  color: #f1f5f9;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  font-family: inherit;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode-fab:hover::after {
+  opacity: 1;
+}
+
+/* Active State Customizations in Dark Mode */
+:host-context(body.dark-mode) .dark-mode-fab {
+  color: #fbbf24;
+}
+:host-context(body.dark-mode) .dark-mode-fab:hover {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.4);
 }

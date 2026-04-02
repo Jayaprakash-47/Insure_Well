@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './notification-bell.html',
+  styleUrl: './notification-bell.css',
 })
 export class NotificationBellComponent implements OnInit {
   isOpen = false;

@@ -257,35 +257,30 @@
 
                 <div class="plan-highlights">
                   <div class="highlight-item">
-                    <span class="highlight-icon"></span>
                     <div>
                       <div class="highlight-label">Max Coverage</div>
                       <div class="highlight-val">₹{{ formatCoverage(p.coverageAmount) }}</div>
                     </div>
                   </div>
                   <div class="highlight-item">
-                    <span class="highlight-icon"></span>
                     <div>
                       <div class="highlight-label">Base Premium</div>
                       <div class="highlight-val">₹{{ formatCoverage(p.basePremiumAmount) }}/yr</div>
                     </div>
                   </div>
                   <div class="highlight-item">
-                    <span class="highlight-icon"></span>
                     <div>
                       <div class="highlight-label">Age Range</div>
                       <div class="highlight-val">{{ p.minAgeLimit }}–{{ p.maxAgeLimit }} yrs</div>
                     </div>
                   </div>
                   <div class="highlight-item">
-                    <span class="highlight-icon"></span>
                     <div>
                       <div class="highlight-label">Waiting Period</div>
                       <div class="highlight-val">{{ p.waitingPeriodMonths }} months</div>
                     </div>
                   </div>
                   <div class="highlight-item">
-                    <span class="highlight-icon"></span>
                     <div>
                       <div class="highlight-label">Duration</div>
                       <div class="highlight-val">{{ p.planDurationMonths }} months</div>
@@ -303,7 +298,7 @@
                   </span>
                 </div>
 
-                <button class="btn btn-primary plan-select-btn" 
+                <button class="btn btn-primary plan-select-btn"
                         (click)="selectPlan(p)">
                   Select This Plan <span class="material-icons" style="font-size:14px;vertical-align:middle">arrow_forward</span>
                 </button>

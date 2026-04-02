@@ -15,7 +15,7 @@
   } @else {
     <!-- Filters -->
     <div class="filter-bar">
-      @for (f of ['ALL', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'DOCUMENT_PENDING']; track f) {
+      @for (f of ['ALL', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'DOCUMENT_PENDING', 'SETTLED']; track f) {
         <button
           class="filter-btn btn-burgundy"
           [class.active]="filter === f"

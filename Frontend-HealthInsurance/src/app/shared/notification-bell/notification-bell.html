@@ -1,136 +1,99 @@
-<div class="notif-wrapper" style="position: relative">
-  <!-- Bell button -->
+<div class="notif-wrapper">
+
+  <!-- Bell Button — inline styles guarantee visibility on dark navbar -->
   <button
     class="notif-btn"
     (click)="togglePanel($event)"
-    style="background: none; border: none; cursor: pointer; position: relative; padding: 6px"
+    title="Notifications"
+    style="
+      position: relative;
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: rgba(255,255,255,0.13);
+      border: 1.5px solid rgba(255,255,255,0.28);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    "
   >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1.5"
-      stroke="currentColor"
-      style="width: 24px; height: 24px"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
-      />
-    </svg>
-    <!-- Badge -->
+    <!-- Material Icon — hardcoded white, always visible -->
     <span
-      *ngIf="unreadCount$ | async as count"
-      class="notif-badge"
-      style="
-        position: absolute;
-        top: 0;
-        right: 0;
-        background: #ef4444;
-        color: white;
-        border-radius: 50%;
-        width: 18px;
-        height: 18px;
-        font-size: 11px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-      "
-    >
-      {{ count > 9 ? '9+' : count }}
-    </span>
+      class="material-icons"
+      style="font-size: 22px; color: #ffffff; line-height: 1; display: block;"
+    >notifications</span>
+
+    <!-- Unread badge using *ngIf pattern -->
+    <ng-container *ngIf="unreadCount$ | async as count">
+      <span
+        *ngIf="count > 0"
+        style="
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          min-width: 18px;
+          height: 18px;
+          background: #ef4444;
+          color: white;
+          border-radius: 9px;
+          font-size: 10px;
+          font-weight: 800;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 4px;
+          border: 2px solid #1a0006;
+          box-shadow: 0 2px 8px rgba(239,68,68,0.6);
+          font-family: sans-serif;
+        "
+      >{{ count > 9 ? '9+' : count }}</span>
+    </ng-container>
   </button>
 
   <!-- Dropdown panel -->
   <div
     *ngIf="isOpen"
     class="notif-panel"
-    style="
-      position: absolute;
-      right: 0;
-      top: 40px;
-      width: 340px;
-      background: var(--bg, #fff);
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      z-index: 1000;
-      overflow: hidden;
-    "
+    (click)="$event.stopPropagation()"
   >
     <!-- Header -->
-    <div
-      style="
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 14px 16px;
-        border-bottom: 1px solid #e5e7eb;
-      "
-    >
-      <span style="font-weight: 600; font-size: 15px">Notifications</span>
-      <button
-        (click)="markAllRead()"
-        style="
-          font-size: 12px;
-          color: #3b82f6;
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-weight: 500;
-        "
-      >
-        Mark all read
-      </button>
+    <div class="notif-header">
+      <div class="notif-header-title">
+        <span>Notifications</span>
+        <ng-container *ngIf="unreadCount$ | async as count">
+          <span *ngIf="count > 0" class="notif-count-chip">{{ count }} new</span>
+        </ng-container>
+      </div>
+      <button class="notif-mark-read" (click)="markAllRead()">Mark all read</button>
     </div>
 
     <!-- List -->
-    <div style="max-height: 360px; overflow-y: auto">
+    <div class="notif-list">
       <ng-container *ngIf="notifications$ | async as list">
-        <div
-          *ngFor="let n of list"
-          class="notif-item"
-          [style.background]="!n.read ? '#eff6ff' : 'transparent'"
-          style="
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
-            display: flex;
-            gap: 10px;
-            align-items: flex-start;
-          "
-        >
-          <span style="font-size: 18px; margin-top: 2px">{{ getIcon(n.type) }}</span>
-          <div style="flex: 1; min-width: 0">
-            <p style="margin: 0; font-size: 13px; line-height: 1.4; color: #111827">
-              {{ n.message }}
-            </p>
-            <small style="color: #9ca3af; font-size: 11px">
-              {{ n.createdAt | date: 'dd MMM, h:mm a' }}
-            </small>
-          </div>
-          <span
-            *ngIf="!n.read"
-            style="
-              width: 8px;
-              height: 8px;
-              background: #3b82f6;
-              border-radius: 50%;
-              flex-shrink: 0;
-              margin-top: 4px;
-            "
+        <div *ngIf="list.length === 0" class="notif-empty">
+              <span style="font-family:'Material Icons'; font-size:2.2rem; color:#cbd5e1; display:block; margin-bottom:10px;">notifications_off</span>
+              <p>No notifications yet</p>
+            </div>
+        <ng-container *ngIf="list.length > 0">
+          <div
+            *ngFor="let n of list"
+            class="notif-item"
+            [class.unread]="!n.read"
           >
-          </span>
-        </div>
-
-        <div
-          *ngIf="list.length === 0"
-          style="padding: 32px; text-align: center; color: #9ca3af; font-size: 14px"
-        >
-          No notifications yet
-        </div>
+            <span class="notif-type-icon">{{ getIcon(n.type) }}</span>
+            <div class="notif-body">
+              <p class="notif-msg">{{ n.message }}</p>
+              <span class="notif-time">{{ n.createdAt | date: 'dd MMM, h:mm a' }}</span>
+            </div>
+            <span *ngIf="!n.read" class="notif-unread-dot"></span>
+          </div>
+        </ng-container>
       </ng-container>
     </div>
   </div>
+
 </div>

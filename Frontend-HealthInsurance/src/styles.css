@@ -300,13 +300,16 @@ img { max-width: 100%; }
 
 .btn-block { width: 100%; }
 
-/* =================== FORMS =================== */
-.form-group { margin-bottom: 1.25rem; }
+/* =================== FORMS — PREMIUM BURGUND THEME =================== */
+.form-group { margin-bottom: 1.35rem; }
 
 .form-group label {
-  display: block; font-size: 0.875rem;
-  font-weight: 500; color: var(--text-secondary);
-  margin-bottom: 0.5rem;
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.45rem;
+  letter-spacing: 0.01em;
 }
 
 .form-group label .required {
@@ -317,55 +320,145 @@ img { max-width: 100%; }
 .form-group .error-message {
   color: var(--danger);
   font-size: 0.75rem;
-  margin-top: 0.25rem;
+  margin-top: 0.3rem;
   display: block;
+  font-weight: 500;
 }
 
+/* Base input/select/textarea */
 .form-control {
   width: 100%;
-  padding: 0.625rem 0.875rem;
-  font-size: 0.875rem; line-height: 1.5;
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--text-primary);
   background-color: var(--bg-secondary);
   border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  transition: var(--transition);
+  border-radius: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s;
   font-family: var(--font-body);
+}
+
+.form-control:hover:not(:focus):not(:disabled) {
+  border-color: #b0b8c8;
 }
 
 .form-control:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.15);
+  box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.12);
+  background-color: #fffafa;
 }
 
 .form-control.error { border-color: var(--danger); }
 
 .form-control.error:focus {
   border-color: var(--danger);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
 }
 
 .form-control::placeholder { color: var(--text-muted); }
 
-textarea.form-control { resize: vertical; min-height: 80px; }
-
-select.form-control {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px;
+textarea.form-control {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.6;
 }
 
+/* Premium custom select — burgundy chevron */
+select.form-control {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23800020' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+select.form-control:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23800020' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 15 12 9 6 15'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+/* Hint text below inputs */
+.form-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+  display: block;
+  font-weight: 400;
+}
+
+/* ── Form Rows / Grids ── */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
 }
 
-@media (max-width: 600px) {
-  .form-row { grid-template-columns: 1fr; }
+@media (max-width: 640px) {
+  .form-row, .form-row-3 { grid-template-columns: 1fr; }
+}
+
+/* ── Section headings inside forms ── */
+.form-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 28px 0 16px;
+  padding-left: 12px;
+  border-left: 3px solid var(--primary);
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+}
+
+/* ── File upload zone ── */
+.file-upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: var(--bg-primary);
+  position: relative;
+}
+
+.file-upload-zone:hover,
+.file-upload-zone.drag-over {
+  border-color: var(--primary);
+  background: rgba(128, 0, 32, 0.03);
+  box-shadow: 0 0 0 4px rgba(128, 0, 32, 0.06);
+}
+
+.file-upload-zone .upload-icon {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.file-upload-zone:hover .upload-icon {
+  transform: translateY(-4px);
+}
+
+.file-upload-zone .upload-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.file-upload-zone .upload-hint {
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 /* =================== BADGES =================== */
@@ -967,64 +1060,7 @@ body.dark-mode .empty-state:hover {
   background: linear-gradient(135deg, #161920 0%, #2d1520 100%) !important;
 }
 
-/* ── Dark Mode FAB ────────────────────────────────── */
-.dark-mode-fab {
-  position: fixed;
-  bottom: 28px;
-  right: 28px;
-  z-index: 9998;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: 1.5px solid #e2e8f0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #ffffff;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
-}
 
-body.dark-mode .dark-mode-fab {
-  background: #161920;
-  border-color: #1e2235;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-}
-
-.dark-mode-fab:hover {
-  transform: scale(1.12) translateY(-2px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.2);
-}
-
-.dark-mode-fab .fab-icon {
-  font-size: 22px;
-  line-height: 1;
-  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
-}
-
-.dark-mode-fab:hover .fab-icon { transform: rotate(20deg); }
-
-.dark-mode-fab::before {
-  content: attr(data-tooltip);
-  position: absolute;
-  right: calc(100% + 10px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: #0d0f14;
-  color: #f1f5f9;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px 10px;
-  border-radius: 6px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-  font-family: var(--font-body);
-}
-
-.dark-mode-fab:hover::before { opacity: 1; }
 /* ── Auth / Login / Register pages ───────────────────
    Add these inside the dark mode block in styles.css
    ─────────────────────────────────────────────────── */
@@ -1189,7 +1225,7 @@ body.dark-mode .form-group label  { color: var(--text-secondary) !important; }
 
 body.dark-mode .form-group input,
 body.dark-mode .form-group select {
-  background: #0d0f14     !important;
+  background-color: #0d0f14     !important;
   border-color: var(--border) !important;
   color: var(--text-primary)  !important;
 }
@@ -1252,7 +1288,7 @@ body.dark-mode .filter-sort-bar {
 }
 
 body.dark-mode .sort-select {
-  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
   color: var(--text-primary) !important;
 }
 
@@ -1302,7 +1338,7 @@ body.dark-mode .upload-hint      { color: var(--text-muted)     !important; }
 
 body.dark-mode .form-group input,
 body.dark-mode .form-group select {
-  background: #0d0f14     !important;
+  background-color: #0d0f14     !important;
   border-color: var(--border) !important;
   color: var(--text-primary)  !important;
 }
@@ -1988,3 +2024,381 @@ body.dark-mode .info-box p        { color: #f9a8c0   !important; }
     grid-template-columns: 1fr 1fr !important;
   }
 }
+
+/* =====================================================================
+   PREMIUM GLOBAL ENHANCEMENTS — appended
+   ===================================================================== */
+
+/* ── Smooth page animation ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.page-wrapper {
+  animation: fadeInUp 0.35s ease-out;
+}
+
+/* ── Buttons — rounded premium style ── */
+.btn {
+  border-radius: 10px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.btn-primary:hover::after {
+  opacity: 1;
+  animation: btnShimmer 1.2s ease infinite;
+}
+
+@keyframes btnShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* ── Stat card — left accent always burgundy on hover ── */
+.stat-card:hover::before {
+  background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+  width: 4px;
+}
+
+/* ── Table row hover — refined ── */
+tbody tr:hover { background-color: rgba(128, 0, 32, 0.03); }
+
+/* ── Card hover — subtle lift ── */
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* ── Scroll top button ── */
+@keyframes scrollBtnPop {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Focus visible outline ── */
+*:focus-visible {
+  outline: 2px solid rgba(128, 0, 32, 0.5);
+  outline-offset: 2px;
+}
+
+/* ── Dark mode: select with white chevron ── */
+body.dark-mode select.form-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23e05577' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-color: #0d0f14 !important;
+}
+
+body.dark-mode select.form-control:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23e05577' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 15 12 9 6 15'%3E%3C/polyline%3E%3C/svg%3E") !important;
+}
+
+/* ── Dark mode: file upload zones ── */
+body.dark-mode .file-upload-zone {
+  background: #0d0f14 !important;
+  border-color: var(--border) !important;
+}
+
+body.dark-mode .file-upload-zone:hover {
+  border-color: var(--primary) !important;
+  background: rgba(201, 64, 112, 0.05) !important;
+}
+
+/* ── Dark mode auth cards ── */
+body.dark-mode .fp-card {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border);
+  box-shadow: 0 32px 64px -12px rgba(0,0,0,0.6) !important;
+}
+
+body.dark-mode .fp-header h2 { color: var(--text-primary) !important; }
+body.dark-mode .fp-header p,
+body.dark-mode .fp-desc,
+body.dark-mode .fp-input-hint { color: var(--text-secondary) !important; }
+
+body.dark-mode .fp-group label { color: var(--text-secondary) !important; }
+
+body.dark-mode .fp-input {
+  background: #0d0f14 !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .fp-input:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(201,64,112,0.2) !important;
+}
+
+body.dark-mode .fp-password-row {
+  border-color: var(--border) !important;
+}
+
+body.dark-mode .fp-password-row:focus-within {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(201,64,112,0.2) !important;
+}
+
+body.dark-mode .fp-password-row input {
+  background: #0d0f14 !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .fp-password-toggle {
+  background: #161920 !important;
+  border-left-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+body.dark-mode .fp-step-circle {
+  background: #1e2235 !important;
+  border-color: var(--border) !important;
+  color: var(--text-muted) !important;
+}
+
+body.dark-mode .fp-step-line { background: var(--border) !important; }
+body.dark-mode .fp-step-line.active { background: var(--primary) !important; }
+
+body.dark-mode .fp-btn-secondary {
+  background: #1e2235 !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .fp-back a { color: var(--text-secondary) !important; }
+body.dark-mode .fp-back a:hover { color: var(--primary) !important; }
+
+/* ── Dark mode: form-control hover ── */
+body.dark-mode .form-control:hover:not(:focus):not(:disabled) {
+  border-color: #2e3347 !important;
+}
+
+body.dark-mode .form-control:focus {
+  background-color: #0d0f14 !important;
+}
+
+/* =====================================================================
+   NOTIFICATION BELL — GLOBAL PIERCE (styles.css = truly global)
+   These selectors pierce Angular's component encapsulation because
+   styles.css is a global stylesheet, not a component stylesheet.
+   ===================================================================== */
+
+/* ── Button container ── */
+app-notification-bell .notif-btn {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 11px !important;
+  background: rgba(255, 255, 255, 0.13) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  position: relative !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0;
+}
+
+/* ── Material Icon bell — always white ── */
+app-notification-bell .notif-icon-bell {
+  font-size: 21px !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  font-family: 'Material Icons' !important;
+  font-style: normal !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Hover ── */
+app-notification-bell .notif-btn:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+  border-color: rgba(255, 255, 255, 0.42) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25) !important;
+}
+
+/* ── Unread state — amber glow ── */
+app-notification-bell .notif-btn.has-unread {
+  background: rgba(251, 191, 36, 0.18) !important;
+  border-color: rgba(251, 191, 36, 0.5) !important;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.2) !important;
+}
+
+app-notification-bell .notif-btn.has-unread .notif-icon-bell {
+  color: #fcd34d !important;
+}
+
+/* ── Red badge ── */
+app-notification-bell .notif-badge {
+  position: absolute !important;
+  top: -6px !important;
+  right: -6px !important;
+  min-width: 19px !important;
+  height: 19px !important;
+  background: #ef4444 !important;
+  color: white !important;
+  border-radius: 10px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 4px !important;
+  border: 2px solid #1a0006 !important;
+  box-shadow: 0 2px 8px rgba(239,68,68,0.55) !important;
+  z-index: 2;
+}
+/* =====================================================================
+   DARK MODE — CUSTOMER DASHBOARD & INVOICES TAB
+   ===================================================================== */
+
+/* ── Dashboard tab bar ── */
+body.dark-mode .dash-tabs {
+  border-color: var(--border) !important;
+}
+
+/* ── Section cards (policy tracker, payment history) ── */
+body.dark-mode .section-card {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+body.dark-mode .section-title { color: var(--text-primary) !important; }
+
+/* ── Policy tracker ── */
+body.dark-mode .policy-tracker {
+  background: #0d0f14 !important;
+  border-color: var(--border) !important;
+}
+
+body.dark-mode .tracker-header strong { color: var(--text-primary) !important; }
+body.dark-mode .tracker-status        { border-color: transparent !important; }
+
+body.dark-mode .pstep-dot  { background: #1e2235 !important; border-color: var(--border) !important; }
+body.dark-mode .pstep-line { background: var(--border) !important; }
+body.dark-mode .pstep-line.done { background: var(--primary) !important; }
+body.dark-mode .pstep-label { color: var(--text-secondary) !important; }
+
+/* ── Coverage bar ── */
+body.dark-mode .coverage-bar-stack { background: #1e2235 !important; }
+body.dark-mode .cov-label          { color: var(--text-secondary) !important; }
+body.dark-mode .total-coverage     { color: var(--text-secondary) !important; }
+body.dark-mode .policy-mini-row    { border-color: var(--border) !important; }
+
+/* ── Claims bars ── */
+body.dark-mode .cbar-track { background: #1e2235 !important; }
+body.dark-mode .cbar-label { color: var(--text-secondary) !important; }
+body.dark-mode .claims-total-label { color: var(--text-muted) !important; }
+body.dark-mode .claims-total-row   { border-color: var(--border) !important; }
+
+/* ── Analytics empty state ── */
+body.dark-mode .analytics-empty { color: var(--text-muted) !important; }
+
+/* ── Invoice tab KPI cards ── */
+body.dark-mode .inv-kpi {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+body.dark-mode .inv-kpi-val   { color: var(--text-primary) !important; }
+body.dark-mode .inv-kpi-label { color: var(--text-muted)   !important; }
+
+body.dark-mode .inv-kpi-green .inv-kpi-icon { background: #052e1c !important; color: #34d399 !important; }
+body.dark-mode .inv-kpi-blue  .inv-kpi-icon { background: #0f2340 !important; color: #60a5fa !important; }
+body.dark-mode .inv-kpi-purple .inv-kpi-icon { background: #1a0a2e !important; color: #a78bfa !important; }
+body.dark-mode .inv-kpi-amber .inv-kpi-icon  { background: #2d1a00 !important; color: #fbbf24 !important; }
+
+/* ── Invoice toolbar ── */
+body.dark-mode .inv-search {
+  background: #0d0f14 !important;
+  border-color: var(--border) !important;
+}
+
+body.dark-mode .inv-search input { color: var(--text-primary) !important; }
+body.dark-mode .inv-search:focus-within { border-color: var(--primary) !important; }
+
+body.dark-mode .inv-select {
+  background: #0d0f14 !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ── Invoice table ── */
+body.dark-mode .inv-table-wrap {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+body.dark-mode .inv-table thead tr { background: #0d0f14 !important; }
+body.dark-mode .inv-table th { color: var(--text-muted) !important; border-color: var(--border) !important; }
+body.dark-mode .inv-table td { border-color: var(--border-light) !important; }
+body.dark-mode .inv-row:hover { background: #1e2235 !important; }
+
+body.dark-mode .inv-num {
+  background: #2d1520 !important;
+  border-color: #3d1a28 !important;
+  color: #e05577 !important;
+}
+
+body.dark-mode .inv-policy-num { color: var(--text-primary)   !important; }
+body.dark-mode .inv-policy-id  { color: var(--text-muted)     !important; }
+body.dark-mode .inv-amount     { color: var(--text-primary)   !important; }
+body.dark-mode .inv-method     { color: var(--text-secondary) !important; }
+body.dark-mode .inv-txn        { background: #1e2235 !important; color: var(--text-secondary) !important; }
+
+/* ── Invoice status badges ── */
+body.dark-mode .inv-status-success { background: #052e1c !important; color: #34d399 !important; }
+body.dark-mode .inv-status-failed  { background: #2d0a0a !important; color: #f87171 !important; }
+body.dark-mode .inv-status-pending { background: #2d1a00 !important; color: #fbbf24 !important; }
+
+/* ── Invoice empty state ── */
+body.dark-mode .inv-empty h3 { color: var(--text-primary)   !important; }
+body.dark-mode .inv-empty p  { color: var(--text-secondary) !important; }
+
+/* ── Alert banners (customer dashboard) ── */
+body.dark-mode .alert-banner {
+  background: #1e1a08 !important;
+  border-color: #3d3010 !important;
+  color: var(--text-secondary) !important;
+}
+
+body.dark-mode .alert-banner.ncb-alert {
+  background: #071a10 !important;
+  border-color: #0d3d1e !important;
+}
+
+body.dark-mode .alert-banner.concern-alert {
+  background: #2d0a0a !important;
+  border-color: #4d1515 !important;
+}
+
+body.dark-mode .alert-link { color: var(--primary) !important; }

@@ -116,7 +116,7 @@ public class SecurityConfig {
                 "Content-Type",
                 "Content-Disposition",
                 "Authorization"
-        ));
+        )); 
         config.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

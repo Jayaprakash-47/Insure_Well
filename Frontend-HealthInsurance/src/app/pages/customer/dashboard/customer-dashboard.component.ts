@@ -12,6 +12,7 @@ import {
 import {ChatbotComponent} from '../../../shared/chatbot/chatbot';
 
 
+
 @Component({
   selector: 'app-customer-dashboard',
   standalone: true,
@@ -20,16 +21,22 @@ import {ChatbotComponent} from '../../../shared/chatbot/chatbot';
   styleUrl: './customer-dashboard.component.css'
 })
 export class CustomerDashboardComponent implements OnInit {
-  activeTab: 'OVERVIEW' | 'ANALYTICS' = 'OVERVIEW';
+  activeTab: 'OVERVIEW' | 'ANALYTICS' | 'INVOICES' = 'OVERVIEW';
   policies: PolicyResponse[] = [];
   claims: ClaimResponse[] = [];
   payments: PaymentResponse[] = [];
   profile: any = null;
   loading = true;
 
-  // ── NEW: Payment filters ──
+  // ── Payment filters (Analytics tab) ──
   paymentFilter = 'ALL';    // ALL | policy number
   downloadingReceipt: number | null = null;
+
+  // ── Invoices tab state ──
+  invoiceSearch = '';
+  invoiceStatusFilter: 'ALL' | 'SUCCESS' | 'FAILED' | 'PENDING' = 'ALL';
+  invoicePolicyFilter = 'ALL';
+  downloadingInvoice: number | null = null;
 
   constructor(
     private api: ApiService,
@@ -164,6 +171,56 @@ export class CustomerDashboardComponent implements OnInit {
 
   get uniquePolicyNumbers(): string[] {
     return [...new Set(this.payments.map(p => p.policyNumber))];
+  }
+
+  // ── Invoice tab computed properties ──
+  get filteredInvoices(): PaymentResponse[] {
+    let list = this.payments;
+    if (this.invoiceStatusFilter !== 'ALL')
+      list = list.filter(p => p.paymentStatus === this.invoiceStatusFilter);
+    if (this.invoicePolicyFilter !== 'ALL')
+      list = list.filter(p => p.policyNumber === this.invoicePolicyFilter);
+    if (this.invoiceSearch.trim()) {
+      const q = this.invoiceSearch.toLowerCase();
+      list = list.filter(p =>
+        p.policyNumber?.toLowerCase().includes(q) ||
+        p.transactionId?.toLowerCase().includes(q) ||
+        p.paymentMethod?.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }
+
+  getInvoiceNumber(payment: PaymentResponse): string {
+    return 'INV-' + String(payment.paymentId).padStart(6, '0');
+  }
+
+  get invoiceTotalPaid(): number {
+    return this.filteredInvoices
+      .filter(p => p.paymentStatus === 'SUCCESS')
+      .reduce((s, p) => s + (p.amount || 0), 0);
+  }
+
+  get invoicePendingCount(): number {
+    return this.payments.filter(p => p.paymentStatus === 'PENDING').length;
+  }
+
+  downloadInvoice(payment: PaymentResponse): void {
+    this.downloadingInvoice = payment.paymentId;
+    const token = localStorage.getItem('hs_token');
+    const url = `${this.api['api']}/payments/${payment.paymentId}/receipt`;
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => { if (!res.ok) throw new Error('Failed'); return res.blob(); })
+      .then(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `invoice_${this.getInvoiceNumber(payment)}.pdf`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        this.downloadingInvoice = null;
+        this.cdr.detectChanges();
+      })
+      .catch(() => { this.downloadingInvoice = null; this.cdr.detectChanges(); });
   }
 
   getPaymentMethodIcon(method: string): string {

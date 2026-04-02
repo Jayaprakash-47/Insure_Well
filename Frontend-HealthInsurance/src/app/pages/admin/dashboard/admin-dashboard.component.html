@@ -12,7 +12,7 @@
     <div class="hero">
       <div class="hero-left">
         <p class="hero-eyebrow">InsureWell Admin</p>
-        <h1 class="hero-title">Welcome back, Admin! 👋</h1>
+        <h1 class="hero-title">Welcome back, Admin!</h1>
         <p class="hero-sub">Here's your platform overview for today</p>
       </div>
       <a routerLink="/admin/profile" class="hero-profile">
@@ -143,7 +143,7 @@
           </div>
           <div class="cl cl-green">
             <div class="cl-n">{{ stats.totalSettledClaims || 0 }}</div>
-            <div class="cl-s">Settled ✓</div>
+            <div class="cl-s">Settled</div>
             <div class="cl-d">Payout completed</div>
           </div>
           <div class="cl cl-red">
@@ -161,7 +161,7 @@
         </div>
         <div class="qa-grid">
           <a routerLink="/admin/assign-underwriter" class="qa qa-highlight">
-            <span class="material-icons">pending_actions</span>
+            <span class="qa-icon-wrap"><span class="material-icons">pending_actions</span></span>
             <span class="qa-lbl">Assign Underwriter</span>
             <span class="qa-sub">{{ stats.totalPendingPolicies || 0 }} pending</span>
             @if ((stats.totalPendingPolicies || 0) > 0) {
@@ -169,37 +169,37 @@
             }
           </a>
           <a routerLink="/admin/assign-claims-officer" class="qa">
-            <span class="material-icons">assignment_ind</span>
+            <span class="qa-icon-wrap"><span class="material-icons">assignment_ind</span></span>
             <span class="qa-lbl">Assign Officer</span>
             <span class="qa-sub">Claims workflow</span>
           </a>
           <a routerLink="/admin/customers" class="qa">
-            <span class="material-icons">people</span>
+            <span class="qa-icon-wrap"><span class="material-icons">people</span></span>
             <span class="qa-lbl">Customers</span>
             <span class="qa-sub">{{ stats.totalCustomers || 0 }} registered</span>
           </a>
           <a routerLink="/admin/underwriters" class="qa">
-            <span class="material-icons">admin_panel_settings</span>
+            <span class="qa-icon-wrap"><span class="material-icons">admin_panel_settings</span></span>
             <span class="qa-lbl">Underwriters</span>
             <span class="qa-sub">{{ stats.totalUnderwriters || 0 }} active</span>
           </a>
           <a routerLink="/admin/plans" class="qa">
-            <span class="material-icons">health_and_safety</span>
+            <span class="qa-icon-wrap"><span class="material-icons">health_and_safety</span></span>
             <span class="qa-lbl">Plans</span>
             <span class="qa-sub">{{ stats.totalActivePlans || 0 }} active</span>
           </a>
           <a routerLink="/admin/claims-officers" class="qa">
-            <span class="material-icons">gavel</span>
+            <span class="qa-icon-wrap"><span class="material-icons">gavel</span></span>
             <span class="qa-lbl">Officers</span>
             <span class="qa-sub">Claims team</span>
           </a>
           <a routerLink="/admin/policies" class="qa">
-            <span class="material-icons">policy</span>
+            <span class="qa-icon-wrap"><span class="material-icons">policy</span></span>
             <span class="qa-lbl">All Policies</span>
             <span class="qa-sub">View &amp; manage</span>
           </a>
           <a routerLink="/admin/claims" class="qa">
-            <span class="material-icons">medical_services</span>
+            <span class="qa-icon-wrap"><span class="material-icons">medical_services</span></span>
             <span class="qa-lbl">All Claims</span>
             <span class="qa-sub">View &amp; manage</span>
           </a>
@@ -335,7 +335,9 @@
           <div class="lb">
             @for (u of underwriterPerformance; track u.underwriterId; let i=$index) {
               <div class="lb-row">
-                <span class="lb-medal">{{ i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1) }}</span>
+                <span class="lb-medal"
+                  [style.background]="i===0?'#d97706':i===1?'#94a3b8':i===2?'#92400e':'#64748b'"
+                >{{ i===0?'#1':i===1?'#2':i===2?'#3':'#'+(i+1) }}</span>
                 <div class="lb-av">{{ (u.underwriterName||'U').charAt(0).toUpperCase() }}</div>
                 <div class="lb-info"><div class="lb-nm">{{ u.underwriterName }}</div><div class="lb-sub">{{ u.totalQuotesSent||0 }} quotes</div></div>
                 <div class="lb-bar"><div [style.width.%]="commissionBarPct(u)" [style.background]="i===0?'#d97706':i===1?'#94a3b8':'#7c3aed'"></div></div>

@@ -62,12 +62,12 @@ export class AssignUnderwriterComponent implements OnInit {
       .assignUnderwriter(this.selectedApp.policyId, { underwriterId: this.selectedUwId })
       .subscribe({
         next: () => {
-          this.assigning = false;
           this.success = true;
           this.pendingApps = this.pendingApps.filter(
             (a) => a.policyId !== this.selectedApp.policyId,
           );
           setTimeout(() => {
+            this.assigning = false;
             this.selectedApp = null;
             this.selectedUwId = null;
             this.success = false;

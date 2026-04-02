@@ -213,6 +213,14 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+@media (max-width: 480px) {
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
 /* ── Alert Banners ── */
 .pending-alert {
   display: flex;

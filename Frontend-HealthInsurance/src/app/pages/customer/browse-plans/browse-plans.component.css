@@ -61,7 +61,7 @@
   padding-top: 6px !important;
   padding-bottom: 6px !important;
   border: none !important;
-  background: #f8fafc !important;
+  background-color: #f8fafc !important;
   box-shadow: none !important;
 }
 
@@ -257,7 +257,7 @@
 .feature-col {
   text-align: left !important;
   width: 200px;
-  background: #f8fafc !important;
+  background-color: #f8fafc !important;
 }
 
 .plan-col { min-width: 180px; }
@@ -551,12 +551,12 @@
 .member-header strong { color: #0f1f3d; }
 
 .btn-add {
-  background: #0f1f3d; color: white; border: none;
+  background: #800020; color: white; border: none;
   padding: 0.45rem 1rem; border-radius: 8px;
   font-weight: 700; font-size: 0.82rem; cursor: pointer;
   transition: background 0.2s;
 }
-.btn-add:hover { background: #1a3a6b; }
+.btn-add:hover { background: #6b001a; }
 
 .btn-remove {
   background: #fee2e2; color: #dc2626; border: none;

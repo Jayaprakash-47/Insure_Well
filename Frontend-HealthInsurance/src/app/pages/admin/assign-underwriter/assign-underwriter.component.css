@@ -19,7 +19,7 @@
   color: #64748b;
 }
 .btn-back {
-  background: #0f1f3d;
+  background: #800020;
   color: white;
   padding: 0.5rem 1.2rem;
   border-radius: 8px;
@@ -168,7 +168,7 @@
 .btn-assign {
   width: 100%;
   padding: 0.85rem;
-  background: linear-gradient(135deg, #0f1f3d, #1a3a6b);
+  background: linear-gradient(135deg, #800020, #5c0016);
   color: white;
   border: none;
   border-radius: 10px;
@@ -179,7 +179,7 @@
 }
 .btn-assign:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(15, 31, 61, 0.3);
+  box-shadow: 0 6px 18px rgba(128, 0, 32, 0.3);
 }
 .btn-assign:disabled {
   opacity: 0.6;
@@ -196,3 +196,45 @@
   color: #dc2626;
   text-align: center;
 }
+
+/* ══════════ DARK MODE ══════════ */
+:host-context(body.dark-mode) .panel {
+  background: var(--bg-secondary) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+:host-context(body.dark-mode) .panel h2 {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border) !important;
+}
+:host-context(body.dark-mode) .page-header h1 { color: var(--text-primary) !important; }
+:host-context(body.dark-mode) .page-header p  { color: var(--text-secondary) !important; }
+:host-context(body.dark-mode) .btn-back {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border);
+}
+:host-context(body.dark-mode) .app-card {
+  border-color: var(--border) !important;
+  color: var(--text-primary);
+}
+:host-context(body.dark-mode) .app-card:hover  { background: #1e2235 !important; border-color: var(--primary) !important; }
+:host-context(body.dark-mode) .app-card.selected { background: #2d1520 !important; border-color: var(--primary) !important; }
+:host-context(body.dark-mode) .app-meta  { color: var(--text-secondary) !important; }
+:host-context(body.dark-mode) .app-date  { color: var(--text-muted)     !important; }
+:host-context(body.dark-mode) .uw-card {
+  border-color: var(--border) !important;
+  color: var(--text-primary);
+}
+:host-context(body.dark-mode) .uw-card:hover   { background: #1e2235 !important; border-color: var(--primary) !important; }
+:host-context(body.dark-mode) .uw-card.selected { background: #2d1520 !important; border-color: var(--primary) !important; }
+:host-context(body.dark-mode) .uw-info strong  { color: var(--text-primary)   !important; }
+:host-context(body.dark-mode) .spec            { color: var(--text-secondary) !important; }
+:host-context(body.dark-mode) .uw-stats        { color: var(--text-secondary) !important; }
+:host-context(body.dark-mode) .selected-app-info {
+  background: #2d1520 !important;
+  border-color: #3d1a28 !important;
+  color: var(--text-primary) !important;
+}
+:host-context(body.dark-mode) .empty,
+:host-context(body.dark-mode) .empty-select,
+:host-context(body.dark-mode) .loader { color: var(--text-muted) !important; }
